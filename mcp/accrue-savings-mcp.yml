@@ -1,0 +1,474 @@
+generated: '2026-09-06'
+method: derived
+source: openapi/accrue-savings-merchant-api-openapi.yaml
+name: Accrue Merchant API — candidate MCP tool surface
+status: candidate
+deployment:
+  mode: none
+  auth: api-key
+  verified: probed
+note: 'Accrue publishes no MCP server. Probed 2026-09-06: mcp.byaccrue.com and mcp.accruesavings.com do
+  not resolve; POST https://merchant-api.accruesavings.com/mcp returns the API''s own 404 envelope; docs.byaccrue.com/mcp
+  is a Docusaurus 404; no /llms.txt is served. The tools below are DERIVED from the published OpenAPI
+  operations and are a candidate surface only — nothing here is running.'
+probes:
+- url: https://mcp.byaccrue.com/
+  result: DNS does not resolve
+- url: https://mcp.accruesavings.com/
+  result: DNS does not resolve
+- url: https://merchant-api.accruesavings.com/mcp
+  status: 404
+  result: 'NotFoundException: Cannot POST /mcp'
+- url: https://docs.byaccrue.com/mcp
+  status: 404
+  result: Docusaurus 404
+- url: https://merchant-api.accruesavings.com/graphql
+  status: 404
+  result: 'NotFoundException: Cannot POST /graphql — no GraphQL surface'
+transport: null
+tool_count: 82
+tool_groups:
+- group: PaymentIntents
+  tools:
+  - tool: createPaymentIntent
+    rest: createPaymentIntent
+    method: POST
+    path: /api/v1/payment-intents
+    summary: Create a Payment Intent
+  - tool: listPaymentIntents
+    rest: listPaymentIntents
+    method: GET
+    path: /api/v1/payment-intents
+    summary: List Payment Intents
+  - tool: getPaymentIntent
+    rest: getPaymentIntent
+    method: GET
+    path: /api/v1/payment-intents/{paymentIntentId}
+    summary: Get a Payment Intent
+  - tool: authorizePayment
+    rest: authorizePayment
+    method: POST
+    path: /api/v1/payment-intents/{paymentIntentId}/authorize
+    summary: Authorize Payment
+- group: Payments
+  tools:
+  - tool: createPayment
+    rest: createPayment
+    method: POST
+    path: /api/v1/payments
+    summary: Create Payment
+  - tool: listPayments
+    rest: listPayments
+    method: GET
+    path: /api/v1/payments
+    summary: List Payments
+  - tool: getPayment
+    rest: getPayment
+    method: GET
+    path: /api/v1/payments/{paymentId}
+    summary: Get a Payment
+  - tool: updatePayment
+    rest: updatePayment
+    method: PATCH
+    path: /api/v1/payments/{paymentId}
+    summary: Update a payment
+  - tool: getVirtualDebitCard
+    rest: getVirtualDebitCard
+    method: GET
+    path: /api/v1/payments/{paymentId}/card
+    summary: Get Virtual Debit Card
+  - tool: capturePayment
+    rest: capturePayment
+    method: POST
+    path: /api/v1/payments/{paymentId}/capture
+    summary: Capture Payment
+  - tool: increaseAuthorization
+    rest: increaseAuthorization
+    method: PATCH
+    path: /api/v1/payments/{paymentId}/increase-authorization
+    summary: Increase Authorization Amount
+  - tool: cancelPayment
+    rest: cancelPayment
+    method: POST
+    path: /api/v1/payments/{paymentId}/cancel
+    summary: Cancel Payment
+  - tool: completePayment
+    rest: completePayment
+    method: POST
+    path: /api/v1/payments/{paymentId}/complete
+    summary: Complete Payment
+  - tool: refund
+    rest: refund
+    method: POST
+    path: /api/v1/payments/{paymentId}/refund
+    summary: Refund Payment
+- group: Simulations
+  tools:
+  - tool: simulateCardAuthorization
+    rest: simulateCardAuthorization
+    method: POST
+    path: /api/v1/simulation/{paymentId}/card/auth
+    summary: Simulate Card Authorization
+  - tool: getAuthorizationRequestList
+    rest: getAuthorizationRequestList
+    method: GET
+    path: /api/v1/simulation/{paymentId}/card/auth
+    summary: Get Authorization Request List
+  - tool: simulateCardCapture
+    rest: simulateCardCapture
+    method: POST
+    path: /api/v1/simulation/{paymentId}/card/capture
+    summary: Simulate Card Capture
+  - tool: getCapturesList
+    rest: getCapturesList
+    method: GET
+    path: /api/v1/simulation/{paymentId}/card/capture
+    summary: Get Captures List
+  - tool: simulateCardAuthorizationCapture
+    rest: simulateCardAuthorizationCapture
+    method: POST
+    path: /api/v1/simulation/{paymentId}/card/auth-capture
+    summary: Simulate Card Authorization/Capture
+  - tool: createDemoBackupPaymentMethod
+    rest: createDemoBackupPaymentMethod
+    method: POST
+    path: /api/v1/simulation/wallets/{walletId}/backup-linked-account
+    summary: Create Demo Backup Payment Method
+  - tool: clearPendingTransactions
+    rest: clearPendingTransactions
+    method: POST
+    path: /api/v1/simulation/wallets/{walletId}/clear-pending/{type}
+    summary: Clear Pending Transactions
+  - tool: listWalletBarcodes
+    rest: listWalletBarcodes
+    method: GET
+    path: /api/v1/simulation/wallets/{walletId}/barcodes
+    summary: List Wallet Barcodes
+  - tool: generateWalletBarcode
+    rest: generateWalletBarcode
+    method: POST
+    path: /api/v1/simulation/wallets/{walletId}/barcodes
+    summary: Generate Wallet Barcode
+  - tool: getWalletBarcode
+    rest: getWalletBarcode
+    method: GET
+    path: /api/v1/simulation/barcodes/{lookUpId}
+    summary: Get Wallet Barcode
+  - tool: failPendingTransaction
+    rest: failPendingTransaction
+    method: POST
+    path: /api/v1/simulation/wallets/{walletId}/fail-transaction
+    summary: Fail Pending Transaction
+  - tool: simulateCounterpartyDeposit
+    rest: simulateCounterpartyDeposit
+    method: POST
+    path: /api/v1/simulation/counterparties/{counterpartyId}/deposits
+    summary: Simulate Counterparty Deposit
+- group: Wallets
+  tools:
+  - tool: getWallet
+    rest: getWallet
+    method: GET
+    path: /api/v1/wallets/:walletId
+    summary: Get Wallet
+  - tool: getWalletByBarcode
+    rest: getWalletByBarcode
+    method: GET
+    path: /api/v1/wallets/barcode/{lookUpId}
+    summary: Get Wallet by Barcode
+  - tool: createWallet
+    rest: createWallet
+    method: POST
+    path: /api/v1/wallets
+    summary: Create Wallet
+  - tool: getWalletBalance
+    rest: getWalletBalance
+    method: GET
+    path: /api/v1/wallets/:walletId/balance
+    summary: Get Wallet Balance
+  - tool: listWallets
+    rest: listWallets
+    method: GET
+    path: /api/v1/wallets/
+    summary: List Wallets
+  - tool: createOneTimeDeposit
+    rest: createOneTimeDeposit
+    method: POST
+    path: /api/v1/wallets/:walletId/transactions
+    summary: Create One-Time Deposit
+  - tool: listTransactions
+    rest: listTransactions
+    method: GET
+    path: /api/v1/wallets/:walletId/transactions
+    summary: List Transactions
+  - tool: closedLoopWithdraw
+    rest: closedLoopWithdraw
+    method: POST
+    path: /api/v1/wallets/:walletId/withdraw
+    summary: Closed-Loop Withdraw
+  - tool: getTransaction
+    rest: getTransaction
+    method: GET
+    path: /api/v1/wallets/:walletId/transactions/:transactionId
+    summary: Get Transaction
+- group: Users
+  tools:
+  - tool: listUsers
+    rest: listUsers
+    method: GET
+    path: /api/v1/users
+    summary: List Users
+  - tool: createUser
+    rest: createUser
+    method: POST
+    path: /api/v1/users
+    summary: Create User
+  - tool: updateUser
+    rest: updateUser
+    method: PATCH
+    path: /api/v1/users/:userReference/attached-profile
+    summary: Update User
+  - tool: getUser
+    rest: getUser
+    method: GET
+    path: /api/v1/users/:userId
+    summary: Get User
+  - tool: acceptKycDisclosureDocuments
+    rest: acceptKycDisclosureDocuments
+    method: POST
+    path: /api/v1/users/:userId/disclosures/kyc
+    summary: Accept KYC Disclosure Documents
+- group: Identity Verification
+  tools:
+  - tool: createIdentityVerificationChallenge
+    rest: createIdentityVerificationChallenge
+    method: POST
+    path: /api/v1/users/:userIdentifier/identity-verification/challenges
+    summary: Create Identity Verification Challenge
+  - tool: submitIdentityVerificationChallenge
+    rest: submitIdentityVerificationChallenge
+    method: POST
+    path: /api/v1/users/:userIdentifier/identity-verification/challenges/:challengeId/submissions
+    summary: Submit Identity Verification Challenge
+  - tool: applyVerifiedProfileUpdate
+    rest: applyVerifiedProfileUpdate
+    method: POST
+    path: /api/v1/users/:userIdentifier/identity-verification/profile-updates
+    summary: Apply Verified Profile Update
+- group: Widgets
+  tools:
+  - tool: getWalletWidgetData
+    rest: getWalletWidgetData
+    method: GET
+    path: /api/v1/widgets/wallet/{walletId}
+    summary: Get Wallet Widget Data
+  - tool: findWalletWidgetData
+    rest: findWalletWidgetData
+    method: GET
+    path: /api/v1/widgets/wallet
+    summary: Find Wallet Widget Data
+  - tool: getLinkedAccountWidgetData
+    rest: getLinkedAccountWidgetData
+    method: GET
+    path: /api/v1/widgets/payment-intent/{paymentIntentId}/linked-account
+    summary: Get Linked Account Widget Data
+  - tool: getWalletWidgetDataV2
+    rest: getWalletWidgetDataV2
+    method: GET
+    path: /api/v2/widgets/wallet/{walletId}
+    summary: Get Wallet Widget Data (V2)
+  - tool: findWalletWidgetDataV2
+    rest: findWalletWidgetDataV2
+    method: GET
+    path: /api/v2/widgets/wallet
+    summary: Find Wallet Widget Data (V2)
+  - tool: createWidgetSession
+    rest: createWidgetSession
+    method: POST
+    path: /api/v1/widgets/session
+    summary: Create Widget Session
+- group: Sweepstakes
+  tools:
+  - tool: addSweepstakesResults
+    rest: addSweepstakesResults
+    method: POST
+    path: /api/v1/sweepstakes/{sweepstakesId}/results
+    summary: Add Sweepstakes Results
+- group: Rewards
+  tools:
+  - tool: issueReward
+    rest: issueReward
+    method: POST
+    path: /api/v1/rewards
+    summary: Issue Reward
+  - tool: listIssuedRewards
+    rest: listIssuedRewards
+    method: GET
+    path: /api/v1/rewards
+    summary: List Issued Rewards
+  - tool: getIssuedRewardById
+    rest: getIssuedRewardById
+    method: GET
+    path: /api/v1/rewards/{id}
+    summary: Get Issued Reward by ID
+  - tool: updateReward
+    rest: updateReward
+    method: PATCH
+    path: /api/v1/rewards/{id}
+    summary: Update Reward
+  - tool: cancelReward
+    rest: cancelReward
+    method: DELETE
+    path: /api/v1/rewards/{id}
+    summary: Cancel Reward
+- group: Gifts
+  tools:
+  - tool: getGiftByLookUpId
+    rest: getGiftByLookUpId
+    method: GET
+    path: /api/v1/gifts/{lookUpId}
+    summary: Get Gift by lookUpId
+- group: Banking
+  tools:
+  - tool: createKycApplication
+    rest: createKycApplication
+    method: POST
+    path: /api/v1/users/:userId/kyc/application
+    summary: Create KYC Application
+  - tool: getKycStatus
+    rest: getKycStatus
+    method: GET
+    path: /api/v1/users/:userId/kyc/status
+    summary: Get KYC Status
+  - tool: getDocumentVerificationLink
+    rest: getDocumentVerificationLink
+    method: POST
+    path: /api/v1/users/:userId/kyc/document-verification-link
+    summary: Get Document Verification Link
+  - tool: completeDocumentVerification
+    rest: completeDocumentVerification
+    method: POST
+    path: /api/v1/users/:userId/kyc/document-verification/complete
+    summary: Complete Document Verification
+- group: Counterparties
+  tools:
+  - tool: createCounterparty
+    rest: createCounterparty
+    method: POST
+    path: /api/v1/counterparties
+    summary: Create Counterparty
+  - tool: listCounterparties
+    rest: listCounterparties
+    method: GET
+    path: /api/v1/counterparties/
+    summary: List Counterparties
+  - tool: getCounterparty
+    rest: getCounterparty
+    method: GET
+    path: /api/v1/counterparties/:counterpartyId
+    summary: Get Counterparty
+  - tool: updateCounterparty
+    rest: updateCounterparty
+    method: PATCH
+    path: /api/v1/counterparties/:counterpartyId
+    summary: Update Counterparty
+  - tool: deleteCounterparty
+    rest: deleteCounterparty
+    method: DELETE
+    path: /api/v1/counterparties/:counterpartyId
+    summary: Delete Counterparty
+  - tool: createCounterpartyPayout
+    rest: createCounterpartyPayout
+    method: POST
+    path: /api/v1/counterparties/:counterpartyId/payouts
+    summary: Create Counterparty Payout
+  - tool: listCounterpartyPayouts
+    rest: listCounterpartyPayouts
+    method: GET
+    path: /api/v1/counterparties/:counterpartyId/payouts
+    summary: List Counterparty Payouts
+- group: CounterpartyTransfers
+  tools:
+  - tool: createCounterpartyTransfer
+    rest: createCounterpartyTransfer
+    method: POST
+    path: /api/v1/counterparty-transfers
+    summary: Create Counterparty Transfer
+  - tool: listCounterpartyTransfers
+    rest: listCounterpartyTransfers
+    method: GET
+    path: /api/v1/counterparty-transfers/
+    summary: List Counterparty Transfers
+  - tool: getCounterpartyTransfer
+    rest: getCounterpartyTransfer
+    method: GET
+    path: /api/v1/counterparty-transfers/:counterpartyTransferId
+    summary: Get Counterparty Transfer
+- group: LinkedAccounts
+  tools:
+  - tool: getLinkedAccounts
+    rest: getLinkedAccounts
+    method: GET
+    path: /api/v1/users/:userId/linked-accounts
+    summary: Get Linked Accounts for User
+  - tool: deleteLinkedAccount
+    rest: deleteLinkedAccount
+    method: DELETE
+    path: /api/v1/users/:userId/linked-accounts/:linkedAccountId
+    summary: Remove a Linked Account
+- group: ExternalTransactions
+  tools:
+  - tool: addExternalTransactions
+    rest: addExternalTransactions
+    method: POST
+    path: /api/v1/external-transactions
+    summary: Add External Transactions
+  - tool: listExternalTransactions
+    rest: listExternalTransactions
+    method: GET
+    path: /api/v1/external-transactions
+    summary: List External Transactions
+  - tool: getExternalTransaction
+    rest: getExternalTransaction
+    method: GET
+    path: /api/v1/external-transactions/{externalTransactionId}
+    summary: Get an External Transaction
+- group: Webhooks
+  tools:
+  - tool: createWebhook
+    rest: createWebhook
+    method: POST
+    path: /api/v1/webhooks
+    summary: Create a webhook
+  - tool: getWebhooks
+    rest: getWebhooks
+    method: GET
+    path: /api/v1/webhooks
+    summary: Get webhooks
+  - tool: getWebhook
+    rest: getWebhook
+    method: GET
+    path: /api/v1/webhooks/{webhookId}
+    summary: Get a webhook
+  - tool: updateWebhook
+    rest: updateWebhook
+    method: PATCH
+    path: /api/v1/webhooks/{webhookId}
+    summary: Update a webhook
+  - tool: deleteWebhook
+    rest: deleteWebhook
+    method: DELETE
+    path: /api/v1/webhooks/{webhookId}
+    summary: Delete a webhook
+- group: WebhookEvents
+  tools:
+  - tool: listWebhookEvents
+    rest: listWebhookEvents
+    method: GET
+    path: /api/v1/webhook-events
+    summary: List Webhook Events
+  - tool: getWebhookEvent
+    rest: getWebhookEvent
+    method: GET
+    path: /api/v1/webhook-events/{webhookEventId}
+    summary: Get a webhook event

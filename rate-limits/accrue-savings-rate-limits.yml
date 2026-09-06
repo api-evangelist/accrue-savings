@@ -1,0 +1,40 @@
+generated: '2026-09-06'
+method: searched
+source: https://docs.byaccrue.com/api/ (Introduction > Rate Limits), plus a live unauthenticated response
+  observed 2026-09-06
+limit_count: 1
+headers:
+  request: []
+  response: []
+  note: 'OBSERVED ABSENCE: a live unauthenticated GET https://merchant-api.accruesavings.com/api/v1/payments
+    (403) and a 404 on the same host returned no X-RateLimit-*, no RateLimit-*, and no Retry-After header.
+    The published limit is documented in prose only, so an agent has no runtime signal of remaining quota
+    and must infer exhaustion from the 429 status alone.'
+exhaustion:
+  status: 429
+  body: JSON error envelope {id,status,code,title,detail,meta}
+  retry_after_header: false
+rate_limits:
+- scope: per-ip
+  window: 1 minute
+  limit: 10000
+  burst: null
+  environment: each of sandbox and production, counted separately
+  source: https://docs.byaccrue.com/api/
+  note: '"The rate limit, based on your IP address, is set at 10,000 requests per minute, applicable to
+    both the sandbox and live environments separately. Exceeding this limit triggers HTTP 429 status codes
+    and relevant messages in responses."'
+retry_guidance:
+  retryable_status:
+  - 408
+  - 429
+  - 500
+  - 501
+  - 502
+  - 503
+  - 504
+  strategy: exponential backoff with jitter; use idempotency keys where available
+  timeouts:
+    short: 10 seconds (default for most operations)
+    long: up to 90 seconds for long-running operations
+  source: https://docs.byaccrue.com/api/

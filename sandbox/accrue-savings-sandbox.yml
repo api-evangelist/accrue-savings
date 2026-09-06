@@ -1,0 +1,69 @@
+generated: '2026-09-06'
+method: searched
+source: https://docs.byaccrue.com/docs/integration/sandbox/instructions and https://docs.byaccrue.com/api/
+  (Introduction > Environments)
+docs: https://docs.byaccrue.com/docs/integration/sandbox/instructions
+environments:
+- name: Sandbox
+  api_base: https://merchant-api-sandbox.accruesavings.com
+  console: https://sandbox.accruesavings.com/
+  purpose: testing and development
+  note: The sandbox console at sandbox.accruesavings.com presented an EXPIRED TLS certificate when probed
+    on 2026-09-06, so the sign-in / KYC / wallets flows the sandbox guide instructs developers to use
+    could not be reached over a verified connection. The sandbox API host itself (merchant-api-sandbox.accruesavings.com)
+    responds normally.
+- name: Live
+  api_base: https://merchant-api.accruesavings.com
+  purpose: production
+mode_signalling:
+  style: separate hosts
+  note: Test and live are separated by hostname, not by a key prefix. Accrue publishes no test-vs-live
+    credential prefix; the same Client-ID/Client Secret pair shape is used against whichever host you
+    point at. Error bodies carry meta.environment ("production" or "sandbox"), which is the only in-band
+    signal of which environment answered.
+test_values:
+- kind: phone number
+  value: xxx-555-xxxx
+  note: The middle segment must be 555 for the number to be treated as a test number; anything else is
+    treated as a real phone number.
+- kind: verification code
+  value: '0001'
+  note: Always the SMS code for a test phone number.
+- kind: debit card
+  value: '5183683001544411'
+  expiry: any future date
+  cvc: any 3 digits
+  note: Published sandbox funding card.
+- kind: SSN
+  value: '123456789'
+  note: Published sandbox KYC value; use with a fake US address and an age over 18.
+test_clocks:
+  supported: false
+  note: No time simulation / test clock facility is published.
+fixtures_and_triggers:
+  style: first-class Simulations API + console debug modal
+  api_operations:
+  - simulateCardAuthorization
+  - getAuthorizationRequestList
+  - simulateCardCapture
+  - getCapturesList
+  - simulateCardAuthorizationCapture
+  - createDemoBackupPaymentMethod
+  - clearPendingTransactions
+  - listWalletBarcodes
+  - generateWalletBarcode
+  - getWalletBarcode
+  - failPendingTransaction
+  - simulateCounterpartyDeposit
+  note: Thirteen operations under the Simulations tag let an integrator drive card authorization, capture,
+    auth+capture, backup payment method creation, pending-transaction clearing, forced transaction failure,
+    wallet barcode generation and counterparty deposits — the sandbox is scripted through the API, not
+    only through the console. The console additionally exposes a "Clear Pending Card Transactions" action
+    in a debug modal.
+kyc:
+  note: KYC must be completed in sandbox before a wallet can be funded; the guide publishes the exact
+    fake values to use.
+gaps:
+- No sandbox API key can be self-issued — credentials come from Accrue, so the sandbox is reachable only
+  after a commercial conversation.
+- sandbox.accruesavings.com served an expired certificate at probe time.

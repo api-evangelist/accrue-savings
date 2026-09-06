@@ -1,0 +1,74 @@
+generated: '2026-09-06'
+method: searched
+source: https://docs.byaccrue.com/docs/payments/web/widgets, https://docs.byaccrue.com/docs/payments/web/payment-methods-widget,
+  https://docs.byaccrue.com/docs/integration/mobile/sdk/intro
+docs: https://docs.byaccrue.com/docs/payments/web/widgets
+families:
+- family: Accrue Pay web widgets
+  technology: custom element / web component (<accrue-pay>)
+  loader:
+    script: https://pay.accruesavings.com/main.js
+    sandbox_script: https://pay-sandbox.accruesavings.com/main.js
+    alternate_host: https://pay.byaccrue.com/main.js
+    attributes:
+    - data-script="accrue-pay"
+    - data-client-id
+    - data-session-id
+    - data-wallet-widget
+    - data-balance-applied
+    - data-hide-balance-toggle
+    - data-default-error-handling
+    - data-linking-flow
+    version: null
+    note: 'UNPINNED DISTRIBUTION: the loader is a single unversioned main.js served from Cloudflare with
+      cache-control: public and no version in the URL, so an integrator cannot pin a build or tell which
+      one they are running. Last-Modified observed 2026-09-04. It is also documented under two different
+      hosts — pay[-sandbox].accruesavings.com on the widgets page and pay[-sandbox].byaccrue.com on the
+      payment-methods page; both return 200.'
+  ready_event: AccruePay::Ready
+  javascript_api:
+  - window.accruePay.setAmount(cents)
+  - window.accruePay.setBalanceApplied(bool)
+  - window.accruePay.setHideBalanceToggle(bool)
+  - window.accruePay.onApplyBalanceToggle(cb)
+  - window.accruePay.onGoToWallet(cb)
+  - window.accruePay.onLinkAccountUpdate(cb)
+  - window.accruePay.onLinkAccountUpdateError(cb)
+  components:
+  - name: wallet-balance
+    markup: <accrue-pay widget="wallet-balance">
+    purpose: Show the user's available wallet balance and let them apply it to an order.
+  - name: wallet-rewards
+    markup: <accrue-pay widget="wallet-rewards">
+    purpose: Preview the rewards a user will earn for completing a purchase.
+  - name: wallet-payment-success
+    markup: <accrue-pay widget="wallet-payment-success">
+    purpose: Show the rewards a user earned into their wallet after a purchase.
+  - name: wallet-earned-rewards
+    markup: <accrue-pay widget="wallet-earned-rewards">
+    purpose: Earned-rewards surface with a go-to-wallet event.
+  - name: payment-methods flow
+    markup: <accrue-pay flow="payment-methods" wallet-id="{active-wallet-id}">
+    purpose: Let users manage and select backup payment methods for wallet payments; supports data-linking-flow="link"
+      and "backup".
+  data_source: Widget payloads come from the Merchant API — getWalletWidgetData / findWalletWidgetData
+    (v1 and v2) and getLinkedAccountWidgetData; sessions from createWidgetSession.
+- family: Mobile SDK widget hosts
+  technology: native + webview
+  components:
+  - name: React Native / Expo
+    purpose: Manages the Accrue widget lifecycle and deep linking.
+    package: '@accrue-savings/react-native-sdk, @accrue-savings/expo-sdk'
+  - name: iOS
+    purpose: Native widget host.
+    package: github.com/accrue-savings/accrue-ios-sdk
+  - name: Android
+    purpose: Native widget host.
+    package: github.com/accrue-savings/android-sdk
+  - name: WebView / deep-linking
+    purpose: Documented fallback integration for apps not using a native SDK.
+    docs: https://docs.byaccrue.com/docs/integration/mobile/web-view/usage
+customization:
+  note: UI customization is documented (https://docs.byaccrue.com/docs/integration/ui-customization/ and
+    trigger-component-customization), but the widgets page states customizations are handled with "your
+    dedicated account manager" rather than being fully self-serve.

@@ -1,0 +1,39 @@
+generated: '2026-09-06'
+method: derived
+source: openapi/accrue-savings-merchant-api-openapi.yaml (TransactionFailureReason enum on the transactionFailed
+  webhook payload and transaction resources)
+envelope_field: failureReason
+enum_name: TransactionFailureReason
+surfaced_on:
+- transactionFailed webhook payload
+- wallet transaction resources
+decline_codes:
+- code: HardDecline
+  meaning: The request was declined (hard decline).
+  action: Do not retry this instrument. Ask the customer for a different funding source.
+- code: SoftDecline
+  meaning: The payment request was declined; subsequent attempts may succeed.
+  action: Retry is permitted — back off and retry, or prompt the customer to retry.
+- code: InsufficientFunds
+  meaning: Insufficient funds to complete the transaction.
+  action: Prompt the customer to add funds or select another linked account.
+- code: Expired
+  meaning: The transaction or authorization expired.
+  action: Re-authorize from a fresh payment intent.
+- code: Canceled
+  meaning: The transaction was canceled.
+  action: Terminal; no retry.
+- code: Reversed
+  meaning: The transaction was reversed.
+  action: Terminal; reconcile against the reversal.
+- code: Unknown
+  meaning: The failure reason is unknown.
+  action: Treat as non-retryable without investigation; contact support with the error `id`.
+masked_to_buyers: null
+note: Accrue does not publish a separate network-level decline-code reference (no ISO 8583 / card-network
+  reason codes). What it publishes is this seven-value coarse failure taxonomy, delivered on the transactionFailed
+  webhook. The hard/soft distinction is stated explicitly, which is the retry decision an agent actually
+  needs. Payout failures are reported separately through the counterpartyPayoutReturned webhook, whose
+  `status` distinguishes returned, reversed, cancelled, denied and failed. Which reasons are masked from
+  the end buyer is not documented.
+related: errors/accrue-savings-problem-types.yml

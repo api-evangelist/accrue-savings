@@ -1,0 +1,159 @@
+generated: '2026-09-06'
+method: searched
+source: https://docs.byaccrue.com/api/ (Introduction + API Design tag descriptions), openapi/accrue-savings-merchant-api-openapi.yaml,
+  and live responses observed 2026-09-06
+docs: https://docs.byaccrue.com/api/
+api_style: REST over JSON:API 1.x. Media type application/vnd.api+json on requests and successful responses;
+  error responses observed live are application/json.
+authentication:
+  style: bearer token + Client-ID header
+  see: authentication/accrue-savings-authentication.yml
+idempotency:
+  coverage: partial
+  scope:
+  - refund
+  - createOneTimeDeposit
+  - createCounterpartyPayout
+  - createCounterpartyTransfer
+  mechanism: A request-BODY attribute named `idempotencyKey` (string, 1-255 characters, UUIDv4 recommended)
+    — NOT an HTTP header. There is no Idempotency-Key header anywhere in the contract or the docs.
+  retention: 48 hours
+  conflict_error: IdempotencyConflict (HTTP 409) is a declared error code in the contract.
+  required_on:
+  - refund
+  source: https://docs.byaccrue.com/api/
+  note: The API Design section states "Accrue supports idempotency for certain API operations" and that
+    keys remain effective for 48 hours, but never names which operations or the field/header carrying
+    the key. Reading the contract itself, exactly four of the 44 mutating operations expose an `idempotencyKey`
+    attribute, and it is documented as REQUIRED only on refund. Every other write — createPayment, authorizePayment,
+    capturePayment, createWallet, createUser, issueReward, createWidgetSession and the rest — has no replay
+    protection an agent can use. deleteLinkedAccount is separately documented as naturally idempotent
+    (a repeat delete also returns 204), which is a different property from a key-based mechanism.
+reversibility:
+  grade: verified
+  note: Accrue documents a reversal path for its money-moving surface AND states the state window each
+    reversal is valid in, which is what raises this above a bare "there is a cancel endpoint". The windows
+    are STATE windows (payment status), not clock windows — Accrue publishes no time-bounded refund window,
+    so none is asserted here.
+  operations:
+  - action: authorize a payment
+    reversal: cancelPayment
+    operationId: cancelPayment
+    method: POST
+    path: /api/v1/payments/{paymentId}/cancel
+    window: Only while the Payment is in `Created` or `Waiting` status; any other status returns an error.
+      Cancel is always for the full amount — no partial cancel.
+    docs: https://docs.byaccrue.com/api/#tag/Payments/operation/cancelPayment
+  - action: capture a payment
+    reversal: refund
+    operationId: refund
+    method: POST
+    path: /api/v1/payments/{paymentId}/refund
+    window: Only while the Payment is in `Processing` or `Sent` status AND has at least one successful
+      capture. Partial refunds are supported; the refund amount cannot exceed the captured amount and
+      the sum of all non-failed refunds cannot exceed the captured amount. Refunding never changes the
+      Payment status, so status cannot be used to detect a refund — read the separate Refund object.
+    docs: https://docs.byaccrue.com/api/#tag/Payments/operation/refund
+  - action: card-rails capture
+    reversal: completePayment
+    operationId: completePayment
+    method: POST
+    path: /api/v1/payments/{paymentId}/complete
+    window: After all funds are captured from the virtual debit card; marks the payment complete and releases
+      remaining reserved funds back to the user. Card-rails (virtual debit card) integrations only.
+    docs: https://docs.byaccrue.com/api/#tag/Payments/operation/completePayment
+  - action: issue a reward
+    reversal: cancelReward
+    operationId: cancelReward
+    method: DELETE
+    path: /api/v1/rewards/{id}
+    window: Only while `canCancel` is true — pre-issued rewards in `Created` status. Returns 204.
+    docs: https://docs.byaccrue.com/api/#tag/Rewards/operation/cancelReward
+  - action: create a counterparty
+    reversal: deleteCounterparty
+    operationId: deleteCounterparty
+    method: DELETE
+    path: /api/v1/counterparties/{counterpartyId}
+    window: Soft delete, and only while the counterparty holds no balance — a counterparty with a balance
+      returns 409 CounterpartyHasBalance and must be paid out first.
+    docs: https://docs.byaccrue.com/api/#tag/Counterparties/operation/deleteCounterparty
+  irreversible:
+  - operationId: deleteLinkedAccount
+    note: 'Explicitly documented as NOT undoable: "This cannot be undone — the user must link and verify
+      the account again." Stops scheduled funding and round-ups and deactivates the account at the bank-linking
+      provider.'
+  - operationId: createCounterpartyPayout
+    note: No reversal operation is published. Once sent, a payout can only be observed via the counterpartyPayoutSent
+      / counterpartyPayoutCompleted / counterpartyPayoutReturned webhooks; a return is a bank-side outcome,
+      not a merchant-initiated reversal.
+  - operationId: closedLoopWithdraw
+    note: No reversal operation is published.
+dry_run_mode:
+  supported: false
+  note: No dry-run/preview flag on any operation. Rehearsal is done in the separate sandbox environment
+    (merchant-api-sandbox.accruesavings.com) and via the Simulations tag, which exposes 13 operations
+    for simulating card authorizations, captures, deposits, barcode generation, failed transactions and
+    counterparty deposits. See sandbox/accrue-savings-sandbox.yml.
+pagination:
+  style: offset
+  params:
+    limit: page[limit] — 1 to 50, default 10; a larger value is capped at 50 rather than rejected
+    offset: page[offset] — number of resources to skip, default 0
+  response: JSON:API document with a top-level data[] array
+  source: https://docs.byaccrue.com/api/
+search:
+  style: full-text
+  note: List operations on Users, Linked Accounts and Transactions accept a full-text search term. Unquoted
+    words are ANDed; "or" ORs; a leading minus excludes.
+  source: https://docs.byaccrue.com/api/
+sparse_and_expansion:
+  style: JSON:API include
+  param: include
+  note: GET operations accept a comma-separated `include` query parameter; related resources are returned
+    in a top-level `included` array.
+  source: https://docs.byaccrue.com/api/
+metadata:
+  supported: true
+  note: Several resources (for example counterparty transfers) accept an optional string-keyed `metadata`
+    object; values must be strings.
+request_id_tracing:
+  supported: true
+  field: id
+  note: Every error body carries a UUID `id` unique to that occurrence of the problem, plus meta.timestamp
+    and meta.path. There is no request-id request header and no correlation header on success responses.
+versioning:
+  style: URI path
+  current: v1 (with /api/v2/widgets/wallet on two widget operations)
+  note: Version lives in the path. info.version is 1.0.0 and has not moved; the dated changelog is the
+    real signal of change.
+  see: lifecycle/accrue-savings-lifecycle.yml
+error_envelope:
+  format: json-api-flavored
+  media_type: application/json (observed) / application/vnd.api+json (declared)
+  shape:
+    id: UUID unique to this occurrence
+    status: integer HTTP status
+    code: Accrue-specific underscored/CamelCase code (observed empty on infrastructure-level errors)
+    title: exception name, e.g. NotFoundException
+    detail: human-readable explanation
+    meta:
+      environment: production | sandbox
+      timestamp: ISO-8601
+      path: request path
+  note: Not RFC 9457 — no application/problem+json media type and no `type` URI. Multiple error objects
+    may be returned for schema-validation failures.
+  see: errors/accrue-savings-problem-types.yml
+rate_limit_signaling:
+  headers: null
+  note: No rate-limit response headers observed. See rate-limits/accrue-savings-rate-limits.yml.
+retries:
+  retryable_status:
+  - 408
+  - 429
+  - 5xx
+  strategy: exponential backoff with jitter
+  source: https://docs.byaccrue.com/api/
+timeouts:
+  short: 10 seconds default
+  long: up to 90 seconds on some operations
+  source: https://docs.byaccrue.com/api/

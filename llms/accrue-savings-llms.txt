@@ -1,0 +1,136 @@
+# Accrue Savings (Accrue Money, Inc.)
+
+> Accrue powers customer loyalty at the payment layer with a branded stored-value wallet that
+> merchants embed in their own checkout. Brands hold customer funds in a wallet, accept payments
+> over wallet and bank rails, reward behaviour through a rules engine, return refunds as
+> closed-loop credit, and let shoppers pre-fund or crowdfund a purchase. Banking services are
+> provided by Cross River Bank, Member FDIC. Accrue is a financial technology company, not a bank.
+
+Generated: 2026-09-06
+Method: generated
+Source: apis.yml and the artifacts in this repository (Accrue serves no /llms.txt of its own;
+        https://docs.accruesavings.com/llms.txt and /llms-full.txt both return 404).
+
+## API
+
+- [Accrue Merchant API reference](https://docs.byaccrue.com/api/): OpenAPI 3.1, 64 paths, 82
+  operations, 20 webhook topics. JSON:API over application/vnd.api+json.
+- [OpenAPI document](https://docs.byaccrue.com/redocusaurus/plugin-redoc-0.yaml): the machine
+  contract, served by Accrue's Redocusaurus docs build. An alternate enum-based build of the same
+  API is at /redocusaurus/plugin-redoc-1.yaml and rendered at /api-fs/.
+- Production base URL: https://merchant-api.accruesavings.com
+- Sandbox base URL: https://merchant-api-sandbox.accruesavings.com
+
+## Getting started
+
+- [Getting started with the API](https://docs.byaccrue.com/getting-started-api)
+- [Integration guide](https://docs.byaccrue.com/integration)
+- [Complete integration example](https://docs.byaccrue.com/complete-integration-example)
+- [Sandbox instructions](https://docs.byaccrue.com/docs/integration/sandbox/instructions): published
+  test phone numbers (xxx-555-xxxx, code 0001), a test debit card, and a test SSN.
+
+## Authentication
+
+Every request carries two headers: `Authorization: Bearer <Client Secret>` and `Client-ID`. There is
+no OAuth, no OIDC, no mTLS, and no scope model. The OpenAPI declares no securitySchemes — the two
+headers appear only as required header parameters — so read the Introduction section of the
+reference, not the spec, to learn they are credentials. An invalid or missing token returns 401.
+
+## Capability surface
+
+- Wallets: createWallet, getWallet, listWallets, getWalletBalance, getWalletByBarcode,
+  createOneTimeDeposit, listTransactions, getTransaction, closedLoopWithdraw
+- Payment intents: createPaymentIntent, getPaymentIntent, listPaymentIntents, authorizePayment
+- Payments: createPayment, getPayment, listPayments, updatePayment, capturePayment,
+  increaseAuthorization, cancelPayment, completePayment, refund, getVirtualDebitCard
+- Users and identity: createUser, getUser, listUsers, updateUser, acceptKycDisclosureDocuments,
+  createIdentityVerificationChallenge, submitIdentityVerificationChallenge,
+  applyVerifiedProfileUpdate
+- Banking / KYC: createKycApplication, getKycStatus, getDocumentVerificationLink,
+  completeDocumentVerification
+- Counterparties and payouts: createCounterparty, getCounterparty, listCounterparties,
+  updateCounterparty, deleteCounterparty, createCounterpartyPayout, listCounterpartyPayouts,
+  createCounterpartyTransfer, listCounterpartyTransfers, getCounterpartyTransfer
+- Rewards and gifts: issueReward, listIssuedRewards, getIssuedRewardById, updateReward,
+  cancelReward, getGiftByLookUpId, addSweepstakesResults
+- Widgets: getWalletWidgetData, findWalletWidgetData, getWalletWidgetDataV2,
+  findWalletWidgetDataV2, getLinkedAccountWidgetData, createWidgetSession
+- Webhooks: createWebhook, getWebhooks, getWebhook, updateWebhook, deleteWebhook,
+  listWebhookEvents, getWebhookEvent
+- Simulations (sandbox only): 13 operations for driving card auth/capture, deposits, barcodes,
+  forced failures and counterparty deposits.
+
+## Runtime semantics an agent needs
+
+- Pagination: `page[limit]` (1-50, default 10, values above 50 are capped not rejected) and
+  `page[offset]`.
+- Expansion: `include=` returns related resources in a top-level `included` array.
+- Idempotency: PARTIAL. A request-body attribute `idempotencyKey` (1-255 chars, UUIDv4 recommended,
+  48-hour retention) on four operations only — refund, createOneTimeDeposit,
+  createCounterpartyPayout, createCounterpartyTransfer. It is documented as required on refund.
+  There is no Idempotency-Key header. A replayed key returns IdempotencyConflict (409).
+- Rate limit: 10,000 requests per minute per IP, counted separately for sandbox and live. Exhaustion
+  returns 429. NO rate-limit response headers are sent, so remaining quota cannot be observed.
+- Retries: retry on 408, 429 and 5xx with exponential backoff and jitter. Default timeout 10s; some
+  operations take up to 90s.
+- Errors: `{id, status, code, title, detail, meta{environment, timestamp, path}}`. Not RFC 9457.
+  71 named error codes are declared in the contract. `code` can be empty on framework-level errors —
+  fall back to `title`.
+- Reversibility: cancelPayment works only while a Payment is `Created` or `Waiting` and is always
+  full-amount; refund works only while a Payment is `Processing` or `Sent` with a successful capture
+  and supports partials, but never changes the Payment status — read the separate Refund object.
+  deleteLinkedAccount is explicitly NOT undoable. Payouts and closed-loop withdrawals have no
+  reversal operation.
+- Money is always an integer in the smallest currency unit (cents for USD).
+
+## Events
+
+20 webhook topics declared in the OpenAPI 3.1 `webhooks` object: paymentIntentCreated/Updated,
+paymentCreated/Updated/Captured, refundCreated/Updated, seven kyc* topics, transactionCleared,
+transactionFailed, counterpartyIncomingPayment and four counterpartyPayout* lifecycle topics.
+Subscribing with `*` means new topics arrive automatically. Signature verification is instructed but
+the signing header and algorithm are not published. There is no AsyncAPI document.
+
+## SDKs and components
+
+- npm: @accrue-savings/react-native-sdk 1.3.30, @accrue-savings/expo-sdk 1.4.30,
+  @accrue-savings/react-native-core 1.4.30, @accrue-savings/react-native-cli 1.4.29
+  (all published 2025-10-21)
+- Source: github.com/accrue-savings/accrue-ios-sdk (Swift), github.com/accrue-savings/android-sdk
+  (Kotlin)
+- No first-party server-side SDK for the Merchant API. The docs point at OpenAPI generators instead.
+- Web components: `<accrue-pay widget="wallet-balance|wallet-rewards|wallet-payment-success|
+  wallet-earned-rewards">` and `<accrue-pay flow="payment-methods">`, loaded from an UNVERSIONED
+  https://pay.accruesavings.com/main.js.
+
+## Operations
+
+- Status page: https://status.accruesavings.com/ (live; on the legacy domain, not linked from the
+  marketing site)
+- Changelog: https://docs.byaccrue.com/changelog (dated, current; nine pages of entries)
+- No deprecation or sunset policy, no SLA, no Sunset/Deprecation headers. 45 `deprecated: true`
+  markers on schema fields, none on operations.
+- Trust center: https://trust.byaccrue.com/ (Vanta-hosted; contents render client-side and no
+  certification could be read without JavaScript)
+- No /.well-known documents are served on any Accrue host. No MCP server. No GraphQL endpoint.
+  No A2A agent card.
+
+## Company
+
+- [Accrue](https://www.byaccrue.com/) — trading name of Accrue Money, Inc., New York, NY
+- [About](https://www.byaccrue.com/about) | [Contact](https://www.byaccrue.com/contact) |
+  [Careers](https://www.byaccrue.com/careers)
+- [GitHub](https://github.com/accrue-savings)
+- accruesavings.com and accruemoney.com both redirect to byaccrue.com; the API, docs sitemap,
+  status page and widget loader still run on accruesavings.com hosts.
+
+## Optional
+
+- [Terms of Use](https://files.byaccrue.com/048c1405-0e96-4033-af8f-ad353e48646f.pdf)
+- [Privacy Policy](https://files.byaccrue.com/61d09791-95f0-4030-8490-d7e7d061592c.pdf)
+- No pricing page is published; https://www.byaccrue.com/pricing returns 404 and the only path to
+  commercial terms is "Contact Sales".
+
+---
+This file was generated by API Evangelist (https://apievangelist.com) from Accrue's own public
+surface. It is not published by Accrue.

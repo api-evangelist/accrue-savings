@@ -1,0 +1,101 @@
+# generated: '2026-09-06'
+# method: generated
+# source: openapi/accrue-savings-merchant-api-openapi.yaml
+overlay: 1.0.0
+info:
+  title: API Evangelist enrichment overlay — Accrue Merchant API
+  version: 1.0.0
+extends: ../openapi/accrue-savings-merchant-api-openapi.yaml
+x-generated: '2026-09-06'
+x-method: generated
+x-source: openapi/accrue-savings-merchant-api-openapi.yaml
+x-note: >-
+  Non-destructive overlay recording the enrichment findings for the Accrue Merchant API. The
+  published contract is left byte-for-byte as Accrue serves it at
+  https://docs.byaccrue.com/redocusaurus/plugin-redoc-0.yaml. The single largest gap this overlay
+  closes is that the spec declares NO components.securitySchemes and no security requirement, even
+  though every operation requires an Authorization bearer token and a Client-ID header — a generator
+  or agent reading the spec alone cannot tell those two headers are credentials.
+actions:
+  - target: $.info
+    description: Record where this contract was fetched from and who publishes it.
+    update:
+      x-apis-io-source: https://docs.byaccrue.com/redocusaurus/plugin-redoc-0.yaml
+      x-apis-io-provider: Accrue Money, Inc. (byaccrue.com)
+      x-apis-io-alternate-version: https://docs.byaccrue.com/redocusaurus/plugin-redoc-1.yaml
+      x-apis-io-alternate-note: >-
+        Accrue publishes two builds of the same API: /api/ carries the full oneOf/discriminator
+        WebhookIncluded schema and /api-fs/ an enum-based variant. Only the full build is stored.
+  - target: $.components
+    description: >-
+      Add the security schemes the API actually enforces. Accrue documents bearer + Client-ID in
+      prose and declares both as required header parameters on all 82 operations, but never as
+      securitySchemes, so the machine contract does not say they are credentials.
+    update:
+      securitySchemes:
+        bearerAuth:
+          type: http
+          scheme: bearer
+          description: >-
+            The Client Secret issued to your Client (merchant). Backend-only. An invalid, missing or
+            expired token returns HTTP 401. Documented at https://docs.byaccrue.com/api/.
+          x-apis-io-derived-from: documentation
+        clientId:
+          type: apiKey
+          in: header
+          name: Client-ID
+          description: >-
+            Merchant tenant identifier, declared as a required header parameter on every operation.
+          x-apis-io-derived-from: openapi header parameters
+  - target: $
+    description: Record the runtime semantics that are documented in prose but absent from the contract.
+    update:
+      x-apis-io-conventions:
+        media_type: application/vnd.api+json
+        design_standard: JSON:API
+        pagination:
+          style: offset
+          limit_param: page[limit]
+          offset_param: page[offset]
+          max_limit: 50
+          default_limit: 10
+        expansion:
+          param: include
+          response_key: included
+        idempotency:
+          coverage: partial
+          carrier: request body attribute `idempotencyKey` (NOT an HTTP header)
+          retention: 48 hours
+          conflict: IdempotencyConflict (409)
+          operations:
+            - refund
+            - createOneTimeDeposit
+            - createCounterpartyPayout
+            - createCounterpartyTransfer
+          note: >-
+            Four of the 44 mutating operations. Documented as required only on refund.
+        rate_limit:
+          scope: per-ip
+          limit: 10000
+          window: 1 minute
+          exhaustion_status: 429
+          response_headers: none observed
+        error_envelope:
+          shape: '{id, status, code, title, detail, meta{environment, timestamp, path}}'
+          rfc9457: false
+          note: >-
+            `code` was observed empty on framework-level errors; fall back to `title`.
+        reversibility:
+          cancel: cancelPayment — only while Payment status is Created or Waiting; full amount only
+          refund: refund — only while Payment status is Processing or Sent with a successful capture; partial supported
+          complete: completePayment — card rails only; releases remaining reserved funds
+          irreversible:
+            - deleteLinkedAccount
+            - createCounterpartyPayout
+            - closedLoopWithdraw
+  - target: $.servers
+    description: Label the sandbox server so tooling does not treat it as a second production base.
+    update:
+      - url: https://merchant-api-sandbox.accruesavings.com
+        description: Sandbox API
+        x-apis-io-environment: sandbox

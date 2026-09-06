@@ -1,0 +1,243 @@
+generated: '2026-09-06'
+method: derived
+source: openapi/accrue-savings-merchant-api-openapi.yaml (4xx/5xx response schemas) — enriched from https://docs.byaccrue.com/api/
+  API Design > Errors
+format: json-api
+media_type: application/vnd.api+json (declared); application/json observed on live error responses
+rfc9457: false
+envelope:
+  id: UUID unique to this occurrence of the problem
+  status: integer HTTP status code
+  code: Accrue-specific error code (see problem_types below)
+  title: exception class name, e.g. NotFoundException
+  detail: human-readable explanation
+  meta:
+    environment: production | sandbox
+    timestamp: ISO-8601
+    path: request path
+multiple_errors: Schema-validation failures return several error objects at once; server-processing failures
+  typically return one. All identified errors are returned together.
+status_usage:
+  '400': 61
+  '401': 1
+  '402': 5
+  '403': 6
+  '404': 45
+  '409': 7
+  '500': 40
+problem_type_count: 68
+problem_types:
+- code: InvalidAmountOrWalletIdentifier
+  status: 400
+  schema: CreatePaymentIntentInvalidResponse
+- code: WalletAccessDenied
+  status: 403
+  schema: CreatePaymentIntentWalletAccessDeniedResponse
+- code: WalletIdentifierNotFound
+  status: 404
+  schema: CreatePaymentIntentWalletNotFoundResponse
+- code: BadRequest
+  status: 400
+  schema: PaymentIntentQueryValidationErrorResponse
+- code: Failed
+  status: 402
+  schema: AuthorizePaymentIntentFailedResponse
+- code: Forbidden
+  status: 403
+  schema: AuthorizePaymentIntentForbiddenResponse
+- code: InvalidPayment
+  status: 400
+  schema: PaymentValidationResponse
+- code: InvalidPaymentIntent
+  status: 400
+  schema: InvalidPaymentIntentForCardDetailsResponse
+- code: PaymentNotFound
+  status: 400
+  schema: PaymentNotFoundForCardDetailsResponse
+- code: InvalidWalletState
+  status: 400
+  schema: WalletNotReadyForPaymentResponse
+- code: AccessDenied
+  status: 403
+  schema: ForbiddenForCardDetailsResponse
+- code: IllegalOperation
+  status: 400
+  schema: CancelPaymentErrorResponse
+- code: InvalidRefund
+  status: 400
+  schema: RefundValidationResponse
+- code: InvalidAmount
+  status: 400
+  schema: SimulationCardAuthorizationValidationResponse
+- code: WalletNotFound
+  status: 400
+  schema: SimulationCardNotSupportedResponse
+- code: NotFound
+  status: 404
+  schema: SimulationPaymentNotFoundResponse
+- code: InvalidTransactionType
+  status: 400
+  schema: InvalidTransactionTypeResponse
+- code: InvalidTransaction
+  status: 400
+  schema: GenerateBarcodeValidationResponse
+- code: BarcodeNotFound
+  status: 404
+  schema: BarcodeNotFoundResponse
+- code: UnexpectedError
+  status: 500
+  schema: UnexpectedErrorForWalletResponse
+- code: WalletIdentifierExpired
+  status: 400
+  schema: WalletBarcodeExpiredOrInvalidResponse
+- code: WalletForBarcodeNotFound
+  status: 404
+  schema: WalletForBarcodeNotFoundResponse
+- code: UserNotFound
+  status: 400
+  schema: WalletUserNotFoundResponse
+- code: WalletAlreadyExists
+  status: 400
+  schema: WalletAlreadyExistsResponse
+- code: NotAllowed
+  status: 400
+  schema: PhoneNumberBannedForWalletResponse
+- code: MerchantIsDisabled
+  status: 400
+  schema: MerchantIsDisabledForWalletResponse
+- code: InvalidIdentifier
+  status: 400
+  schema: InvalidIdentifierForWalletResponse
+- code: MultipleWalletsFound
+  status: 400
+  schema: MultipleWalletsFoundResponse
+- code: DepositFailedAtCardProcessor
+  status: 400
+  schema: DepositFailedAtCardProcessorResponse
+- code: ExceedsMaxOneTimeDepositAmount
+  status: 400
+  schema: ExceedsMaxOneTimeDepositAmountResponse
+- code: TransactionNotFound
+  status: 404
+  schema: TransactionNotFoundResponse
+- code: PhoneNumberBanned
+  status: 400
+  schema: PhoneNumberBannedResponse
+- code: UserAlreadyExists
+  status: 409
+  schema: UserAlreadyExistsResponse
+- code: IdentityProviderFailure
+  status: 500
+  schema: IdentityProviderFailureResponse
+- code: CooldownActive
+  status: 400
+  schema: CreateIdentityVerificationChallengeErrorResponse
+- code: InsufficientVerificationData
+  status: 403
+  schema: InsufficientVerificationDataResponse
+- code: ChallengeExpired
+  status: 400
+  schema: ChallengeExpiredResponse
+- code: ChallengeFailed
+  status: 400
+  schema: ChallengeFailedResponse
+- code: MaxAttemptsExceeded
+  status: 400
+  schema: MaxAttemptsExceededResponse
+- code: ValidationError
+  status: 400
+  schema: IdentityVerificationValidationErrorResponse
+- code: ChallengeNotFound
+  status: 404
+  schema: ChallengeNotFoundResponse
+- code: NoWalletFound
+  status: 400
+  schema: NoWalletFoundResponse
+- code: NoLinkedAccountFound
+  status: 400
+  schema: NoLinkedAccountFoundResponse
+- code: InvalidRequest
+  status: 400
+  schema: SweepstakesRequestInvalidResponse
+- code: SweepstakesNotFound
+  status: 400
+  schema: SweepstakesNotFoundResponse
+- code: MultipleActiveWallets
+  status: 400
+  schema: MultipleActiveWalletsResponse
+- code: WalletNotIssuable
+  status: 409
+  schema: WalletNotIssuableResponse
+- code: PreIssuedConflict
+  status: 409
+  schema: PreIssuedConflictResponse
+- code: IdempotencyConflict
+  status: 409
+  schema: IdempotencyConflictResponse
+- code: InvalidState
+  status: 409
+  schema: InvalidRewardStateResponse
+- code: GiftIdentifierExpired
+  status: 400
+  schema: GiftLookUpIdExpiredOrInvalidResponse
+- code: GiftIdentifierMaxUsesExceeded
+  status: 400
+  schema: GiftLookUpIdExpiredOrInvalidResponse
+- code: GiftNotFound
+  status: 404
+  schema: GiftNotFoundResponse
+- code: KycApplicationFailed
+  status: 400
+  schema: KycApplicationFailedResponse
+- code: KycStatusNotFound
+  status: 400
+  schema: KycStatusNotFoundResponse
+- code: DocumentVerificationFailed
+  status: 400
+  schema: DocumentVerificationFailedResponse
+- code: CounterpartyAlreadyExists
+  status: 409
+  schema: CounterpartyAlreadyExistsResponse
+- code: Unauthorized
+  status: 401
+  schema: UnauthorizedForCounterpartiesResponse
+- code: CounterpartyNotFound
+  status: 404
+  schema: CounterpartyNotFoundResponse
+- code: CounterpartyHasBalance
+  status: 409
+  schema: CounterpartyHasBalanceResponse
+- code: InsufficientBalance
+  status: 400
+  schema: InsufficientBalanceResponse
+- code: ValidationFailed
+  status: 400
+  schema: CounterpartyTransferValidationResponse
+- code: CrossTenantTransfer
+  status: 403
+  schema: CrossTenantCounterpartyTransferResponse
+- code: TransferNotFound
+  status: 404
+  schema: CounterpartyTransferNotFoundResponse
+- code: InvalidUser
+  status: 400
+  schema: LinkedAccountInvalidUserResponse
+- code: LinkedAccountNotFound
+  status: 404
+  schema: LinkedAccountUserNotFoundResponse
+- code: ExternalTransactionNotFound
+  status: 404
+  schema: ExternalTransactionNotFoundResponse
+- code: InvalidTopics
+  status: 400
+  schema: InvalidWebhookTopicsResponse
+note: 'Accrue declares 71 named error codes across its response schemas — an unusually complete error
+  surface for a payments API. It is NOT RFC 9457: there is no problem+json media type and no `type` URI,
+  so an agent must key on `code`. A live probe on 2026-09-06 confirmed the envelope shape but showed `code`
+  empty ("") on framework-level errors (NotFoundException, ForbiddenException), so consumers must fall
+  back to `title` when `code` is blank.'
+observed:
+- url: https://merchant-api.accruesavings.com/api/v1/payments
+  status: 403
+  body: '{"id":"...","status":403,"code":"","title":"ForbiddenException","detail":"ForbiddenException:
+    Forbidden resource","meta":{"environment":"production","timestamp":"...","path":"/api/v1/payments"}}'

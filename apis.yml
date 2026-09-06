@@ -1,23 +1,137 @@
 aid: accrue-savings
 name: Accrue Savings
-description: 'Accrue Savings is a company surfaced via the API Evangelist harvest backlog (source: secondary-market)
-  and added to the network as a stub for full-pipeline profiling.'
+description: >-
+  Accrue Savings (legally Accrue Money, Inc., now trading as Accrue at byaccrue.com) is a New York
+  fintech that powers customer loyalty at the payment layer with a branded stored-value wallet
+  merchants embed in their own checkout. Its platform lets brands hold customer funds in a wallet,
+  accept payments over wallet and bank rails, run a rules-driven reward engine, return refunds as
+  closed-loop credit, and let shoppers pre-fund or crowdfund a future purchase. The Accrue Merchant
+  API is a public, JSON:API-shaped OpenAPI 3.1 contract covering wallets, payment intents, payments,
+  users, KYC and identity verification, counterparties and payouts, linked accounts, rewards, gifts,
+  sweepstakes, external transactions and webhooks, with a sandbox environment, mobile SDKs for
+  iOS/Android/React Native/Expo, and embeddable web wallet widgets. Banking services are provided by
+  Cross River Bank, Member FDIC.
+image: https://docs.byaccrue.com/img/accrue-logo.svg
 url: https://raw.githubusercontent.com/api-evangelist/accrue-savings/refs/heads/main/apis.yml
 x-type: company
 x-source: harvest:secondary-market
-x-tier: stub
-x-tier-reason: harvest
 specificationVersion: '0.20'
 created: '2026-09-06'
 modified: '2026-09-06'
 tags:
 - Company
-apis: []
+- Payments
+- Loyalty
+- Wallets
+- Stored Value
+- Rewards
+- Banking
+- Fintech
+- Webhooks
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
+apis:
+- aid: accrue-savings-merchant-api
+  name: Accrue Merchant API
+  description: >-
+    The Accrue Merchant API is a JSON:API-based REST API for embedding Accrue's stored-value wallet
+    into a merchant experience — creating and funding wallets, running payment intents and payments
+    (authorize, capture, cancel, complete, refund, increase authorization), onboarding users through
+    KYC and identity verification, managing counterparties and payouts, issuing rewards and gifts,
+    and subscribing to twenty webhook topics. Published as OpenAPI 3.1 with 82 operations across
+    production and sandbox environments.
+  humanURL: https://docs.byaccrue.com/api/
+  image: https://docs.byaccrue.com/img/accrue-logo.svg
+  baseURL: https://merchant-api.accruesavings.com
+  tags:
+  - Payments
+  - Wallets
+  - Rewards
+  - Banking
+  - Webhooks
+  properties:
+  - type: OpenAPI
+    url: openapi/accrue-savings-merchant-api-openapi.yaml
+  - type: Documentation
+    url: https://docs.byaccrue.com/
+  - type: APIReference
+    url: https://docs.byaccrue.com/api/
+  - type: GettingStarted
+    url: https://docs.byaccrue.com/getting-started-api
+  - type: Overlay
+    url: overlays/accrue-savings-merchant-api-overlay.yaml
+  - type: Sandbox
+    url: sandbox/accrue-savings-sandbox.yml
+  - type: Webhooks
+    url: asyncapi/accrue-savings-merchant-api-webhooks.yml
 common:
+- type: DomainSecurity
+  url: security/accrue-savings-domain-security.yml
 - type: Website
-  url: https://www.nasdaqprivatemarket.com/
+  url: https://www.byaccrue.com/
+- type: DeveloperPortal
+  url: https://docs.byaccrue.com/
+- type: Documentation
+  url: https://docs.byaccrue.com/
+- type: APIReference
+  url: https://docs.byaccrue.com/api/
+- type: GettingStarted
+  url: https://docs.byaccrue.com/getting-started-api
+- type: Support
+  url: https://www.byaccrue.com/contact
+- type: GitHubOrganization
+  url: https://github.com/accrue-savings
+- type: TermsOfService
+  url: https://files.byaccrue.com/048c1405-0e96-4033-af8f-ad353e48646f.pdf
+- type: PrivacyPolicy
+  url: https://files.byaccrue.com/61d09791-95f0-4030-8490-d7e7d061592c.pdf
+- type: Packages
+  url: packages/accrue-savings-packages.yml
+- type: SDKs
+  url: packages/accrue-savings-packages.yml
+- type: X-MCPServerCandidate
+  url: mcp/accrue-savings-mcp.yml
+- type: LLMsTxt
+  url: llms/accrue-savings-llms.txt
+- type: Conformance
+  url: conformance/accrue-savings-conformance.yml
+- type: ErrorCatalog
+  url: errors/accrue-savings-problem-types.yml
+- type: DeclineCodes
+  url: errors/accrue-savings-decline-codes.yml
+- type: Lifecycle
+  url: lifecycle/accrue-savings-lifecycle.yml
+- type: StatusPage
+  url: https://status.accruesavings.com/
+- type: Authentication
+  url: authentication/accrue-savings-authentication.yml
+- type: TrustCenter
+  url: https://trust.byaccrue.com/
+- type: Sandbox
+  url: sandbox/accrue-savings-sandbox.yml
+- type: Conventions
+  url: conventions/accrue-savings-conventions.yml
+- type: Idempotency
+  url: conventions/accrue-savings-conventions.yml
+- type: ChangeLog
+  url: https://docs.byaccrue.com/changelog
+- type: Components
+  url: components/accrue-savings-components.yml
+- type: DataModel
+  url: data-model/accrue-savings-data-model.yml
+- type: Webhooks
+  url: asyncapi/accrue-savings-merchant-api-webhooks.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: Plans
+  url: plans/accrue-savings-plans-pricing.yml
+- type: RateLimits
+  url: rate-limits/accrue-savings-rate-limits.yml
+x-enrichment:
+  date: '2026-09-06'
+  status: enriched
+  artifacts_added: 28
+  pass: local-v3

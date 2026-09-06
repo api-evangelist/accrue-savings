@@ -1,0 +1,23 @@
+generated: '2026-09-06'
+method: probed
+source: https://trust.byaccrue.com/ probed 2026-09-06
+url: https://trust.byaccrue.com/
+status: 200
+platform: Vanta Trust Center
+evidence:
+  canonical: https://trust.byaccrue.com
+  title: Accrue Trust Center
+  vanta_slug: 927vrpcd1zwr55w4lpwknu
+  og_image: https://app.vanta.com/doc?s=j0l97qrftnsqy9oy981tr
+certifications: []
+note: 'A real, first-party trust center exists and is hosted on Vanta. Its contents — the certification
+  list, subprocessors and documents — are rendered client-side from Vanta''s API, so nothing readable
+  was returned to an unauthenticated non-JS fetch (6KB shell). NO certification is asserted here: SOC
+  2, ISO 27001, PCI DSS and HIPAA are all UNVERIFIED for this provider, not denied. Anyone needing the
+  list must open the page in a browser or request access through Vanta.'
+related_security:
+  banking_partner: Cross River Bank, Member FDIC
+  source: https://www.byaccrue.com/ footer disclosure
+  note: Accrue states plainly that it is "a financial technology company, not an FDIC insured depository
+    institution" and that banking services are provided by Cross River Bank — the honest disclosure a
+    fintech in this category should make.

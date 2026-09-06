@@ -1,0 +1,85 @@
+generated: '2026-09-06'
+method: searched
+source: https://docs.byaccrue.com/api/ (API Design tag) and openapi/accrue-savings-merchant-api-openapi.yaml
+conformance:
+- id: openapi-3.1
+  conforms: true
+  evidence: 'openapi: 3.1.0 at the root of openapi/accrue-savings-merchant-api-openapi.yaml; the docs
+    state "The Accrue API conforms to OpenAPI 3.1".'
+- id: json:api
+  conforms: true
+  evidence: https://docs.byaccrue.com/api/ — "Accrue's API is REST-based and adheres to the JSON:API specification";
+    every request/response body in the contract uses media type application/vnd.api+json and the data/type/id/attributes/relationships/included
+    document shape.
+- id: pagination
+  conforms: true
+  evidence: JSON:API page[limit]/page[offset] family, documented at https://docs.byaccrue.com/api/ and
+    declared as query parameters on every list operation.
+- id: idempotency
+  conforms: true
+  partial: true
+  evidence: '`idempotencyKey` body attribute on refund, createOneTimeDeposit, createCounterpartyPayout
+    and createCounterpartyTransfer; 48-hour retention documented at https://docs.byaccrue.com/api/; IdempotencyConflict
+    (409) declared as an error code. Four of 44 write operations — partial, not full.'
+- id: rfc9457
+  conforms: false
+  evidence: No application/problem+json media type and no `type` URI anywhere in the contract; errors
+    use a JSON:API-flavored {id,status,code,title,detail,meta} envelope instead.
+- id: oauth2
+  conforms: false
+  evidence: No oauth2 securityScheme and no OAuth documentation; authentication is a bearer Client Secret
+    plus a Client-ID header.
+- id: oidc
+  conforms: false
+  evidence: /.well-known/openid-configuration returns 404 on all eight probed hosts (see well-known/accrue-savings-well-known.yml).
+- id: rfc8594-sunset
+  conforms: false
+  evidence: 'No Sunset or Deprecation response headers are declared in the contract; deprecation is signalled
+    with OpenAPI `deprecated: true` on schema fields and in changelog prose only.'
+- id: iso-4217
+  conforms: true
+  evidence: Currency fields are documented as ISO 4217 codes (e.g. CounterpartyIncomingPaymentEventAttributes.currency,
+    "ISO 4217 currency code of the payment").
+- id: iso-8601
+  conforms: true
+  evidence: 'All timestamps are format: date-time; bank settlement dates are documented as YYYY-MM-DD.'
+domain_standards:
+- id: json:api
+  domain: API design
+  conforms: true
+  evidence: https://docs.byaccrue.com/api/ API Design > About JSON API, plus the application/vnd.api+json
+    media type on all 82 operations.
+  note: JSON:API is the cross-cutting design standard Accrue declares in its own contract. It is not a
+    payments-domain standard.
+- id: kyc-cip
+  domain: US financial services
+  conforms: true
+  evidence: A first-class KYC surface — createKycApplication, getKycStatus, getDocumentVerificationLink,
+    completeDocumentVerification, acceptKycDisclosureDocuments — plus seven kyc* webhook topics, consistent
+    with US Customer Identification Program obligations. Banking services are provided by Cross River
+    Bank, Member FDIC (stated on https://www.byaccrue.com/).
+not_applicable:
+- fhir
+- fapi
+- scim
+- odata
+- psd2
+- openrtb
+- sparkplug
+- activitypub
+- lti
+- oai-pmh
+- hl7v2
+- x12
+- edifact
+note: 'No ISO 20022, FDX, or Open Banking message shape appears anywhere in the contract — Accrue moves
+  money through Cross River Bank over ACH/wire rails and exposes its own resource model rather than a
+  banking-standard message set, so no financial-messaging domain standard is asserted. REWARD-ONLY: the
+  absence is recorded, not penalised.'
+compliance:
+  trust_center: https://trust.byaccrue.com/
+  certifications: []
+  note: A Vanta-hosted Trust Center exists at trust.byaccrue.com (HTTP 200, canonical link and og:title
+    "Accrue Trust Center"), but its certification list is rendered client-side and is not readable without
+    JavaScript. No SOC 2 / ISO 27001 / PCI DSS claim is asserted here because none could be read from
+    a public surface.

@@ -1,0 +1,69 @@
+generated: '2026-09-06'
+method: searched
+source: https://docs.byaccrue.com/changelog and https://docs.byaccrue.com/changelog/archive
+url: https://docs.byaccrue.com/changelog
+scheme: dated entries (no semantic version tags after v0.9.0)
+current_version: v1 (API path); docs changelog is date-keyed
+cadence: irregular; eight entries in 2026, clustered in August 2026
+entries:
+- date: '2026-08-27'
+  title: CounterpartyIncomingPayment webhook topic
+  breaking: false
+  additions: true
+  highlights: New webhook topic fired when funding arrives on a counterparty bank account, so merchants
+    can reconcile deposits without polling the counterparty balance. Wildcard ("*") subscribers receive
+    it automatically — handlers must tolerate the new topic.
+  url: https://docs.byaccrue.com/changelog/counterparty-incoming-payment-webhook
+- date: '2026-08-27'
+  title: Counterparty payout lifecycle webhooks
+  breaking: false
+  additions: true
+  highlights: counterpartyPayoutCreated / Sent / Completed / Returned topics covering the full payout
+    lifecycle including terminal failures.
+  url: https://docs.byaccrue.com/changelog/counterparty-payout-lifecycle-webhooks
+- date: '2026-08-26'
+  title: Counterparty balances are 64-bit
+  breaking: false
+  additions: false
+  highlights: Counterparty balance money type widened.
+  url: https://docs.byaccrue.com/changelog/counterparty-balance-money-type
+- date: '2026-08-26'
+  title: Missing resources now return 404
+  breaking: true
+  additions: false
+  highlights: 'Status-code change: lookups for missing resources now return 404 where they previously
+    did not. A behavioural break for clients keying on the old status.'
+  url: https://docs.byaccrue.com/changelog/not-found-status-codes
+- date: '2026-08-24'
+  title: Counterparty settlement account details
+  breaking: false
+  additions: true
+  highlights: Settlement account details exposed on counterparties.
+  url: https://docs.byaccrue.com/changelog/counterparty-internal-bank-account
+- date: '2026-08-20'
+  title: Counterparty Accrue bank account details
+  breaking: false
+  additions: true
+  highlights: External bank account details exposed on counterparties.
+  url: https://docs.byaccrue.com/changelog/counterparty-external-bank-account
+- date: '2026-08-20'
+  title: Simulate a counterparty deposit
+  breaking: false
+  additions: true
+  highlights: New sandbox simulation endpoint POST /api/v1/simulation/counterparties/{counterpartyId}/deposits.
+  url: https://docs.byaccrue.com/changelog/simulate-counterparty-deposit
+- date: '2026-03-31'
+  title: Stable Reference ID
+  breaking: false
+  additions: true
+  highlights: Stable reference identifier introduced.
+  url: https://docs.byaccrue.com/changelog/stable-reference-id
+- date: '2024-02-01'
+  title: v0.9.0
+  breaking: false
+  additions: true
+  highlights: Earliest published entry.
+  url: https://docs.byaccrue.com/changelog/v0.9.0
+note: The changelog is dated, per-change, paginated to nine pages and genuinely current — the most recent
+  entry is ten days before this pass. It announced one behavioural break (404 on missing resources) in
+  plain language. There is no RSS/Atom feed and no machine-readable release feed.

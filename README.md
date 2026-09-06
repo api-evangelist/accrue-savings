@@ -64,5 +64,25 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Accrue Savings is a company surfaced via the API Evangelist harvest backlog (source: secondary-market) and added to the network as a stub for full-pipeline profiling.
-- https://www.nasdaqprivatemarket.com/
+Accrue Savings — trading as **Accrue**, legally **Accrue Money, Inc.** — is a New York fintech that
+powers customer loyalty at the payment layer with a branded stored-value wallet merchants embed in
+their own checkout. Brands hold customer funds in a wallet, accept payments over wallet and bank
+rails, reward behaviour through a rules engine, return refunds as closed-loop credit, and let
+shoppers pre-fund or crowdfund a future purchase. Banking services are provided by Cross River Bank,
+Member FDIC; Accrue is a financial technology company, not a bank.
+
+The company publishes a real, current machine-readable contract: the **Accrue Merchant API**, an
+OpenAPI 3.1 document with 64 paths, 82 operations, 20 webhook topics and 71 named error codes,
+served from its Redocusaurus docs build.
+
+- Website: https://www.byaccrue.com/
+- Developer docs: https://docs.byaccrue.com/
+- API reference: https://docs.byaccrue.com/api/
+- Status: https://status.accruesavings.com/
+- GitHub: https://github.com/accrue-savings
+
+> **Note on the domain.** This repository was created from a harvest backlog row that carried
+> `https://www.nasdaqprivatemarket.com/` — the secondary-market venue the company was listed on,
+> not the company's own site. That has been corrected to byaccrue.com.
+> `accruesavings.com` and `accruemoney.com` both 301 to `byaccrue.com`, while the API, the docs
+> sitemap, the status page and the widget loader still run on `accruesavings.com` hosts.

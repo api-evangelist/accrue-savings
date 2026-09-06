@@ -1,0 +1,18 @@
+generated: '2026-09-06'
+method: searched
+source: https://www.byaccrue.com/ and https://www.byaccrue.com/contact, probed 2026-09-06
+plan_count: 0
+currency: null
+plans: []
+note: Accrue publishes no pricing or plans page. https://www.byaccrue.com/pricing returns 404; the site's
+  only commercial call to action is "Get a demo" / "Contact Sales" on the homepage and https://www.byaccrue.com/contact
+  (200). The Merchant API contract does surface merchant-side fee objects (fee type + amount in cents
+  on transactions and payments), but Accrue does not publish the rate card those fees are drawn from.
+  Enterprise contact-sales only.
+evidence:
+- url: https://www.byaccrue.com/pricing
+  status: 404
+- url: https://www.byaccrue.com/contact
+  status: 200
+- url: https://www.byaccrue.com/
+  status: 200

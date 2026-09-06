@@ -1,0 +1,58 @@
+generated: '2026-09-06'
+method: searched
+source: https://docs.byaccrue.com/changelog, https://docs.byaccrue.com/changelog/archive, https://status.accruesavings.com/,
+  openapi/accrue-savings-merchant-api-openapi.yaml
+versioning:
+  scheme: URI path versioning
+  current: v1
+  other: /api/v2/widgets/wallet and /api/v2/widgets/wallet/{walletId} are the only v2 paths
+  spec_version: 1.0.0
+  note: info.version has stayed at 1.0.0; the dated changelog, not the spec version, is where change is
+    announced.
+status_page:
+  url: https://status.accruesavings.com/
+  status: 200
+  provider: self-hosted status page
+  components:
+  - Accrue Production API Server
+  - Jobs
+  - Merchant API Production
+  - Accrue Development API Server
+  - Merchant API Jobs Development
+  - Accrue Sandbox Core API Sandbox
+  - Merchant API Sandbox
+  note: Live and up to date at probe time ("All services are online", last updated Sep 6, 2026). It is
+    served on the legacy accruesavings.com domain, not on byaccrue.com, and is not linked from the marketing
+    site footer — a discoverability gap, not an availability one. No status.byaccrue.com host exists (TLS
+    handshake fails).
+deprecation_policy:
+  published: false
+  headers:
+    sunset: false
+    deprecation: false
+  note: 'No written deprecation or sunset policy, no SLA page, and no RFC 8594 Sunset/Deprecation response
+    headers. Deprecation is communicated two ways only: OpenAPI `deprecated: true` on individual schema
+    fields, and prose in the dated changelog. One field carries an explicit removal warning ("Deprecated.
+    Always returns true. All disbursements are remitted directly. Will be removed in a future version.")
+    with no date attached.'
+deprecated:
+  operations: []
+  fields:
+  - schema: counterparty payout disbursement
+    field: remit
+    note: Deprecated. Always returns true. All disbursements are remitted directly. Will be removed in
+      a future version.
+  - schema: payment charges
+    field: legacy charges breakdown (rewards/fees)
+    note: Legacy charges breakdown. Use `charges` instead.
+  - schema: payment fee
+    field: fee (whole-payment)
+    note: Deprecated integer fee on the whole payment, in the smallest currency unit.
+  note: '45 `deprecated: true` markers appear in the contract, all on schema properties; NO operation
+    is marked deprecated.'
+sla:
+  published: false
+  note: No SLA or uptime commitment is published.
+changelog:
+  url: https://docs.byaccrue.com/changelog
+  see: changelog/accrue-savings-changelog.yml

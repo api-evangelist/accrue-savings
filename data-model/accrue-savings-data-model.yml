@@ -1,0 +1,245 @@
+generated: '2026-09-06'
+method: derived
+source: openapi/accrue-savings-merchant-api-openapi.yaml
+note: Derived from the JSON:API resource schemas and the id-reference path parameters in the contract.
+  Only eight schemas carry a full attributes+relationships resource shape; the rest of the graph is expressed
+  through id fields on path parameters and request bodies, which is how the edges below marked via_field
+  were recovered.
+entities:
+- name: Wallet
+  id: walletId (uuid)
+  operations:
+  - createWallet
+  - getWallet
+  - listWallets
+  - getWalletBalance
+  - getWalletByBarcode
+  - closedLoopWithdraw
+  description: A merchant-branded stored-value wallet holding a user's funds. Carries available/pending/withdrawable
+    balances.
+- name: User
+  id: userId / userReference / userIdentifier
+  operations:
+  - createUser
+  - getUser
+  - listUsers
+  - updateUser
+  description: The end customer behind a wallet, with an attachedProfile (referenceId, email, phoneNumber).
+- name: PaymentIntent
+  id: paymentIntentId (uuid)
+  operations:
+  - createPaymentIntent
+  - getPaymentIntent
+  - listPaymentIntents
+  - authorizePayment
+  description: An intent to charge, created against exactly one of walletId or lookUpId (wallet barcode
+    or gift identifier).
+- name: Payment
+  id: paymentId (uuid)
+  operations:
+  - createPayment
+  - getPayment
+  - listPayments
+  - updatePayment
+  - capturePayment
+  - increaseAuthorization
+  - cancelPayment
+  - completePayment
+  - refund
+  description: 'An authorized charge with a state machine: Created -> Waiting -> Processing/Sent -> Canceled/Failed.'
+- name: Refund
+  id: (returned by refund)
+  operations:
+  - refund
+  description: Independent object with its own status; a Payment's status never reflects that it was refunded.
+- name: VirtualDebitCard
+  id: (links.virtualDebitCard on a Payment)
+  operations:
+  - getVirtualDebitCard
+  description: Card-rails instrument spent by card-present authorization; how gift balance is actually
+    consumed.
+- name: Transaction
+  id: transactionId
+  operations:
+  - createOneTimeDeposit
+  - listTransactions
+  - getTransaction
+  description: A movement on a wallet, with a fee breakdown and a TransactionFailureReason on failure.
+- name: LinkedAccount
+  id: linkedAccountId
+  operations:
+  - getLinkedAccounts
+  - deleteLinkedAccount
+  description: An external bank account linked to a user for funding and withdrawal.
+- name: Counterparty
+  id: counterpartyId (uuid)
+  operations:
+  - createCounterparty
+  - getCounterparty
+  - listCounterparties
+  - updateCounterparty
+  - deleteCounterparty
+  description: A party a merchant pays out to, with its own bank account details and balance.
+- name: CounterpartyPayout
+  id: (payout id)
+  operations:
+  - createCounterpartyPayout
+  - listCounterpartyPayouts
+  description: Outbound bank payment to a counterparty; lifecycle observed through four webhook topics.
+- name: CounterpartyTransfer
+  id: counterpartyTransferId
+  operations:
+  - createCounterpartyTransfer
+  - listCounterpartyTransfers
+  - getCounterpartyTransfer
+  description: Internal transfer between counterparties.
+- name: Reward
+  id: reward id
+  operations:
+  - issueReward
+  - listIssuedRewards
+  - getIssuedRewardById
+  - updateReward
+  - cancelReward
+  description: An incentive issued into a wallet; cancellable only while canCancel is true.
+- name: Gift
+  id: lookUpId
+  operations:
+  - getGiftByLookUpId
+  description: A scannable gift identifier with a remaining balance; skips KYC.
+- name: KycApplication
+  id: (per user)
+  operations:
+  - createKycApplication
+  - getKycStatus
+  - getDocumentVerificationLink
+  - completeDocumentVerification
+  - acceptKycDisclosureDocuments
+  description: Identity verification for a user; seven webhook topics track its states.
+- name: IdentityVerificationChallenge
+  id: challengeId
+  operations:
+  - createIdentityVerificationChallenge
+  - submitIdentityVerificationChallenge
+  - applyVerifiedProfileUpdate
+  description: Step-up verification gating profile updates.
+- name: ExternalTransaction
+  id: externalTransactionId
+  operations:
+  - addExternalTransactions
+  - listExternalTransactions
+  - getExternalTransaction
+  description: Merchant-reported off-platform activity used to drive rewards.
+- name: Webhook
+  id: webhookId
+  operations:
+  - createWebhook
+  - getWebhooks
+  - getWebhook
+  - updateWebhook
+  - deleteWebhook
+  description: A registered subscription to one or more topics.
+- name: WebhookEvent
+  id: webhookEventId
+  operations:
+  - listWebhookEvents
+  - getWebhookEvent
+  description: A delivered event, queryable after the fact.
+- name: WidgetSession
+  id: session id
+  operations:
+  - createWidgetSession
+  - getWalletWidgetData
+  - findWalletWidgetData
+  - getWalletWidgetDataV2
+  - findWalletWidgetDataV2
+  - getLinkedAccountWidgetData
+  description: Signed payload consumed by the <accrue-pay> web components.
+relationships:
+- from: PaymentIntent
+  to: Payment
+  kind: has_many
+  via: relationships.payments
+  source: schema PaymentIntent
+- from: Payment
+  to: PaymentIntent
+  kind: belongs_to
+  via: relationships.paymentIntent
+  source: schema Payment
+- from: VirtualDebitCard
+  to: Payment
+  kind: belongs_to
+  via: relationships.payment
+  source: schema VirtualDebitCard
+- from: VirtualDebitCard
+  to: PaymentIntent
+  kind: belongs_to
+  via: relationships.paymentIntent
+  source: schema VirtualDebitCard
+- from: Wallet
+  to: User
+  kind: belongs_to
+  via: relationships.user
+  source: schema Wallet
+- from: WalletWidgetData
+  to: Wallet
+  kind: belongs_to
+  via: relationships.wallet
+  source: schema WalletWidgetData
+- from: ExternalTransaction
+  to: User
+  kind: has_many
+  via: relationships.user
+  source: schema ExternalTransaction
+- from: ExternalTransaction
+  to: ExternalTransaction
+  kind: has_many
+  via: relationships.linkedExternalTransaction
+  source: schema ExternalTransaction
+- from: Wallet
+  to: Transaction
+  kind: has_many
+  via_field: walletId path parameter on /wallets/:walletId/transactions
+- from: User
+  to: Wallet
+  kind: has_many
+  via_field: userId; MultipleActiveWallets and MultipleWalletsFound are declared error codes
+- from: User
+  to: LinkedAccount
+  kind: has_many
+  via_field: userId path parameter on /users/:userId/linked-accounts
+- from: User
+  to: KycApplication
+  kind: has_one
+  via_field: userId path parameter on /users/:userId/kyc/application
+- from: User
+  to: IdentityVerificationChallenge
+  kind: has_many
+  via_field: userIdentifier path parameter
+- from: Counterparty
+  to: CounterpartyPayout
+  kind: has_many
+  via_field: counterpartyId path parameter on /counterparties/:counterpartyId/payouts
+- from: Payment
+  to: Refund
+  kind: has_many
+  via_field: refund returns a Refund; includable on getPayment
+- from: Payment
+  to: Counterparty
+  kind: has_many
+  via_field: refund disbursement[].counterpartyId
+- from: Webhook
+  to: WebhookEvent
+  kind: has_many
+  via_field: webhookEventId
+identifier_conventions:
+  format: UUID v4 for nearly every resource id
+  exceptions:
+  - lookUpId (gift / wallet barcode scan string)
+  - userReference and userIdentifier (merchant-supplied alternates to userId)
+  note: 'The contract warns explicitly: "Never send a gift `data.id` as `walletId`" — the two id spaces
+    are distinct despite both being accepted by createPaymentIntent.'
+money:
+  unit: smallest currency unit (cents for USD)
+  type: integer
+  note: Divide by 100 for dollars. Counterparty balances were widened to 64-bit on 2026-08-26.

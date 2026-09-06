@@ -1,0 +1,91 @@
+generated: '2026-09-06'
+method: searched
+source: https://registry.npmjs.org/ (scope @accrue-savings), https://github.com/accrue-savings, https://docs.byaccrue.com/docs/integration/mobile/sdk/intro
+name: Accrue Savings client packages
+note: Accrue publishes first-party mobile SDKs under the npm scope @accrue-savings (maintainers eldar.accrue,
+  marko-accruemoney, accrue-othecos) and two source repos in the github.com/accrue-savings org. No first-party
+  server-side SDK (Node/Python/Java/Go/Ruby/PHP) is published for the Merchant API; the docs say the OpenAPI
+  can be used with generators instead.
+packages:
+- name: '@accrue-savings/react-native-sdk'
+  registry: npm
+  language: JavaScript/TypeScript
+  official: true
+  url: https://www.npmjs.com/package/@accrue-savings/react-native-sdk
+  version: 1.3.30
+  published: '2025-10-21'
+  description: Accrue Savings SDK for React Native
+  note: 35 versions since 2024-04-11; npm maintainers are Accrue staff accounts.
+- name: '@accrue-savings/expo-sdk'
+  registry: npm
+  language: JavaScript/TypeScript
+  official: true
+  url: https://www.npmjs.com/package/@accrue-savings/expo-sdk
+  version: 1.4.30
+  published: '2025-10-21'
+  description: Accrue Savings SDK for Expo (React Native)
+- name: '@accrue-savings/react-native-core'
+  registry: npm
+  language: JavaScript/TypeScript
+  official: true
+  url: https://www.npmjs.com/package/@accrue-savings/react-native-core
+  version: 1.4.30
+  published: '2025-10-21'
+  description: Shared core for the Accrue React Native and Expo SDKs (no published description on npm).
+- name: '@accrue-savings/react-native-cli'
+  registry: npm
+  language: JavaScript/TypeScript
+  official: true
+  url: https://www.npmjs.com/package/@accrue-savings/react-native-cli
+  version: 1.4.29
+  published: '2025-10-21'
+  description: Build-time helper CLI shipped alongside the React Native SDK (no published description
+    on npm).
+  note: Not a general-purpose API CLI; no cli/ artifact is emitted for it.
+- name: accrue-ios-sdk
+  registry: source
+  language: Swift
+  official: true
+  url: https://github.com/accrue-savings/accrue-ios-sdk
+  version: null
+  published: null
+  description: iOS SDK source repository in the accrue-savings GitHub org.
+  note: Distributed from the GitHub repo (Swift Package Manager), not from a package registry with a metadata
+    endpoint; no tagged release version was published at probe time, so version/published are null rather
+    than guessed. Last push observed 2026-07-30.
+- name: android-sdk
+  registry: source
+  language: Kotlin
+  official: true
+  url: https://github.com/accrue-savings/android-sdk
+  version: null
+  published: null
+  description: Android SDK source repository in the accrue-savings GitHub org.
+  note: No Maven Central coordinates published; consumed from the repo. Last push observed 2026-07-08.
+- name: accrue-sdk
+  registry: npm
+  language: TypeScript
+  official: false
+  url: https://www.npmjs.com/package/accrue-sdk
+  version: 1.0.2
+  published: '2023-12-20'
+  description: Third-party TypeScript wrapper describing itself as access to "the Accrue API".
+  note: 'NOT first-party: sole npm maintainer "terader" is unrelated to the @accrue-savings scope, and
+    neither Accrue docs nor the GitHub org reference it. Two versions, last published 2023-12-20.'
+registries_checked:
+- registry: npm
+  result: 4 first-party packages under @accrue-savings; 1 unaffiliated package named accrue-sdk
+- registry: PyPI
+  result: no first-party package found
+- registry: Maven Central
+  result: no first-party coordinates found; Android SDK is distributed from GitHub
+- registry: NuGet
+  result: none
+- registry: RubyGems
+  result: none
+- registry: Packagist
+  result: none
+- registry: crates.io
+  result: none
+- registry: pkg.go.dev
+  result: none
