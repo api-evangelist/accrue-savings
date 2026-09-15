@@ -1,16 +1,14 @@
 aid: accrue-savings
 name: Accrue Savings
-description: >-
-  Accrue Savings (legally Accrue Money, Inc., now trading as Accrue at byaccrue.com) is a New York
-  fintech that powers customer loyalty at the payment layer with a branded stored-value wallet
-  merchants embed in their own checkout. Its platform lets brands hold customer funds in a wallet,
-  accept payments over wallet and bank rails, run a rules-driven reward engine, return refunds as
-  closed-loop credit, and let shoppers pre-fund or crowdfund a future purchase. The Accrue Merchant
-  API is a public, JSON:API-shaped OpenAPI 3.1 contract covering wallets, payment intents, payments,
-  users, KYC and identity verification, counterparties and payouts, linked accounts, rewards, gifts,
-  sweepstakes, external transactions and webhooks, with a sandbox environment, mobile SDKs for
-  iOS/Android/React Native/Expo, and embeddable web wallet widgets. Banking services are provided by
-  Cross River Bank, Member FDIC.
+description: Accrue Savings (legally Accrue Money, Inc., now trading as Accrue at byaccrue.com) is a New
+  York fintech that powers customer loyalty at the payment layer with a branded stored-value wallet merchants
+  embed in their own checkout. Its platform lets brands hold customer funds in a wallet, accept payments
+  over wallet and bank rails, run a rules-driven reward engine, return refunds as closed-loop credit,
+  and let shoppers pre-fund or crowdfund a future purchase. The Accrue Merchant API is a public, JSON:API-shaped
+  OpenAPI 3.1 contract covering wallets, payment intents, payments, users, KYC and identity verification,
+  counterparties and payouts, linked accounts, rewards, gifts, sweepstakes, external transactions and
+  webhooks, with a sandbox environment, mobile SDKs for iOS/Android/React Native/Expo, and embeddable
+  web wallet widgets. Banking services are provided by Cross River Bank, Member FDIC.
 image: https://docs.byaccrue.com/img/accrue-logo.svg
 url: https://raw.githubusercontent.com/api-evangelist/accrue-savings/refs/heads/main/apis.yml
 x-type: company
@@ -27,6 +25,16 @@ tags:
 - Rewards
 - Banking
 - Fintech
+- Webhook
+tags_raw:
+- Company
+- Payments
+- Loyalty
+- Wallets
+- Stored Value
+- Rewards
+- Banking
+- Fintech
 - Webhooks
 maintainers:
 - FN: Kin Lane
@@ -34,19 +42,24 @@ maintainers:
 - FN: APIs.json
   email: info@apis.io
 apis:
-- aid: accrue-savings-merchant-api
+- aid: accrue-savings:accrue-savings-merchant-api
   name: Accrue Merchant API
-  description: >-
-    The Accrue Merchant API is a JSON:API-based REST API for embedding Accrue's stored-value wallet
-    into a merchant experience — creating and funding wallets, running payment intents and payments
-    (authorize, capture, cancel, complete, refund, increase authorization), onboarding users through
-    KYC and identity verification, managing counterparties and payouts, issuing rewards and gifts,
-    and subscribing to twenty webhook topics. Published as OpenAPI 3.1 with 82 operations across
-    production and sandbox environments.
+  description: The Accrue Merchant API is a JSON:API-based REST API for embedding Accrue's stored-value
+    wallet into a merchant experience — creating and funding wallets, running payment intents and payments
+    (authorize, capture, cancel, complete, refund, increase authorization), onboarding users through KYC
+    and identity verification, managing counterparties and payouts, issuing rewards and gifts, and subscribing
+    to twenty webhook topics. Published as OpenAPI 3.1 with 82 operations across production and sandbox
+    environments.
   humanURL: https://docs.byaccrue.com/api/
   image: https://docs.byaccrue.com/img/accrue-logo.svg
   baseURL: https://merchant-api.accruesavings.com
   tags:
+  - Payments
+  - Wallets
+  - Rewards
+  - Banking
+  - Webhook
+  tags_raw:
   - Payments
   - Wallets
   - Rewards
