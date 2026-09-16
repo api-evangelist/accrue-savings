@@ -42,45 +42,415 @@ maintainers:
 - FN: APIs.json
   email: info@apis.io
 apis:
-- aid: accrue-savings:accrue-savings-merchant-api
-  name: Accrue Merchant API
-  description: The Accrue Merchant API is a JSON:API-based REST API for embedding Accrue's stored-value
-    wallet into a merchant experience — creating and funding wallets, running payment intents and payments
-    (authorize, capture, cancel, complete, refund, increase authorization), onboarding users through KYC
-    and identity verification, managing counterparties and payouts, issuing rewards and gifts, and subscribing
-    to twenty webhook topics. Published as OpenAPI 3.1 with 82 operations across production and sandbox
-    environments.
+- aid: accrue-savings:accrue-savings-banking-api
+  name: Accrue Savings Banking API
+  description: >-
+    Banking APIs provide KYC (Know Your Customer) verification functionality to enable users to comply
+    with financial regulations when using banking features. These endpoints manage identity verification
+    through document submission, status tracking, and automated compliance checks.
   humanURL: https://docs.byaccrue.com/api/
-  image: https://docs.byaccrue.com/img/accrue-logo.svg
   baseURL: https://merchant-api.accruesavings.com
   tags:
-  - Payments
-  - Wallets
-  - Rewards
   - Banking
-  - Webhook
-  tags_raw:
-  - Payments
-  - Wallets
-  - Rewards
-  - Banking
-  - Webhooks
   properties:
   - type: OpenAPI
-    url: openapi/accrue-savings-merchant-api-openapi.yaml
+    url: openapi/accrue-savings-banking-api-openapi.yml
   - type: Documentation
     url: https://docs.byaccrue.com/
   - type: APIReference
     url: https://docs.byaccrue.com/api/
   - type: GettingStarted
     url: https://docs.byaccrue.com/getting-started-api
-  - type: Overlay
-    url: overlays/accrue-savings-merchant-api-overlay.yaml
+  - type: Sandbox
+    url: sandbox/accrue-savings-sandbox.yml
+  - type: Webhooks
+    url: asyncapi/accrue-savings-merchant-api-webhooks.yml
+- aid: accrue-savings:accrue-savings-counterparties-api
+  name: Accrue Savings Counterparties API
+  description: >-
+    Counterparties define bank accounts where funds are settled for captured payments. Settlement details
+    live on `externalBankAccount`. There can be multiple counterparties.
+  humanURL: https://docs.byaccrue.com/api/
+  baseURL: https://merchant-api.accruesavings.com
+  tags:
+  - Counterparties
+  properties:
+  - type: OpenAPI
+    url: openapi/accrue-savings-counterparties-api-openapi.yml
+  - type: Documentation
+    url: https://docs.byaccrue.com/
+  - type: APIReference
+    url: https://docs.byaccrue.com/api/
+  - type: GettingStarted
+    url: https://docs.byaccrue.com/getting-started-api
+  - type: Sandbox
+    url: sandbox/accrue-savings-sandbox.yml
+  - type: Webhooks
+    url: asyncapi/accrue-savings-merchant-api-webhooks.yml
+- aid: accrue-savings:accrue-savings-counterpartytransfers-api
+  name: Accrue Savings Counterparty Transfers API
+  description: >-
+    Counterparty Transfers represent movements of funds between two counterparties owned by the same partner.
+    Use these endpoints to initiate, list, and retrieve counterparty-to-counterparty transfers.
+  humanURL: https://docs.byaccrue.com/api/
+  baseURL: https://merchant-api.accruesavings.com
+  tags:
+  - CounterpartyTransfers
+  properties:
+  - type: OpenAPI
+    url: openapi/accrue-savings-counterpartytransfers-api-openapi.yml
+  - type: Documentation
+    url: https://docs.byaccrue.com/
+  - type: APIReference
+    url: https://docs.byaccrue.com/api/
+  - type: GettingStarted
+    url: https://docs.byaccrue.com/getting-started-api
+  - type: Sandbox
+    url: sandbox/accrue-savings-sandbox.yml
+  - type: Webhooks
+    url: asyncapi/accrue-savings-merchant-api-webhooks.yml
+- aid: accrue-savings:accrue-savings-externaltransactions-api
+  name: Accrue Savings External Transactions API
+  description: >-
+    External transactions are records of transfers that happened outside the Accrue system. E.g. purchases
+    in an online shop using a non-Accrue payment method.
+  humanURL: https://docs.byaccrue.com/api/
+  baseURL: https://merchant-api.accruesavings.com
+  tags:
+  - ExternalTransactions
+  properties:
+  - type: OpenAPI
+    url: openapi/accrue-savings-externaltransactions-api-openapi.yml
+  - type: Documentation
+    url: https://docs.byaccrue.com/
+  - type: APIReference
+    url: https://docs.byaccrue.com/api/
+  - type: GettingStarted
+    url: https://docs.byaccrue.com/getting-started-api
+  - type: Sandbox
+    url: sandbox/accrue-savings-sandbox.yml
+  - type: Webhooks
+    url: asyncapi/accrue-savings-merchant-api-webhooks.yml
+- aid: accrue-savings:accrue-savings-gifts-api
+  name: Accrue Savings Gifts API
+  description: >-
+    Gifts expose remaining spendable balance for a scanned lookUpId. Point-of-sale remaining lookup is
+    GET /api/v1/gifts/{lookUpId}. Spend still uses payment intents with the same scanned string as lookUpId
+    — never send Gift.id as walletId. Amounts are integer cents.
+  humanURL: https://docs.byaccrue.com/api/
+  baseURL: https://merchant-api.accruesavings.com
+  tags:
+  - Gifts
+  properties:
+  - type: OpenAPI
+    url: openapi/accrue-savings-gifts-api-openapi.yml
+  - type: Documentation
+    url: https://docs.byaccrue.com/
+  - type: APIReference
+    url: https://docs.byaccrue.com/api/
+  - type: GettingStarted
+    url: https://docs.byaccrue.com/getting-started-api
+  - type: Sandbox
+    url: sandbox/accrue-savings-sandbox.yml
+  - type: Webhooks
+    url: asyncapi/accrue-savings-merchant-api-webhooks.yml
+- aid: accrue-savings:accrue-savings-identity-verification-api
+  name: Accrue Savings Identity Verification API
+  description: >-
+    Identity Verification provides knowledge-based authentication for sensitive account changes. Use these
+    endpoints to challenge a user with profile and wallet questions, then apply verified phone or email
+    updates with a single-use verification token.
+  humanURL: https://docs.byaccrue.com/api/
+  baseURL: https://merchant-api.accruesavings.com
+  tags:
+  - Identity Verification
+  properties:
+  - type: OpenAPI
+    url: openapi/accrue-savings-identity-verification-api-openapi.yml
+  - type: Documentation
+    url: https://docs.byaccrue.com/
+  - type: APIReference
+    url: https://docs.byaccrue.com/api/
+  - type: GettingStarted
+    url: https://docs.byaccrue.com/getting-started-api
+  - type: Sandbox
+    url: sandbox/accrue-savings-sandbox.yml
+  - type: Webhooks
+    url: asyncapi/accrue-savings-merchant-api-webhooks.yml
+- aid: accrue-savings:accrue-savings-linkedaccounts-api
+  name: Accrue Savings Linked Accounts API
+  description: >-
+    Linked Accounts represent payment methods that users have connected to their Accrue account. These
+    accounts can be used for funding payments or topping up the wallet.
+  humanURL: https://docs.byaccrue.com/api/
+  baseURL: https://merchant-api.accruesavings.com
+  tags:
+  - LinkedAccounts
+  properties:
+  - type: OpenAPI
+    url: openapi/accrue-savings-linkedaccounts-api-openapi.yml
+  - type: Documentation
+    url: https://docs.byaccrue.com/
+  - type: APIReference
+    url: https://docs.byaccrue.com/api/
+  - type: GettingStarted
+    url: https://docs.byaccrue.com/getting-started-api
+  - type: Sandbox
+    url: sandbox/accrue-savings-sandbox.yml
+  - type: Webhooks
+    url: asyncapi/accrue-savings-merchant-api-webhooks.yml
+- aid: accrue-savings:accrue-savings-paymentintents-api
+  name: Accrue Savings Payment Intents API
+  description: >-
+    Payment Intents represent a commitment to pay a specified amount, allowing for a structured process
+    to handle payments from initiation to completion. This resource serves as a provisional step in the
+    payment process, where the amount, payment method, and other details are specified by the initiator
+    (e.g., a user, support staff, or merchant). Payment Intents can go through several states, such as
+    requiring action, being canceled, or being promoted to an actual payment upon successful authorization.
+  humanURL: https://docs.byaccrue.com/api/
+  baseURL: https://merchant-api.accruesavings.com
+  tags:
+  - PaymentIntents
+  properties:
+  - type: OpenAPI
+    url: openapi/accrue-savings-paymentintents-api-openapi.yml
+  - type: Documentation
+    url: https://docs.byaccrue.com/
+  - type: APIReference
+    url: https://docs.byaccrue.com/api/
+  - type: GettingStarted
+    url: https://docs.byaccrue.com/getting-started-api
+  - type: Sandbox
+    url: sandbox/accrue-savings-sandbox.yml
+  - type: Webhooks
+    url: asyncapi/accrue-savings-merchant-api-webhooks.yml
+- aid: accrue-savings:accrue-savings-payments-api
+  name: Accrue Savings Payments API
+  description: >-
+    Payments are the realization of payment intents, representing the actual transfer or authorization
+    of funds. This resource encapsulates the details of completed transactions, including the payment
+    status, amount, and any adjustments or refunds that have occurred post-initial authorization. Payments
+    can have various statuses reflecting their current state, from pending to refunded, providing a comprehensive
+    view of the transaction lifecycle.
+  humanURL: https://docs.byaccrue.com/api/
+  baseURL: https://merchant-api.accruesavings.com
+  tags:
+  - Payments
+  properties:
+  - type: OpenAPI
+    url: openapi/accrue-savings-payments-api-openapi.yml
+  - type: Documentation
+    url: https://docs.byaccrue.com/
+  - type: APIReference
+    url: https://docs.byaccrue.com/api/
+  - type: GettingStarted
+    url: https://docs.byaccrue.com/getting-started-api
+  - type: Sandbox
+    url: sandbox/accrue-savings-sandbox.yml
+  - type: Webhooks
+    url: asyncapi/accrue-savings-merchant-api-webhooks.yml
+- aid: accrue-savings:accrue-savings-rewards-api
+  name: Accrue Savings Rewards API
+  description: >-
+    Partner-issued rewards let trusted integrations credit customer wallets or create pre-issued rewards
+    for recipients identified by phone number. When a recipient has an active wallet, rewards are deposited
+    immediately. When no active wallet exists, a pre-issued reward is created for the user to claim when
+    they sign up. All issue requests require an idempotency key.
+  humanURL: https://docs.byaccrue.com/api/
+  baseURL: https://merchant-api.accruesavings.com
+  tags:
+  - Rewards
+  properties:
+  - type: OpenAPI
+    url: openapi/accrue-savings-rewards-api-openapi.yml
+  - type: Documentation
+    url: https://docs.byaccrue.com/
+  - type: APIReference
+    url: https://docs.byaccrue.com/api/
+  - type: GettingStarted
+    url: https://docs.byaccrue.com/getting-started-api
+  - type: Sandbox
+    url: sandbox/accrue-savings-sandbox.yml
+  - type: Webhooks
+    url: asyncapi/accrue-savings-merchant-api-webhooks.yml
+- aid: accrue-savings:accrue-savings-simulations-api
+  name: Accrue Savings Simulations API
+  description: >-
+    Simulations are used to simulate payments authorizations and captures for Card Rails (Virtual Debit
+    Cards).
+  humanURL: https://docs.byaccrue.com/api/
+  baseURL: https://merchant-api.accruesavings.com
+  tags:
+  - Simulations
+  properties:
+  - type: OpenAPI
+    url: openapi/accrue-savings-simulations-api-openapi.yml
+  - type: Documentation
+    url: https://docs.byaccrue.com/
+  - type: APIReference
+    url: https://docs.byaccrue.com/api/
+  - type: GettingStarted
+    url: https://docs.byaccrue.com/getting-started-api
+  - type: Sandbox
+    url: sandbox/accrue-savings-sandbox.yml
+  - type: Webhooks
+    url: asyncapi/accrue-savings-merchant-api-webhooks.yml
+- aid: accrue-savings:accrue-savings-sweepstakes-api
+  name: Accrue Savings Sweepstakes API
+  description: >-
+    Sweepstakes campaigns give users the chance to win prizes by participating in merchant-sponsored promotions.
+    Each campaign is linked to a specific merchant and tracks user entries. Users can earn entries through
+    actions like purchases, and winners are selected based on campaign rules. Sweepstakes add an engaging
+    layer of excitement and reward to the user experience.
+  humanURL: https://docs.byaccrue.com/api/
+  baseURL: https://merchant-api.accruesavings.com
+  tags:
+  - Sweepstakes
+  properties:
+  - type: OpenAPI
+    url: openapi/accrue-savings-sweepstakes-api-openapi.yml
+  - type: Documentation
+    url: https://docs.byaccrue.com/
+  - type: APIReference
+    url: https://docs.byaccrue.com/api/
+  - type: GettingStarted
+    url: https://docs.byaccrue.com/getting-started-api
+  - type: Sandbox
+    url: sandbox/accrue-savings-sandbox.yml
+  - type: Webhooks
+    url: asyncapi/accrue-savings-merchant-api-webhooks.yml
+- aid: accrue-savings:accrue-savings-users-api
+  name: Accrue Savings Users API
+  description: >-
+    Users represent the end users and are the parent container of Wallets. A user is automatically created
+    when the end-user signs into the Accrue product through various different methods using their phone
+    number.
+  humanURL: https://docs.byaccrue.com/api/
+  baseURL: https://merchant-api.accruesavings.com
+  tags:
+  - Users
+  properties:
+  - type: OpenAPI
+    url: openapi/accrue-savings-users-api-openapi.yml
+  - type: Documentation
+    url: https://docs.byaccrue.com/
+  - type: APIReference
+    url: https://docs.byaccrue.com/api/
+  - type: GettingStarted
+    url: https://docs.byaccrue.com/getting-started-api
+  - type: Sandbox
+    url: sandbox/accrue-savings-sandbox.yml
+  - type: Webhooks
+    url: asyncapi/accrue-savings-merchant-api-webhooks.yml
+- aid: accrue-savings:accrue-savings-wallets-api
+  name: Accrue Savings Wallets API
+  description: >-
+    Wallets are where users save money and collect rewards for future payments to merchants. Each wallet
+    is linked to a specific merchant and tracks the balance of deposits and rewards. Users can contribute
+    to their wallet's balance as part of their payment planning, while also accruing rewards.
+  humanURL: https://docs.byaccrue.com/api/
+  baseURL: https://merchant-api.accruesavings.com
+  tags:
+  - Wallets
+  properties:
+  - type: OpenAPI
+    url: openapi/accrue-savings-wallets-api-openapi.yml
+  - type: Documentation
+    url: https://docs.byaccrue.com/
+  - type: APIReference
+    url: https://docs.byaccrue.com/api/
+  - type: GettingStarted
+    url: https://docs.byaccrue.com/getting-started-api
+  - type: Sandbox
+    url: sandbox/accrue-savings-sandbox.yml
+  - type: Webhooks
+    url: asyncapi/accrue-savings-merchant-api-webhooks.yml
+- aid: accrue-savings:accrue-savings-webhook-topics-api
+  name: Accrue Savings Webhook Topics API
+  description: Webhook Topics
+  humanURL: https://docs.byaccrue.com/api/
+  baseURL: https://merchant-api.accruesavings.com
+  tags:
+  - Webhook Topics
+  properties:
+  - type: OpenAPI
+    url: openapi/accrue-savings-webhook-topics-api-openapi.yml
+  - type: Documentation
+    url: https://docs.byaccrue.com/
+  - type: APIReference
+    url: https://docs.byaccrue.com/api/
+  - type: GettingStarted
+    url: https://docs.byaccrue.com/getting-started-api
+  - type: Sandbox
+    url: sandbox/accrue-savings-sandbox.yml
+  - type: Webhooks
+    url: asyncapi/accrue-savings-merchant-api-webhooks.yml
+- aid: accrue-savings:accrue-savings-webhookevents-api
+  name: Accrue Savings Webhook Events API
+  description: Webhook Event management APIs
+  humanURL: https://docs.byaccrue.com/api/
+  baseURL: https://merchant-api.accruesavings.com
+  tags:
+  - WebhookEvents
+  properties:
+  - type: OpenAPI
+    url: openapi/accrue-savings-webhookevents-api-openapi.yml
+  - type: Documentation
+    url: https://docs.byaccrue.com/
+  - type: APIReference
+    url: https://docs.byaccrue.com/api/
+  - type: GettingStarted
+    url: https://docs.byaccrue.com/getting-started-api
+  - type: Sandbox
+    url: sandbox/accrue-savings-sandbox.yml
+  - type: Webhooks
+    url: asyncapi/accrue-savings-merchant-api-webhooks.yml
+- aid: accrue-savings:accrue-savings-webhooks-api
+  name: Accrue Savings Webhooks API
+  description: Webhook management APIs
+  humanURL: https://docs.byaccrue.com/api/
+  baseURL: https://merchant-api.accruesavings.com
+  tags:
+  - Webhooks
+  properties:
+  - type: OpenAPI
+    url: openapi/accrue-savings-webhooks-api-openapi.yml
+  - type: Documentation
+    url: https://docs.byaccrue.com/
+  - type: APIReference
+    url: https://docs.byaccrue.com/api/
+  - type: GettingStarted
+    url: https://docs.byaccrue.com/getting-started-api
+  - type: Sandbox
+    url: sandbox/accrue-savings-sandbox.yml
+  - type: Webhooks
+    url: asyncapi/accrue-savings-merchant-api-webhooks.yml
+- aid: accrue-savings:accrue-savings-widgets-api
+  name: Accrue Savings Widgets API
+  description: >-
+    <p>Widgets are components that are embedded into applications to enrich the user experience. Some
+    of those require additional data loaded through API endpoints.</p><p>Learn more about the different
+    widget types <a href='/docs/payments/web/widgets'>here</a>.</p>
+  humanURL: https://docs.byaccrue.com/api/
+  baseURL: https://merchant-api.accruesavings.com
+  tags:
+  - Widgets
+  properties:
+  - type: OpenAPI
+    url: openapi/accrue-savings-widgets-api-openapi.yml
+  - type: Documentation
+    url: https://docs.byaccrue.com/
+  - type: APIReference
+    url: https://docs.byaccrue.com/api/
+  - type: GettingStarted
+    url: https://docs.byaccrue.com/getting-started-api
   - type: Sandbox
     url: sandbox/accrue-savings-sandbox.yml
   - type: Webhooks
     url: asyncapi/accrue-savings-merchant-api-webhooks.yml
 common:
+- type: Overlay
+  url: overlays/accrue-savings-merchant-api-overlay.yaml
 - type: DomainSecurity
   url: security/accrue-savings-domain-security.yml
 - type: Website
