@@ -177,53 +177,6 @@ apis:
     url: sandbox/accrue-savings-sandbox.yml
   - type: Webhooks
     url: asyncapi/accrue-savings-merchant-api-webhooks.yml
-- aid: accrue-savings:accrue-savings-linkedaccounts-api
-  name: Accrue Savings Linked Accounts API
-  description: >-
-    Linked Accounts represent payment methods that users have connected to their Accrue account. These
-    accounts can be used for funding payments or topping up the wallet.
-  humanURL: https://docs.byaccrue.com/api/
-  baseURL: https://merchant-api.accruesavings.com
-  tags:
-  - LinkedAccounts
-  properties:
-  - type: OpenAPI
-    url: openapi/accrue-savings-linkedaccounts-api-openapi.yml
-  - type: Documentation
-    url: https://docs.byaccrue.com/
-  - type: APIReference
-    url: https://docs.byaccrue.com/api/
-  - type: GettingStarted
-    url: https://docs.byaccrue.com/getting-started-api
-  - type: Sandbox
-    url: sandbox/accrue-savings-sandbox.yml
-  - type: Webhooks
-    url: asyncapi/accrue-savings-merchant-api-webhooks.yml
-- aid: accrue-savings:accrue-savings-paymentintents-api
-  name: Accrue Savings Payment Intents API
-  description: >-
-    Payment Intents represent a commitment to pay a specified amount, allowing for a structured process
-    to handle payments from initiation to completion. This resource serves as a provisional step in the
-    payment process, where the amount, payment method, and other details are specified by the initiator
-    (e.g., a user, support staff, or merchant). Payment Intents can go through several states, such as
-    requiring action, being canceled, or being promoted to an actual payment upon successful authorization.
-  humanURL: https://docs.byaccrue.com/api/
-  baseURL: https://merchant-api.accruesavings.com
-  tags:
-  - PaymentIntents
-  properties:
-  - type: OpenAPI
-    url: openapi/accrue-savings-paymentintents-api-openapi.yml
-  - type: Documentation
-    url: https://docs.byaccrue.com/
-  - type: APIReference
-    url: https://docs.byaccrue.com/api/
-  - type: GettingStarted
-    url: https://docs.byaccrue.com/getting-started-api
-  - type: Sandbox
-    url: sandbox/accrue-savings-sandbox.yml
-  - type: Webhooks
-    url: asyncapi/accrue-savings-merchant-api-webhooks.yml
 - aid: accrue-savings:accrue-savings-payments-api
   name: Accrue Savings Payments API
   description: >-
@@ -385,26 +338,6 @@ apis:
     url: sandbox/accrue-savings-sandbox.yml
   - type: Webhooks
     url: asyncapi/accrue-savings-merchant-api-webhooks.yml
-- aid: accrue-savings:accrue-savings-webhookevents-api
-  name: Accrue Savings Webhook Events API
-  description: Webhook Event management APIs
-  humanURL: https://docs.byaccrue.com/api/
-  baseURL: https://merchant-api.accruesavings.com
-  tags:
-  - WebhookEvents
-  properties:
-  - type: OpenAPI
-    url: openapi/accrue-savings-webhookevents-api-openapi.yml
-  - type: Documentation
-    url: https://docs.byaccrue.com/
-  - type: APIReference
-    url: https://docs.byaccrue.com/api/
-  - type: GettingStarted
-    url: https://docs.byaccrue.com/getting-started-api
-  - type: Sandbox
-    url: sandbox/accrue-savings-sandbox.yml
-  - type: Webhooks
-    url: asyncapi/accrue-savings-merchant-api-webhooks.yml
 - aid: accrue-savings:accrue-savings-webhooks-api
   name: Accrue Savings Webhooks API
   description: Webhook management APIs
@@ -438,6 +371,70 @@ apis:
   properties:
   - type: OpenAPI
     url: openapi/accrue-savings-widgets-api-openapi.yml
+  - type: Documentation
+    url: https://docs.byaccrue.com/
+  - type: APIReference
+    url: https://docs.byaccrue.com/api/
+  - type: GettingStarted
+    url: https://docs.byaccrue.com/getting-started-api
+  - type: Sandbox
+    url: sandbox/accrue-savings-sandbox.yml
+  - type: Webhooks
+    url: asyncapi/accrue-savings-merchant-api-webhooks.yml
+- aid: accrue-savings:accrue-savings-linked-accounts-api
+  name: Accrue Savings Linked Accounts API
+  description: >-
+    Linked Accounts represent payment methods that users have connected to their Accrue account. These
+    accounts can be used for funding payments or topping up the wallet.
+  humanURL: https://docs.byaccrue.com/api/
+  baseURL: https://merchant-api.accruesavings.com
+  tags:
+  - Linked Accounts
+  properties:
+  - type: OpenAPI
+    url: openapi/accrue-savings-linked-accounts-api-openapi.yml
+  - type: Documentation
+    url: https://docs.byaccrue.com/
+  - type: APIReference
+    url: https://docs.byaccrue.com/api/
+  - type: GettingStarted
+    url: https://docs.byaccrue.com/getting-started-api
+  - type: Sandbox
+    url: sandbox/accrue-savings-sandbox.yml
+  - type: Webhooks
+    url: asyncapi/accrue-savings-merchant-api-webhooks.yml
+- aid: accrue-savings:accrue-savings-payment-intents-api
+  name: Accrue Savings Payment Intents API
+  description: >-
+    Payment Intents represent a commitment to pay a specified amount, allowing for a structured process
+    to handle payments from initiation to completion.
+  humanURL: https://docs.byaccrue.com/api/
+  baseURL: https://merchant-api.accruesavings.com
+  tags:
+  - Payment Intents
+  properties:
+  - type: OpenAPI
+    url: openapi/accrue-savings-payment-intents-api-openapi.yml
+  - type: Documentation
+    url: https://docs.byaccrue.com/
+  - type: APIReference
+    url: https://docs.byaccrue.com/api/
+  - type: GettingStarted
+    url: https://docs.byaccrue.com/getting-started-api
+  - type: Sandbox
+    url: sandbox/accrue-savings-sandbox.yml
+  - type: Webhooks
+    url: asyncapi/accrue-savings-merchant-api-webhooks.yml
+- aid: accrue-savings:accrue-savings-webhook-events-api
+  name: Accrue Savings Webhook Events API
+  description: Webhook Event management APIs
+  humanURL: https://docs.byaccrue.com/api/
+  baseURL: https://merchant-api.accruesavings.com
+  tags:
+  - Webhook Events
+  properties:
+  - type: OpenAPI
+    url: openapi/accrue-savings-webhook-events-api-openapi.yml
   - type: Documentation
     url: https://docs.byaccrue.com/
   - type: APIReference
