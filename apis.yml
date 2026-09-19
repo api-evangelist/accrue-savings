@@ -16,6 +16,10 @@ x-source: harvest:secondary-market
 specificationVersion: '0.20'
 created: '2026-09-06'
 modified: '2026-09-06'
+x-docs-platform: docusaurus
+x-docs-platform-confidence: medium
+x-docs-platform-checked: 2026-09-17
+x-docs-hosting: vercel
 tags:
 - Company
 - Payments
@@ -234,6 +238,8 @@ apis:
   humanURL: https://docs.byaccrue.com/api/
   baseURL: https://merchant-api.accruesavings.com
   tags:
+  - Simulation
+  tags_raw:
   - Simulations
   properties:
   - type: OpenAPI
@@ -281,6 +287,8 @@ apis:
   humanURL: https://docs.byaccrue.com/api/
   baseURL: https://merchant-api.accruesavings.com
   tags:
+  - User
+  tags_raw:
   - Users
   properties:
   - type: OpenAPI
@@ -344,6 +352,8 @@ apis:
   humanURL: https://docs.byaccrue.com/api/
   baseURL: https://merchant-api.accruesavings.com
   tags:
+  - Webhook
+  tags_raw:
   - Webhooks
   properties:
   - type: OpenAPI
