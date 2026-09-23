@@ -1,0 +1,25 @@
+# Front Door AI Index — accrue-savings — 2026-09-17
+# AI vocabulary counted on the provider's root page. Generated; do not edit.
+# `score` is null unless ownership is `own` — see front_door_ai.py.
+front_door_ai:
+  slug: accrue-savings
+  lexicon_version: '1.0'
+  probed_at: '2026-09-17'
+  host: www.byaccrue.com
+  final_host: www.byaccrue.com
+  ownership: own
+  owner: accrue-savings
+  shares_host_with: null
+  inherited_from: null
+  verdict: scored
+  score: 1
+  host_score: 1
+  density: 2.77
+  words: 361
+  tiers:
+    agentic: 1
+    core: 0
+    model: 0
+  ambiguous: 0
+  top_terms:
+    agentic: 1

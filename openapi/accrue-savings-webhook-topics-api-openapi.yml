@@ -1,0 +1,2267 @@
+openapi: 3.2.0
+info:
+  version: 1.0.0
+  title: Accrue Merchant Webhook Topics API
+  x-links:
+  - name: View Alternative Version
+    url: /api-fs/
+    description: View API documentation with alternative enum-based WebhookIncluded schema
+  description: Webhook Topics
+servers:
+- description: Production API
+  url: https://merchant-api.accruesavings.com
+- description: Sandbox API
+  url: https://merchant-api-sandbox.accruesavings.com
+tags:
+- name: Webhook Topics
+  description: Webhook Topics
+paths: {}
+webhooks:
+  paymentIntentCreated:
+    post:
+      operationId: paymentIntentCreated
+      tags:
+      - Webhook Topics
+      summary: PaymentIntentCreated
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/WebhookEvent'
+              - type: object
+                properties:
+                  included:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                          description: Unique identifier for the object.
+                          readOnly: true
+                        type:
+                          type: string
+                          enum:
+                          - PaymentIntent
+                        attributes:
+                          type: object
+                          properties:
+                            balance:
+                              allOf:
+                              - $ref: '#/components/schemas/PaymentIntentBalanceInformation'
+                              - description: Optional wallet balance information
+                            billingAddress:
+                              type:
+                              - object
+                              - 'null'
+                              properties:
+                                street:
+                                  type:
+                                  - string
+                                  - 'null'
+                                street2:
+                                  type:
+                                  - string
+                                  - 'null'
+                                city:
+                                  type:
+                                  - string
+                                  - 'null'
+                                state:
+                                  type:
+                                  - string
+                                  - 'null'
+                                postalCode:
+                                  type:
+                                  - string
+                                  - 'null'
+                                country:
+                                  type:
+                                  - string
+                                  - 'null'
+                              required:
+                              - street
+                              - street2
+                              - city
+                              - state
+                              - postalCode
+                              - country
+                            email:
+                              type:
+                              - string
+                              - 'null'
+                              format: email
+                            error:
+                              type:
+                              - string
+                              - 'null'
+                              enum:
+                              - LinkedAccountUnverified
+                              - LinkedAccountDisconnected
+                              - LinkedAccountMissing
+                              - InsufficientBalance
+                              - MissingFullName
+                              - WrongEmail
+                              - InvalidKycStatus
+                              description: Specific error associated with the current invalid status.
+                            expiresAt:
+                              type:
+                              - string
+                              - 'null'
+                              format: date-time
+                              description: The datetime at which the payment intent is set to expire. After this time, the intent cannot be promoted to a payment and is considered expired.
+                              readOnly: true
+                            fullName:
+                              type:
+                              - string
+                              - 'null'
+                            phoneNumber:
+                              type:
+                              - string
+                              - 'null'
+                            amount:
+                              type: integer
+                              description: Total purchase amount in cents.
+                              format: int32
+                              example: 3600
+                            reference:
+                              type:
+                              - string
+                              - 'null'
+                              description: Reference to the data inside an external system.
+                              example: MERCHANT-GENERATED-TOKEN
+                            status:
+                              type: string
+                              enum:
+                              - Promotable
+                              - PromotedToPayment
+                              - Invalid
+                              - Expired
+                              - Canceled
+                              description: The current status of the payment intent. Each status represents a different stage in the payment intent lifecycle, from creation to completion or cancellation.
+                            userId:
+                              type:
+                              - string
+                              - 'null'
+                            walletId:
+                              type:
+                              - string
+                              - 'null'
+                              description: The ID of the wallet for which the payment intent is created.
+                              example: 123e4567-e89b-12d3-a456-426614174000
+                            updatedAt:
+                              type: string
+                              format: date-time
+                              readOnly: true
+                            createdAt:
+                              type: string
+                              format: date-time
+                              readOnly: true
+                          required:
+                          - updatedAt
+                          - createdAt
+                      required:
+                      - id
+                      - type
+                      - attributes
+                required:
+                - included
+              description: ''
+              x-tags: Model
+      responses:
+        '200':
+          description: Return a 200 status to indicate that the data was received successfully
+  paymentIntentUpdated:
+    post:
+      operationId: paymentIntentUpdated
+      tags:
+      - Webhook Topics
+      summary: PaymentIntentUpdated
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/WebhookEvent'
+              - type: object
+                properties:
+                  included:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                          description: Unique identifier for the object.
+                          readOnly: true
+                        type:
+                          type: string
+                          enum:
+                          - PaymentIntent
+                        attributes:
+                          type: object
+                          properties:
+                            balance:
+                              allOf:
+                              - $ref: '#/components/schemas/PaymentIntentBalanceInformation'
+                              - description: Optional wallet balance information
+                            billingAddress:
+                              type:
+                              - object
+                              - 'null'
+                              properties:
+                                street:
+                                  type:
+                                  - string
+                                  - 'null'
+                                street2:
+                                  type:
+                                  - string
+                                  - 'null'
+                                city:
+                                  type:
+                                  - string
+                                  - 'null'
+                                state:
+                                  type:
+                                  - string
+                                  - 'null'
+                                postalCode:
+                                  type:
+                                  - string
+                                  - 'null'
+                                country:
+                                  type:
+                                  - string
+                                  - 'null'
+                              required:
+                              - street
+                              - street2
+                              - city
+                              - state
+                              - postalCode
+                              - country
+                            email:
+                              type:
+                              - string
+                              - 'null'
+                              format: email
+                            error:
+                              type:
+                              - string
+                              - 'null'
+                              enum:
+                              - LinkedAccountUnverified
+                              - LinkedAccountDisconnected
+                              - LinkedAccountMissing
+                              - InsufficientBalance
+                              - MissingFullName
+                              - WrongEmail
+                              - InvalidKycStatus
+                              description: Specific error associated with the current invalid status.
+                            expiresAt:
+                              type:
+                              - string
+                              - 'null'
+                              format: date-time
+                              description: The datetime at which the payment intent is set to expire. After this time, the intent cannot be promoted to a payment and is considered expired.
+                              readOnly: true
+                            fullName:
+                              type:
+                              - string
+                              - 'null'
+                            phoneNumber:
+                              type:
+                              - string
+                              - 'null'
+                            amount:
+                              type: integer
+                              description: Total purchase amount in cents.
+                              format: int32
+                              example: 3600
+                            reference:
+                              type:
+                              - string
+                              - 'null'
+                              description: Reference to the data inside an external system.
+                              example: MERCHANT-GENERATED-TOKEN
+                            status:
+                              type: string
+                              enum:
+                              - Promotable
+                              - PromotedToPayment
+                              - Invalid
+                              - Expired
+                              - Canceled
+                              description: The current status of the payment intent. Each status represents a different stage in the payment intent lifecycle, from creation to completion or cancellation.
+                            userId:
+                              type:
+                              - string
+                              - 'null'
+                            walletId:
+                              type:
+                              - string
+                              - 'null'
+                              description: The ID of the wallet for which the payment intent is created.
+                              example: 123e4567-e89b-12d3-a456-426614174000
+                            updatedAt:
+                              type: string
+                              format: date-time
+                              readOnly: true
+                            createdAt:
+                              type: string
+                              format: date-time
+                              readOnly: true
+                          required:
+                          - updatedAt
+                          - createdAt
+                      required:
+                      - id
+                      - type
+                      - attributes
+                required:
+                - included
+              description: ''
+              x-tags: Model
+      responses:
+        '200':
+          description: Return a 200 status to indicate that the data was received successfully
+  paymentCreated:
+    post:
+      operationId: paymentCreated
+      tags:
+      - Webhook Topics
+      summary: PaymentCreated
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/WebhookEvent'
+              - type: object
+                properties:
+                  included:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                          description: Unique identifier for the object.
+                          readOnly: true
+                        type:
+                          type: string
+                          enum:
+                          - Payment
+                        attributes:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                              example: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                            status:
+                              type: string
+                              enum:
+                              - Canceled
+                              - Created
+                              - Failed
+                              - Processing
+                              - Returned
+                              - Sent
+                              description: The current status of the payment. Each status indicates a specific phase in the payment process, such as waiting for authorization, being processed, or having been successfully completed or canceled.
+                              example: Sent
+                            amount:
+                              type: integer
+                              description: The total amount of the payment processed, represented in the smallest currency unit (e.g., cents for USD). To obtain the value in dollars, divide by 100. This amount may differ from the initially intended amount due to adjustments, fees, or additional charges.
+                              format: int32
+                              example: 9999
+                            channel:
+                              type:
+                              - string
+                              - 'null'
+                              description: External system identifier used to identify the payment channel. E.g. App Name, Activity ID, Checkout Interface, etc.
+                              example: ORG-1
+                            reference:
+                              type:
+                              - string
+                              - 'null'
+                              description: Reference to the data inside an external system.
+                              example: MERCHANT-GENERATED-TOKEN
+                            disbursement:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  counterpartyId:
+                                    type: string
+                                    format: uuid
+                                    description: The ID of the counterparty to whom the funds are being disbursed.
+                                    example: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                                  amount:
+                                    type: integer
+                                    description: The total amount charged with a particular payment method, represented in the smallest currency unit (e.g., cents for USD). To obtain the value in dollars, divide by 100.
+                                    format: int32
+                                    example: 1337
+                                  fee:
+                                    type: integer
+                                    description: The fee assigned to this particular disbursement based on the whole payment fee, represented in the smallest currency unit (e.g., cents for USD). To obtain the value in dollars, divide by 100.
+                                    format: int32
+                                    deprecated: true
+                                    example: 10
+                                  remit:
+                                    type: boolean
+                                    description: Deprecated. Always returns `true`. All disbursements are remitted directly. Will be removed in a future version.
+                                    example: true
+                                    deprecated: true
+                                required:
+                                - counterpartyId
+                                - amount
+                                - fee
+                                - remit
+                              description: Array of disbursements associated with this payment, including counterparty IDs, amounts, and fees.
+                              example:
+                              - counterpartyId: 9f755746-13cb-4d0b-81f2-3b4f1b44f6d8
+                                amount: 800
+                                fee: 10
+                                remit: true
+                              - counterpartyId: 4cf95060-dd01-42ac-9020-8ca42004920d
+                                amount: 200
+                                fee: 5
+                                remit: true
+                            charges:
+                              type: object
+                              properties:
+                                fee:
+                                  type: object
+                                  properties:
+                                    amount:
+                                      type: integer
+                                      minimum: 0
+                                      description: Fee amount in cents
+                                      format: int32
+                                      example: 150
+                                    type:
+                                      type: string
+                                      description: Fee type identifier
+                                      example: pay_by_wallet
+                                  required:
+                                  - amount
+                                  - type
+                                  description: Processing fee details
+                                rewards:
+                                  type: integer
+                                  minimum: 0
+                                  description: Rewards amount spent from wallet balance, in cents
+                                  format: int32
+                                  example: 1000
+                              description: Charges applied to this payment.
+                            deductions:
+                              type: object
+                              properties:
+                                rewards:
+                                  type: integer
+                                  minimum: 0
+                                  description: Rewards amount spent from wallet balance, in cents
+                                  format: int32
+                                  example: 1000
+                                fees:
+                                  type: integer
+                                  minimum: 0
+                                  description: Processing fees charged, in cents
+                                  format: int32
+                                  example: 150
+                              required:
+                              - rewards
+                              - fees
+                              description: Legacy charges breakdown. Use `charges` instead.
+                              deprecated: true
+                            expiresAt:
+                              type: string
+                              format: date-time
+                              description: The field indicates the date and time until which the payment is valid. After this date, the payment will either be automatically cancelled or completed.
+                              readOnly: true
+                            updatedAt:
+                              type: string
+                              format: date-time
+                              readOnly: true
+                            createdAt:
+                              type: string
+                              format: date-time
+                              readOnly: true
+                          required:
+                          - updatedAt
+                          - createdAt
+                        links:
+                          type: object
+                          properties:
+                            virtualDebitCard:
+                              type: string
+                              example: https://secure-api.accruesavings.com/api/v1/payments/497f6eca-6276-4993-bfeb-53cbbbba6f08/card
+                          required:
+                          - virtualDebitCard
+                      required:
+                      - id
+                      - type
+                      - attributes
+                      - links
+                required:
+                - included
+              description: ''
+              x-tags: Model
+      responses:
+        '200':
+          description: Return a 200 status to indicate that the data was received successfully
+  paymentUpdated:
+    post:
+      operationId: paymentUpdated
+      tags:
+      - Webhook Topics
+      summary: PaymentUpdated
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/WebhookEvent'
+              - type: object
+                properties:
+                  included:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                          description: Unique identifier for the object.
+                          readOnly: true
+                        type:
+                          type: string
+                          enum:
+                          - Payment
+                        attributes:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                              example: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                            status:
+                              type: string
+                              enum:
+                              - Canceled
+                              - Created
+                              - Failed
+                              - Processing
+                              - Returned
+                              - Sent
+                              description: The current status of the payment. Each status indicates a specific phase in the payment process, such as waiting for authorization, being processed, or having been successfully completed or canceled.
+                              example: Sent
+                            amount:
+                              type: integer
+                              description: The total amount of the payment processed, represented in the smallest currency unit (e.g., cents for USD). To obtain the value in dollars, divide by 100. This amount may differ from the initially intended amount due to adjustments, fees, or additional charges.
+                              format: int32
+                              example: 9999
+                            channel:
+                              type:
+                              - string
+                              - 'null'
+                              description: External system identifier used to identify the payment channel. E.g. App Name, Activity ID, Checkout Interface, etc.
+                              example: ORG-1
+                            reference:
+                              type:
+                              - string
+                              - 'null'
+                              description: Reference to the data inside an external system.
+                              example: MERCHANT-GENERATED-TOKEN
+                            disbursement:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  counterpartyId:
+                                    type: string
+                                    format: uuid
+                                    description: The ID of the counterparty to whom the funds are being disbursed.
+                                    example: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                                  amount:
+                                    type: integer
+                                    description: The total amount charged with a particular payment method, represented in the smallest currency unit (e.g., cents for USD). To obtain the value in dollars, divide by 100.
+                                    format: int32
+                                    example: 1337
+                                  fee:
+                                    type: integer
+                                    description: The fee assigned to this particular disbursement based on the whole payment fee, represented in the smallest currency unit (e.g., cents for USD). To obtain the value in dollars, divide by 100.
+                                    format: int32
+                                    deprecated: true
+                                    example: 10
+                                  remit:
+                                    type: boolean
+                                    description: Deprecated. Always returns `true`. All disbursements are remitted directly. Will be removed in a future version.
+                                    example: true
+                                    deprecated: true
+                                required:
+                                - counterpartyId
+                                - amount
+                                - fee
+                                - remit
+                              description: Array of disbursements associated with this payment, including counterparty IDs, amounts, and fees.
+                              example:
+                              - counterpartyId: 9f755746-13cb-4d0b-81f2-3b4f1b44f6d8
+                                amount: 800
+                                fee: 10
+                                remit: true
+                              - counterpartyId: 4cf95060-dd01-42ac-9020-8ca42004920d
+                                amount: 200
+                                fee: 5
+                                remit: true
+                            charges:
+                              type: object
+                              properties:
+                                fee:
+                                  type: object
+                                  properties:
+                                    amount:
+                                      type: integer
+                                      minimum: 0
+                                      description: Fee amount in cents
+                                      format: int32
+                                      example: 150
+                                    type:
+                                      type: string
+                                      description: Fee type identifier
+                                      example: pay_by_wallet
+                                  required:
+                                  - amount
+                                  - type
+                                  description: Processing fee details
+                                rewards:
+                                  type: integer
+                                  minimum: 0
+                                  description: Rewards amount spent from wallet balance, in cents
+                                  format: int32
+                                  example: 1000
+                              description: Charges applied to this payment.
+                            deductions:
+                              type: object
+                              properties:
+                                rewards:
+                                  type: integer
+                                  minimum: 0
+                                  description: Rewards amount spent from wallet balance, in cents
+                                  format: int32
+                                  example: 1000
+                                fees:
+                                  type: integer
+                                  minimum: 0
+                                  description: Processing fees charged, in cents
+                                  format: int32
+                                  example: 150
+                              required:
+                              - rewards
+                              - fees
+                              description: Legacy charges breakdown. Use `charges` instead.
+                              deprecated: true
+                            expiresAt:
+                              type: string
+                              format: date-time
+                              description: The field indicates the date and time until which the payment is valid. After this date, the payment will either be automatically cancelled or completed.
+                              readOnly: true
+                            updatedAt:
+                              type: string
+                              format: date-time
+                              readOnly: true
+                            createdAt:
+                              type: string
+                              format: date-time
+                              readOnly: true
+                          required:
+                          - updatedAt
+                          - createdAt
+                        links:
+                          type: object
+                          properties:
+                            virtualDebitCard:
+                              type: string
+                              example: https://secure-api.accruesavings.com/api/v1/payments/497f6eca-6276-4993-bfeb-53cbbbba6f08/card
+                          required:
+                          - virtualDebitCard
+                      required:
+                      - id
+                      - type
+                      - attributes
+                      - links
+                required:
+                - included
+              description: ''
+              x-tags: Model
+      responses:
+        '200':
+          description: Return a 200 status to indicate that the data was received successfully
+  paymentCaptured:
+    post:
+      operationId: paymentCaptured
+      tags:
+      - Webhook Topics
+      summary: PaymentCaptured
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/WebhookEvent'
+              - type: object
+                properties:
+                  included:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                          description: Unique identifier for the object.
+                          readOnly: true
+                        type:
+                          type: string
+                          enum:
+                          - Capture
+                        attributes:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                              description: Capture ID
+                              example: 123e4567-e89b-12d3-a456-426614174000
+                            amount:
+                              type: integer
+                              description: The total amount of the payment captured, represented in the smallest currency unit (e.g., cents for USD). To obtain the value in dollars, divide by 100.
+                              format: int32
+                              example: 9999
+                            success:
+                              type: boolean
+                              description: Indicates whether the capture was successful.
+                              example: true
+                            method:
+                              type: string
+                              enum:
+                              - BankRails
+                              - VirtualDebitCard
+                              description: The payment method used to capture the payment.
+                              example: VirtualDebitCard
+                            reference:
+                              type:
+                              - string
+                              - 'null'
+                              description: Reference to the data inside an external system.
+                              example: MERCHANT-GENERATED-TOKEN
+                            updatedAt:
+                              type: string
+                              format: date-time
+                              readOnly: true
+                            createdAt:
+                              type: string
+                              format: date-time
+                              readOnly: true
+                          required:
+                          - id
+                          - amount
+                          - success
+                          - method
+                          - updatedAt
+                          - createdAt
+                      required:
+                      - id
+                      - type
+                      - attributes
+                required:
+                - included
+              description: ''
+              x-tags: Model
+      responses:
+        '200':
+          description: Return a 200 status to indicate that the data was received successfully
+  refundCreated:
+    post:
+      operationId: refundCreated
+      tags:
+      - Webhook Topics
+      summary: RefundCreated
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/WebhookEvent'
+              - type: object
+                properties:
+                  included:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                          description: Unique identifier for the object.
+                          readOnly: true
+                        type:
+                          type: string
+                          enum:
+                          - Refund
+                        attributes:
+                          type: object
+                          properties:
+                            status:
+                              type: string
+                              enum:
+                              - Failed
+                              - Pending
+                              - Sent
+                              - Waiting
+                              description: The current status of the refund.
+                            amount:
+                              type: integer
+                              description: The amount refunded, represented in the smallest currency unit (e.g., cents for USD). To obtain the value in dollars, divide by 100.
+                              format: int32
+                              example: 9999
+                            message:
+                              type: string
+                              description: A human-readable message describing the refund status or outcome.
+                              example: 'Refund processed. Fee: 59 cents'
+                            reference:
+                              type:
+                              - string
+                              - 'null'
+                              description: Reference inherited from the parent Payment. This is not a direct field on the Refund entity.
+                              example: MERCHANT-GENERATED-TOKEN
+                            charges:
+                              type: object
+                              properties:
+                                fee:
+                                  type: object
+                                  properties:
+                                    amount:
+                                      type: integer
+                                      minimum: 0
+                                      description: Fee amount in cents
+                                      format: int32
+                                      example: 59
+                                    type:
+                                      type: string
+                                      description: Fee type identifier. For refunds, this is `pay_by_wallet_refund`.
+                                      example: pay_by_wallet_refund
+                                  required:
+                                  - amount
+                                  - type
+                                  description: Processing fee details for this refund
+                                rewards:
+                                  type: integer
+                                  minimum: 0
+                                  description: Rewards amount. Always 0 for refunds (rewards are not applicable to refunds).
+                                  format: int32
+                                  example: 0
+                              description: Charges applied to this refund.
+                            deductions:
+                              type: object
+                              properties:
+                                rewards:
+                                  type: integer
+                                  minimum: 0
+                                  description: Rewards amount. Always 0 for refunds.
+                                  format: int32
+                                  example: 0
+                                fees:
+                                  type: integer
+                                  minimum: 0
+                                  description: Processing fees charged for this refund, in cents. Same value as `charges.fee.amount`.
+                                  format: int32
+                                  example: 59
+                              required:
+                              - rewards
+                              - fees
+                              description: Legacy charges breakdown. Use `charges` instead.
+                              deprecated: true
+                            id:
+                              type: string
+                              format: uuid
+                              example: 9f755746-13cb-4d0b-81f2-3b4f1b44f6d8
+                            updatedAt:
+                              type: string
+                              format: date-time
+                              readOnly: true
+                            createdAt:
+                              type: string
+                              format: date-time
+                              readOnly: true
+                          required:
+                          - updatedAt
+                          - createdAt
+                      required:
+                      - id
+                      - type
+                      - attributes
+                required:
+                - included
+              description: ''
+              x-tags: Model
+      responses:
+        '200':
+          description: Return a 200 status to indicate that the data was received successfully
+  refundUpdated:
+    post:
+      operationId: refundUpdated
+      tags:
+      - Webhook Topics
+      summary: RefundUpdated
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/WebhookEvent'
+              - type: object
+                properties:
+                  included:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                          description: Unique identifier for the object.
+                          readOnly: true
+                        type:
+                          type: string
+                          enum:
+                          - Refund
+                        attributes:
+                          type: object
+                          properties:
+                            status:
+                              type: string
+                              enum:
+                              - Failed
+                              - Pending
+                              - Sent
+                              - Waiting
+                              description: The current status of the refund.
+                            amount:
+                              type: integer
+                              description: The amount refunded, represented in the smallest currency unit (e.g., cents for USD). To obtain the value in dollars, divide by 100.
+                              format: int32
+                              example: 9999
+                            message:
+                              type: string
+                              description: A human-readable message describing the refund status or outcome.
+                              example: 'Refund processed. Fee: 59 cents'
+                            reference:
+                              type:
+                              - string
+                              - 'null'
+                              description: Reference inherited from the parent Payment. This is not a direct field on the Refund entity.
+                              example: MERCHANT-GENERATED-TOKEN
+                            charges:
+                              type: object
+                              properties:
+                                fee:
+                                  type: object
+                                  properties:
+                                    amount:
+                                      type: integer
+                                      minimum: 0
+                                      description: Fee amount in cents
+                                      format: int32
+                                      example: 59
+                                    type:
+                                      type: string
+                                      description: Fee type identifier. For refunds, this is `pay_by_wallet_refund`.
+                                      example: pay_by_wallet_refund
+                                  required:
+                                  - amount
+                                  - type
+                                  description: Processing fee details for this refund
+                                rewards:
+                                  type: integer
+                                  minimum: 0
+                                  description: Rewards amount. Always 0 for refunds (rewards are not applicable to refunds).
+                                  format: int32
+                                  example: 0
+                              description: Charges applied to this refund.
+                            deductions:
+                              type: object
+                              properties:
+                                rewards:
+                                  type: integer
+                                  minimum: 0
+                                  description: Rewards amount. Always 0 for refunds.
+                                  format: int32
+                                  example: 0
+                                fees:
+                                  type: integer
+                                  minimum: 0
+                                  description: Processing fees charged for this refund, in cents. Same value as `charges.fee.amount`.
+                                  format: int32
+                                  example: 59
+                              required:
+                              - rewards
+                              - fees
+                              description: Legacy charges breakdown. Use `charges` instead.
+                              deprecated: true
+                            id:
+                              type: string
+                              format: uuid
+                              example: 9f755746-13cb-4d0b-81f2-3b4f1b44f6d8
+                            updatedAt:
+                              type: string
+                              format: date-time
+                              readOnly: true
+                            createdAt:
+                              type: string
+                              format: date-time
+                              readOnly: true
+                          required:
+                          - updatedAt
+                          - createdAt
+                      required:
+                      - id
+                      - type
+                      - attributes
+                required:
+                - included
+              description: ''
+              x-tags: Model
+      responses:
+        '200':
+          description: Return a 200 status to indicate that the data was received successfully
+  kycCreated:
+    post:
+      operationId: kycCreated
+      tags:
+      - Webhook Topics
+      summary: KycCreated
+      description: Fired when a KYC application is created for a user. This event is triggered when a user initiates the identity verification process.
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/WebhookEvent'
+              - type: object
+                properties:
+                  included:
+                    type: array
+                    items:
+                      allOf:
+                      - $ref: '#/components/schemas/Kyc'
+                      - properties:
+                          id:
+                            type: string
+                            format: uuid
+                            description: Unique identifier for the object.
+                            readOnly: true
+                          type:
+                            type: string
+                            enum:
+                            - Kyc
+                          attributes:
+                            type: object
+                            properties:
+                              status:
+                                type: string
+                                enum:
+                                - Approved
+                                - AwaitingDocuments
+                                - Denied
+                                - ManualReview
+                                - NotStarted
+                                - Pending
+                                - Unknown
+                                description: The current KYC verification status
+                                example: Approved
+                            required:
+                            - status
+                required:
+                - included
+              description: ''
+              x-tags: Model
+      responses:
+        '200':
+          description: Return a 200 status to indicate that the data was received successfully
+  kycApproved:
+    post:
+      operationId: kycApproved
+      tags:
+      - Webhook Topics
+      summary: KycApproved
+      description: Fired when a KYC application is approved. This event indicates that the user has successfully passed identity verification and can access banking features.
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/WebhookEvent'
+              - type: object
+                properties:
+                  included:
+                    type: array
+                    items:
+                      allOf:
+                      - $ref: '#/components/schemas/Kyc'
+                      - properties:
+                          id:
+                            type: string
+                            format: uuid
+                            description: Unique identifier for the object.
+                            readOnly: true
+                          type:
+                            type: string
+                            enum:
+                            - Kyc
+                          attributes:
+                            type: object
+                            properties:
+                              status:
+                                type: string
+                                enum:
+                                - Approved
+                                - AwaitingDocuments
+                                - Denied
+                                - ManualReview
+                                - NotStarted
+                                - Pending
+                                - Unknown
+                                description: The current KYC verification status
+                                example: Approved
+                            required:
+                            - status
+                required:
+                - included
+              description: ''
+              x-tags: Model
+      responses:
+        '200':
+          description: Return a 200 status to indicate that the data was received successfully
+  kycDeclined:
+    post:
+      operationId: kycDeclined
+      tags:
+      - Webhook Topics
+      summary: KycDeclined
+      description: Fired when a KYC application is declined. This event indicates that the user did not pass identity verification and cannot access banking features.
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/WebhookEvent'
+              - type: object
+                properties:
+                  included:
+                    type: array
+                    items:
+                      allOf:
+                      - $ref: '#/components/schemas/Kyc'
+                      - properties:
+                          id:
+                            type: string
+                            format: uuid
+                            description: Unique identifier for the object.
+                            readOnly: true
+                          type:
+                            type: string
+                            enum:
+                            - Kyc
+                          attributes:
+                            type: object
+                            properties:
+                              status:
+                                type: string
+                                enum:
+                                - Approved
+                                - AwaitingDocuments
+                                - Denied
+                                - ManualReview
+                                - NotStarted
+                                - Pending
+                                - Unknown
+                                description: The current KYC verification status
+                                example: Approved
+                            required:
+                            - status
+                required:
+                - included
+              description: ''
+              x-tags: Model
+      responses:
+        '200':
+          description: Return a 200 status to indicate that the data was received successfully
+  kycAwaitingDocuments:
+    post:
+      operationId: kycAwaitingDocuments
+      tags:
+      - Webhook Topics
+      summary: KycAwaitingDocuments
+      description: Fired when a KYC application requires additional document verification. This event indicates that the user needs to upload identity documents (such as a driver's license or passport) to complete verification.
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/WebhookEvent'
+              - type: object
+                properties:
+                  included:
+                    type: array
+                    items:
+                      allOf:
+                      - $ref: '#/components/schemas/Kyc'
+                      - properties:
+                          id:
+                            type: string
+                            format: uuid
+                            description: Unique identifier for the object.
+                            readOnly: true
+                          type:
+                            type: string
+                            enum:
+                            - Kyc
+                          attributes:
+                            type: object
+                            properties:
+                              status:
+                                type: string
+                                enum:
+                                - Approved
+                                - AwaitingDocuments
+                                - Denied
+                                - ManualReview
+                                - NotStarted
+                                - Pending
+                                - Unknown
+                                description: The current KYC verification status
+                                example: Approved
+                            required:
+                            - status
+                required:
+                - included
+              description: ''
+              x-tags: Model
+      responses:
+        '200':
+          description: Return a 200 status to indicate that the data was received successfully
+  kycPending:
+    post:
+      operationId: kycPending
+      tags:
+      - Webhook Topics
+      summary: KycPending
+      description: Fired when a KYC application is pending review. This event indicates that the application is being processed through automated verification checks.
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/WebhookEvent'
+              - type: object
+                properties:
+                  included:
+                    type: array
+                    items:
+                      allOf:
+                      - $ref: '#/components/schemas/Kyc'
+                      - properties:
+                          id:
+                            type: string
+                            format: uuid
+                            description: Unique identifier for the object.
+                            readOnly: true
+                          type:
+                            type: string
+                            enum:
+                            - Kyc
+                          attributes:
+                            type: object
+                            properties:
+                              status:
+                                type: string
+                                enum:
+                                - Approved
+                                - AwaitingDocuments
+                                - Denied
+                                - ManualReview
+                                - NotStarted
+                                - Pending
+                                - Unknown
+                                description: The current KYC verification status
+                                example: Approved
+                            required:
+                            - status
+                required:
+                - included
+              description: ''
+              x-tags: Model
+      responses:
+        '200':
+          description: Return a 200 status to indicate that the data was received successfully
+  kycManualReview:
+    post:
+      operationId: kycManualReview
+      tags:
+      - Webhook Topics
+      summary: KycManualReview
+      description: Fired when a KYC application requires manual review. This event indicates that automated verification could not make a determination and the application needs human review.
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/WebhookEvent'
+              - type: object
+                properties:
+                  included:
+                    type: array
+                    items:
+                      allOf:
+                      - $ref: '#/components/schemas/Kyc'
+                      - properties:
+                          id:
+                            type: string
+                            format: uuid
+                            description: Unique identifier for the object.
+                            readOnly: true
+                          type:
+                            type: string
+                            enum:
+                            - Kyc
+                          attributes:
+                            type: object
+                            properties:
+                              status:
+                                type: string
+                                enum:
+                                - Approved
+                                - AwaitingDocuments
+                                - Denied
+                                - ManualReview
+                                - NotStarted
+                                - Pending
+                                - Unknown
+                                description: The current KYC verification status
+                                example: Approved
+                            required:
+                            - status
+                required:
+                - included
+              description: ''
+              x-tags: Model
+      responses:
+        '200':
+          description: Return a 200 status to indicate that the data was received successfully
+  transactionCleared:
+    post:
+      operationId: transactionCleared
+      tags:
+      - Webhook Topics
+      summary: Transaction Cleared
+      description: Fired when a transaction is cleared. This event indicates that the transaction has been successfully processed and funds are available. The included payload contains event data with a **fee** object (fee type and amount in cents).
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/WebhookEvent'
+              - type: object
+                properties:
+                  included:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WebhookTransactionCleared'
+                required:
+                - included
+              description: ''
+              x-tags: Model
+      responses:
+        '200':
+          description: Return a 200 status to indicate that the data was received successfully
+  transactionFailed:
+    post:
+      operationId: transactionFailed
+      tags:
+      - Webhook Topics
+      summary: Transaction Failed
+      description: 'Fired when a transaction fails. This event indicates that the transaction could not be processed successfully. The included payload contains event data with a **fee** object (fee type and amount in cents) and **failureReason** (TransactionFailureReason: e.g. Canceled, HardDecline, SoftDecline, Expired, InsufficientFunds, Reversed, Unknown).'
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/WebhookEvent'
+              - type: object
+                properties:
+                  included:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WebhookTransactionFailed'
+                required:
+                - included
+              description: ''
+              x-tags: Model
+      responses:
+        '200':
+          description: Return a 200 status to indicate that the data was received successfully
+  counterpartyIncomingPayment:
+    post:
+      operationId: counterpartyIncomingPayment
+      tags:
+      - Webhook Topics
+      summary: CounterpartyIncomingPayment
+      description: 'Fired when a payment arrives on a counterparty''s bank account and has been recorded on the counterparty''s balance. Use this to reconcile funding you receive from a counterparty over bank rails without polling the counterparty balance.
+
+
+        The included payload carries **counterpartyId**, **amount** (in cents), **currency**, **direction** (`credit` for funds received, `debit` for funds withdrawn), **method** (the bank rail, for example `ach` or `wire`), **asOfDate** (the bank settlement date), and **externalIncomingPaymentId** for reconciliation against your bank records.
+
+
+        This event is only sent after the payment has been recorded, so the counterparty balance already reflects it when you receive the webhook.'
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/WebhookEvent'
+              - type: object
+                properties:
+                  included:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WebhookCounterpartyIncomingPayment'
+                required:
+                - included
+              description: ''
+              x-tags: Model
+      responses:
+        '200':
+          description: Return a 200 status to indicate that the data was received successfully
+  counterpartyPayoutCreated:
+    post:
+      operationId: counterpartyPayoutCreated
+      tags:
+      - Webhook Topics
+      summary: CounterpartyPayoutCreated
+      description: 'Fired when a payout is created for a counterparty and submitted for processing. `status` is the payout''s initial state, which may be `Approved`, `NeedsApproval`, or `Processing` depending on your approval configuration.
+
+
+        A duplicate create — the same idempotency key replayed — returns the existing payout and does **not** fire a second event.
+
+
+        The included payload mirrors the payout resource — **payoutId**, **counterpartyId**, **amount** (in cents), **currency**, **status**, **description**, and **effectiveDate** — so you can act on the event without re-reading the payouts API.'
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/WebhookEvent'
+              - type: object
+                properties:
+                  included:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WebhookCounterpartyPayout'
+                required:
+                - included
+              description: ''
+              x-tags: Model
+      responses:
+        '200':
+          description: Return a 200 status to indicate that the data was received successfully
+  counterpartyPayoutSent:
+    post:
+      operationId: counterpartyPayoutSent
+      tags:
+      - Webhook Topics
+      summary: CounterpartyPayoutSent
+      description: 'Fired when the payout has been sent to the bank. The funds have left, but the payment is not yet reconciled — a payout can sit in this state for a few days depending on the rail, and can still be returned afterwards. Wait for `CounterpartyPayoutCompleted` before treating the money as delivered.
+
+
+        The included payload mirrors the payout resource — **payoutId**, **counterpartyId**, **amount** (in cents), **currency**, **status**, **description**, and **effectiveDate** — so you can act on the event without re-reading the payouts API.'
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/WebhookEvent'
+              - type: object
+                properties:
+                  included:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WebhookCounterpartyPayout'
+                required:
+                - included
+              description: ''
+              x-tags: Model
+      responses:
+        '200':
+          description: Return a 200 status to indicate that the data was received successfully
+  counterpartyPayoutCompleted:
+    post:
+      operationId: counterpartyPayoutCompleted
+      tags:
+      - Webhook Topics
+      summary: CounterpartyPayoutCompleted
+      description: 'Fired when the payout has been reconciled to a posted bank transaction. This is the terminal success state: the funds have settled at the receiving bank.
+
+
+        The included payload mirrors the payout resource — **payoutId**, **counterpartyId**, **amount** (in cents), **currency**, **status**, **description**, and **effectiveDate** — so you can act on the event without re-reading the payouts API.'
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/WebhookEvent'
+              - type: object
+                properties:
+                  included:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WebhookCounterpartyPayout'
+                required:
+                - included
+              description: ''
+              x-tags: Model
+      responses:
+        '200':
+          description: Return a 200 status to indicate that the data was received successfully
+  counterpartyPayoutReturned:
+    post:
+      operationId: counterpartyPayoutReturned
+      tags:
+      - Webhook Topics
+      summary: CounterpartyPayoutReturned
+      description: 'Fired when a payout ends without delivering funds. This covers every terminal failure — returned, reversed, cancelled, denied, and failed — so read **status** to see which occurred rather than relying on the topic name.
+
+
+        **returnCode** and **returnReason** are populated when the receiving bank returned the payment (for example `R01`, insufficient funds) and are null for the other failures. The payout amount is available on the counterparty balance again.
+
+
+        The included payload mirrors the payout resource — **payoutId**, **counterpartyId**, **amount** (in cents), **currency**, **status**, **description**, and **effectiveDate** — so you can act on the event without re-reading the payouts API.'
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/WebhookEvent'
+              - type: object
+                properties:
+                  included:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WebhookCounterpartyPayoutReturned'
+                required:
+                - included
+              description: ''
+              x-tags: Model
+      responses:
+        '200':
+          description: Return a 200 status to indicate that the data was received successfully
+components:
+  schemas:
+    WebhookCounterpartyPayoutReturned:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum:
+          - CounterpartyPayoutReturned
+        attributes:
+          allOf:
+          - $ref: '#/components/schemas/CounterpartyPayoutEventAttributes'
+          - type: object
+            properties:
+              returnCode:
+                type:
+                - string
+                - 'null'
+                description: Bank return code when the payout was returned by the receiving bank (for example `R01`). Null for the other terminal failures, which carry no bank return.
+                example: R01
+              returnReason:
+                type:
+                - string
+                - 'null'
+                description: Human-readable reason for the return, when the bank supplied one
+                example: insufficient funds
+              reference:
+                type:
+                - string
+                - 'null'
+              email:
+                type:
+                - string
+                - 'null'
+                format: email
+              fullName:
+                type:
+                - string
+                - 'null'
+              phoneNumber:
+                type:
+                - string
+                - 'null'
+              error:
+                type:
+                - string
+                - 'null'
+              walletId:
+                type:
+                - string
+                - 'null'
+                format: uuid
+              billingAddress:
+                type:
+                - object
+                - 'null'
+                additionalProperties: {}
+            required:
+            - returnCode
+            - returnReason
+      required:
+      - id
+      - type
+      - attributes
+      description: CounterpartyPayoutReturned event data as stored in webhook payload
+      x-tags:
+      - Model
+    CounterpartyIncomingPaymentEventAttributes:
+      type: object
+      properties:
+        counterpartyId:
+          type: string
+          format: uuid
+          description: The counterparty whose account received the payment
+          example: 123e4567-e89b-12d3-a456-426614174000
+        merchantId:
+          type: string
+          format: uuid
+          description: The merchant that owns the counterparty
+          example: 123e4567-e89b-12d3-a456-426614174000
+        amount:
+          type: integer
+          description: The payment amount, represented in the smallest currency unit (e.g., cents for USD).
+          example: 2500
+        currency:
+          type: string
+          description: ISO 4217 currency code of the payment
+          example: USD
+        direction:
+          type: string
+          enum:
+          - credit
+          - debit
+          description: 'Direction of the movement on the counterparty account.
+
+
+            - **credit**: funds were received into the counterparty account.
+
+            - **debit**: funds were withdrawn from the counterparty account.'
+          example: credit
+        method:
+          type: string
+          description: The bank rail the payment arrived over, for example `ach`, `wire`, or `rtp`. Treat this as an open set — new values may be added without notice.
+          example: ach
+        asOfDate:
+          type: string
+          description: The date the payment settled at the bank, as `YYYY-MM-DD`
+          example: '2026-08-27'
+        externalIncomingPaymentId:
+          type: string
+          description: Identifier for this incoming payment at the banking provider. Stable for the life of the payment and safe to use for reconciliation against your bank records.
+          example: ipd_a1b2c3d4e5
+      required:
+      - counterpartyId
+      - merchantId
+      - amount
+      - currency
+      - direction
+      - method
+      - asOfDate
+      - externalIncomingPaymentId
+    Kyc:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - Kyc
+        attributes:
+          type: object
+          properties:
+            status:
+              type: string
+              enum:
+              - Approved
+              - AwaitingDocuments
+              - Denied
+              - ManualReview
+              - NotStarted
+              - Pending
+              - Unknown
+              description: The current status of the user's KYC verification
+              example: Approved
+            updatedAt:
+              type: string
+              format: date-time
+              readOnly: true
+            createdAt:
+              type: string
+              format: date-time
+              readOnly: true
+          required:
+          - status
+          - updatedAt
+          - createdAt
+      required:
+      - id
+      - type
+      - attributes
+      description: KYC verification status for a user
+      x-tags:
+      - Model
+    CounterpartyPayoutEventAttributes:
+      type: object
+      properties:
+        payoutId:
+          type: string
+          description: The payout id, identical to the one the payouts API returns
+          example: po_a1b2c3d4e5
+        counterpartyId:
+          type: string
+          format: uuid
+          description: The counterparty being paid out
+          example: 123e4567-e89b-12d3-a456-426614174000
+        merchantId:
+          type: string
+          format: uuid
+          description: The merchant that owns the counterparty
+          example: 123e4567-e89b-12d3-a456-426614174000
+        amount:
+          type: integer
+          description: The payout amount, represented in the smallest currency unit (e.g., cents for USD).
+          example: 5000
+        currency:
+          type: string
+          description: ISO 4217 currency code of the payout
+          example: USD
+        status:
+          type: string
+          enum:
+          - Approved
+          - Cancelled
+          - Completed
+          - Denied
+          - Failed
+          - NeedsApproval
+          - Pending
+          - Processing
+          - Returned
+          - Reversed
+          - Sent
+          description: The payout status at the time the event fired. This is the same status the payouts API reports, so a webhook and a subsequent read always agree.
+          example: Sent
+        description:
+          type:
+          - string
+          - 'null'
+          description: Description recorded on the payout
+          example: Payout to Acme Vendor
+        effectiveDate:
+          type: string
+          description: The date the payout is scheduled to settle, as `YYYY-MM-DD`
+          example: '2026-08-28'
+        createdAt:
+          type: string
+          description: ISO 8601 timestamp
+        updatedAt:
+          type: string
+          description: ISO 8601 timestamp
+      required:
+      - payoutId
+      - counterpartyId
+      - merchantId
+      - amount
+      - currency
+      - status
+      - description
+      - effectiveDate
+      - createdAt
+      - updatedAt
+    PaymentIntentBalanceInformation:
+      type: object
+      properties:
+        available:
+          type: integer
+          description: Available wallet balance in cents
+          format: int32
+          example: 1500
+        eligibleReward:
+          type: integer
+          description: Eligible reward amount for this transaction in cents
+          format: int32
+          example: 500
+        upperLimit:
+          type: integer
+          description: Maximum checkout amount supported for this purchase, in cents
+          format: int32
+          example: 103600
+      required:
+      - available
+      - eligibleReward
+      - upperLimit
+      description: Balance for this payment intent. `available` is the remaining spendable amount in cents (gift remaining for a gift lookUpId, or wallet available for a wallet).
+      x-tags:
+      - Model
+    WebhookTransactionFailed:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum:
+          - TransactionFailed
+        attributes:
+          allOf:
+          - $ref: '#/components/schemas/TransactionEventAttributes'
+          - type: object
+            properties:
+              reference:
+                type:
+                - string
+                - 'null'
+              email:
+                type:
+                - string
+                - 'null'
+                format: email
+              fullName:
+                type:
+                - string
+                - 'null'
+              phoneNumber:
+                type:
+                - string
+                - 'null'
+              error:
+                type:
+                - string
+                - 'null'
+              billingAddress:
+                type:
+                - object
+                - 'null'
+                additionalProperties: {}
+              fee:
+                type: object
+                properties:
+                  type:
+                    type:
+                    - string
+                    - 'null'
+                    description: The fee type applied to this transaction (for example, a specific FeeType name). This value can be null when no fee type applies or the fee type cannot be determined.
+                    example: JitFundingFee
+                  amount:
+                    type: integer
+                    description: The fee amount applied to this transaction, represented in the smallest currency unit (e.g., cents for USD). This value can be 0 when no fee was charged.
+                    example: 125
+                required:
+                - type
+                - amount
+                description: Fee breakdown applied to this transaction.
+              failureReason:
+                type: string
+                enum:
+                - Canceled
+                - HardDecline
+                - SoftDecline
+                - Expired
+                - InsufficientFunds
+                - Reversed
+                - Unknown
+                description: 'Transaction failure reason (TransactionFailureReason).
+
+
+                  - **Canceled**: The transaction was canceled.
+
+                  - **HardDecline**: The request was declined (hard decline).
+
+                  - **SoftDecline**: The payment request was declined; subsequent attempts may succeed.
+
+                  - **Expired**: The transaction or authorization expired.
+
+                  - **InsufficientFunds**: Insufficient funds to complete the transaction.
+
+                  - **Reversed**: The transaction was reversed.
+
+                  - **Unknown**: The failure reason is unknown.'
+                example: SoftDecline
+            required:
+            - fee
+      required:
+      - id
+      - type
+      - attributes
+      description: TransactionFailed event data as stored in webhook payload
+      x-tags:
+      - Model
+    WebhookEvent:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - WebhookEvent
+        attributes:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: The webhook event ID
+              example: 123e4567-e89b-12d3-a456-426614174000
+            topic:
+              type: string
+              description: The webhook topic/event type
+            clientId:
+              type: string
+              format: uuid
+              description: The client ID associated with this webhook event
+            userId:
+              type: string
+              format: uuid
+              description: The user ID associated with this webhook event (if applicable)
+              example: 123e4567-e89b-12d3-a456-426614174000
+            walletId:
+              type: string
+              format: uuid
+              description: The wallet ID associated with this webhook event (if applicable)
+              example: 123e4567-e89b-12d3-a456-426614174000
+            updatedAt:
+              type: string
+              format: date-time
+              readOnly: true
+            createdAt:
+              type: string
+              format: date-time
+              readOnly: true
+          required:
+          - id
+          - topic
+          - clientId
+          - updatedAt
+          - createdAt
+        relationships:
+          type: object
+          properties:
+            event:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                    type:
+                      type: string
+                  required:
+                  - id
+                  - type
+                  description: The related event resource (PaymentIntent, Payment, Refund, Capture, or ApplicationEvent)
+              required:
+              - data
+      required:
+      - id
+      - type
+      - attributes
+      - relationships
+      description: ''
+      x-tags: Model
+    TransactionEventAttributes:
+      type: object
+      properties:
+        transactionId:
+          type: string
+          format: uuid
+          description: The transaction ID associated with this event
+          example: 123e4567-e89b-12d3-a456-426614174000
+        walletId:
+          type: string
+          format: uuid
+          description: The wallet ID associated with this transaction
+          example: 123e4567-e89b-12d3-a456-426614174000
+        rewardIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Optional array of reward IDs associated with this transaction
+          example: []
+      required:
+      - transactionId
+      - walletId
+    WebhookTransactionCleared:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum:
+          - TransactionCleared
+        attributes:
+          allOf:
+          - $ref: '#/components/schemas/TransactionEventAttributes'
+          - type: object
+            properties:
+              reference:
+                type:
+                - string
+                - 'null'
+              email:
+                type:
+                - string
+                - 'null'
+                format: email
+              fullName:
+                type:
+                - string
+                - 'null'
+              phoneNumber:
+                type:
+                - string
+                - 'null'
+              error:
+                type:
+                - string
+                - 'null'
+              billingAddress:
+                type:
+                - object
+                - 'null'
+                additionalProperties: {}
+              fee:
+                type: object
+                properties:
+                  type:
+                    type:
+                    - string
+                    - 'null'
+                    description: The fee type applied to this transaction (for example, a specific FeeType name). This value can be null when no fee type applies or the fee type cannot be determined.
+                    example: JitFundingFee
+                  amount:
+                    type: integer
+                    description: The fee amount applied to this transaction, represented in the smallest currency unit (e.g., cents for USD). This value can be 0 when no fee was charged.
+                    example: 125
+                required:
+                - type
+                - amount
+                description: Fee breakdown applied to this transaction.
+            required:
+            - fee
+      required:
+      - id
+      - type
+      - attributes
+      description: TransactionCleared event data as stored in webhook payload
+      x-tags:
+      - Model
+    WebhookCounterpartyPayout:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum:
+          - CounterpartyPayoutCreated
+          - CounterpartyPayoutSent
+          - CounterpartyPayoutCompleted
+        attributes:
+          allOf:
+          - $ref: '#/components/schemas/CounterpartyPayoutEventAttributes'
+          - type: object
+            properties:
+              reference:
+                type:
+                - string
+                - 'null'
+              email:
+                type:
+                - string
+                - 'null'
+                format: email
+              fullName:
+                type:
+                - string
+                - 'null'
+              phoneNumber:
+                type:
+                - string
+                - 'null'
+              error:
+                type:
+                - string
+                - 'null'
+              walletId:
+                type:
+                - string
+                - 'null'
+                format: uuid
+              billingAddress:
+                type:
+                - object
+                - 'null'
+                additionalProperties: {}
+      required:
+      - id
+      - type
+      - attributes
+      description: Counterparty payout lifecycle event data (CounterpartyPayoutCreated, CounterpartyPayoutSent, CounterpartyPayoutCompleted) as stored in webhook payload
+      x-tags:
+      - Model
+    WebhookCounterpartyIncomingPayment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum:
+          - CounterpartyIncomingPayment
+        attributes:
+          allOf:
+          - $ref: '#/components/schemas/CounterpartyIncomingPaymentEventAttributes'
+          - type: object
+            properties:
+              reference:
+                type:
+                - string
+                - 'null'
+              email:
+                type:
+                - string
+                - 'null'
+                format: email
+              fullName:
+                type:
+                - string
+                - 'null'
+              phoneNumber:
+                type:
+                - string
+                - 'null'
+              error:
+                type:
+                - string
+                - 'null'
+              walletId:
+                type:
+                - string
+                - 'null'
+                format: uuid
+              billingAddress:
+                type:
+                - object
+                - 'null'
+                additionalProperties: {}
+      required:
+      - id
+      - type
+      - attributes
+      description: CounterpartyIncomingPayment event data as stored in webhook payload
+      x-tags:
+      - Model
+x-tagGroups:
+- name: Overview
+  tags:
+  - Introduction
+  - API Design
+- name: Users
+  tags:
+  - Users
+  - LinkedAccounts
+  - Identity Verification
+- name: Wallets
+  tags:
+  - Wallets
+- name: Gifts
+  tags:
+  - Gifts
+- name: Payments
+  tags:
+  - PaymentIntents
+  - Payments
+  - ExternalTransactions
+  - Simulations
+- name: Banking & KYC
+  tags:
+  - Banking
+  - Counterparties
+  - CounterpartyTransfers
+- name: Sweepstakes
+  tags:
+  - Sweepstakes
+- name: Rewards
+  tags:
+  - Rewards
+- name: Widgets
+  tags:
+  - Widgets
+- name: Webhooks
+  tags:
+  - Webhooks
+  - WebhookEvents
+  - Webhook Topics

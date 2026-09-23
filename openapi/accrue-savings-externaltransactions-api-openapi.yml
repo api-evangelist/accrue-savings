@@ -1,0 +1,948 @@
+openapi: 3.2.0
+info:
+  version: 1.0.0
+  title: Accrue Merchant External Transactions API
+  x-links:
+  - name: View Alternative Version
+    url: /api-fs/
+    description: View API documentation with alternative enum-based WebhookIncluded schema
+  description: External transactions are records of transfers that happened outside the Accrue system. E.g. purchases in an online shop using a non-Accrue payment method.
+servers:
+- description: Production API
+  url: https://merchant-api.accruesavings.com
+- description: Sandbox API
+  url: https://merchant-api-sandbox.accruesavings.com
+tags:
+- name: ExternalTransactions
+  description: External transactions are records of transfers that happened outside the Accrue system. E.g. purchases in an online shop using a non-Accrue payment method.
+paths:
+  /api/v1/external-transactions:
+    post:
+      operationId: addExternalTransactions
+      tags:
+      - ExternalTransactions
+      summary: Add External Transactions
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/CreateExternalTransaction'
+              required:
+              - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/AddExternalTransactionResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ExternalTransactionValidationErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedExternalTransactionErrorResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request POST \\\n  --url https://merchant-api.accruesavings.com/api/v1/external-transactions \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'POST',\n  url: 'https://merchant-api.accruesavings.com/api/v1/external-transactions',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"POST\", \"/api/v1/external-transactions\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/external-transactions")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Post.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/external-transactions\")\n  .post(null)\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/external-transactions\"\n\n\treq, _ := http.NewRequest(\"POST\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/external-transactions");
+
+          var request = new RestRequest(Method.POST);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/external-transactions');\n$request->setMethod(HTTP_METH_POST);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+    get:
+      operationId: listExternalTransactions
+      tags:
+      - ExternalTransactions
+      summary: List External Transactions
+      parameters:
+      - schema:
+          type: string
+          description: Filter the list of objects by the value of the phoneNumber field.
+        required: false
+        name: filter[phoneNumber]
+        in: query
+      - schema:
+          type: string
+          description: Filter the list of objects by the value of the userId field.
+        required: false
+        name: filter[userId]
+        in: query
+      - schema:
+          type: string
+          description: Filter the list of objects by the value of the sourceId field.
+        required: false
+        name: filter[sourceId]
+        in: query
+      - schema:
+          type: number
+          minimum: 1
+          maximum: 50
+          default: 10
+          description: Maximum number of objects that will be returned. Can not be greater than 50.
+        required: false
+        name: page[limit]
+        in: query
+      - schema:
+          type: number
+          minimum: 0
+          default: 0
+          description: Offset from the beginning of the list of objects. Can not be negative.
+        required: false
+        name: page[offset]
+        in: query
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ListExternalTransactionsResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ExternalTransactionValidationErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedExternalTransactionErrorResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request GET \\\n  --url 'https://merchant-api.accruesavings.com/api/v1/external-transactions?filter%5BphoneNumber%5D=SOME_STRING_VALUE&filter%5BuserId%5D=SOME_STRING_VALUE&filter%5BsourceId%5D=SOME_STRING_VALUE&page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE' \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'GET',\n  url: 'https://merchant-api.accruesavings.com/api/v1/external-transactions',\n  qs: {\n    'filter[phoneNumber]': 'SOME_STRING_VALUE',\n    'filter[userId]': 'SOME_STRING_VALUE',\n    'filter[sourceId]': 'SOME_STRING_VALUE',\n    'page[limit]': 'SOME_NUMBER_VALUE',\n    'page[offset]': 'SOME_NUMBER_VALUE'\n  },\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"GET\", \"/api/v1/external-transactions?filter%5BphoneNumber%5D=SOME_STRING_VALUE&filter%5BuserId%5D=SOME_STRING_VALUE&filter%5BsourceId%5D=SOME_STRING_VALUE&page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/external-transactions?filter%5BphoneNumber%5D=SOME_STRING_VALUE&filter%5BuserId%5D=SOME_STRING_VALUE&filter%5BsourceId%5D=SOME_STRING_VALUE&page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Get.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/external-transactions?filter%5BphoneNumber%5D=SOME_STRING_VALUE&filter%5BuserId%5D=SOME_STRING_VALUE&filter%5BsourceId%5D=SOME_STRING_VALUE&page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE\")\n  .get()\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/external-transactions?filter%5BphoneNumber%5D=SOME_STRING_VALUE&filter%5BuserId%5D=SOME_STRING_VALUE&filter%5BsourceId%5D=SOME_STRING_VALUE&page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE\"\n\n\treq, _ := http.NewRequest(\"GET\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/external-transactions?filter%5BphoneNumber%5D=SOME_STRING_VALUE&filter%5BuserId%5D=SOME_STRING_VALUE&filter%5BsourceId%5D=SOME_STRING_VALUE&page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE");
+
+          var request = new RestRequest(Method.GET);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/external-transactions');\n$request->setMethod(HTTP_METH_GET);\n\n$request->setQueryData([\n  'filter[phoneNumber]' => 'SOME_STRING_VALUE',\n  'filter[userId]' => 'SOME_STRING_VALUE',\n  'filter[sourceId]' => 'SOME_STRING_VALUE',\n  'page[limit]' => 'SOME_NUMBER_VALUE',\n  'page[offset]' => 'SOME_NUMBER_VALUE'\n]);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+  /api/v1/external-transactions/{externalTransactionId}:
+    get:
+      operationId: getExternalTransaction
+      tags:
+      - ExternalTransactions
+      summary: Get an External Transaction
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: External Transaction ID
+        required: true
+        name: externalTransactionId
+        in: path
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/GetExternalTransaction'
+        '404':
+          description: Not Found
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ExternalTransactionNotFoundResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedExternalTransactionErrorResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request GET \\\n  --url https://merchant-api.accruesavings.com/api/v1/external-transactions/%7BexternalTransactionId%7D \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'GET',\n  url: 'https://merchant-api.accruesavings.com/api/v1/external-transactions/%7BexternalTransactionId%7D',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"GET\", \"/api/v1/external-transactions/%7BexternalTransactionId%7D\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/external-transactions/%7BexternalTransactionId%7D")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Get.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/external-transactions/%7BexternalTransactionId%7D\")\n  .get()\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/external-transactions/%7BexternalTransactionId%7D\"\n\n\treq, _ := http.NewRequest(\"GET\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/external-transactions/%7BexternalTransactionId%7D");
+
+          var request = new RestRequest(Method.GET);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/external-transactions/%7BexternalTransactionId%7D');\n$request->setMethod(HTTP_METH_GET);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+components:
+  schemas:
+    ExternalTransactionValidationErrorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - BadRequest
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: BadRequest
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ValidationError
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Validation failed for data.attributes.amount
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/external-transactions
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/external-transactions
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    UnexpectedExternalTransactionErrorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 500
+        code:
+          type: string
+          enum:
+          - UnexpectedError
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: UnexpectedError
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ExternalTransactionException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - An unexpected error occurred.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/external-transactions
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/external-transactions
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    ExternalTransactionReference:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - ExternalTransaction
+        attributes:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: Unique identifier for the object.
+              readOnly: true
+            sourceId:
+              type: string
+              description: Transaction identifier inside the originating external system.
+              example: 9f755746-13cb-4d0b-81f2-3b4f1b44f6d8
+            updatedAt:
+              type: string
+              format: date-time
+              readOnly: true
+            createdAt:
+              type: string
+              format: date-time
+              readOnly: true
+          required:
+          - id
+          - sourceId
+          - updatedAt
+          - createdAt
+        relationships:
+          type: object
+          properties:
+            linkedExternalTransaction:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                        example: 9f755746-13cb-4d0b-81f2-3b4f1b44f6d8
+                      type:
+                        type: string
+                        enum:
+                        - ExternalTransaction
+                    required:
+                    - id
+                    - type
+              required:
+              - data
+            user:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      type:
+                        type: string
+                        enum:
+                        - User
+                    required:
+                    - id
+                    - type
+              required:
+              - data
+      required:
+      - id
+      - type
+      - attributes
+      - relationships
+      description: ExternalTransactionReference
+      x-tags:
+      - Model
+    ExternalTransactionNotFoundResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 404
+        code:
+          type: string
+          enum:
+          - ExternalTransactionNotFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: ExternalTransactionNotFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ExternalTransactionNotFoundException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - External transaction '{externalTransactionId}' not found.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/external-transactions/9f755746-13cb-4d0b-81f2-3b4f1b44f6d8
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/external-transactions/9f755746-13cb-4d0b-81f2-3b4f1b44f6d8
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    AddExternalTransactionResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            allOf:
+            - $ref: '#/components/schemas/ExternalTransactionReference'
+            - type: object
+              properties: {}
+            description: ExternalTransactionReference
+            x-tags:
+            - Model
+      required:
+      - data
+    ListExternalTransactionsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExternalTransaction'
+        meta:
+          type: object
+          properties:
+            total:
+              type: number
+              example: 1
+            limit:
+              type: number
+              example: 10
+            offset:
+              type: number
+              example: 0
+          required:
+          - total
+          - limit
+          - offset
+      required:
+      - data
+      - meta
+    CreateExternalTransaction:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - ExternalTransaction
+        attributes:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+              - Purchase
+              - Void
+              - Refund
+              default: Purchase
+              description: Type of the external transactions.
+            source:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: Transaction identifier inside the originating external system.
+                  example: 9f755746-13cb-4d0b-81f2-3b4f1b44f6d8
+                createdAt:
+                  type: string
+                  format: date-time
+                  description: Original date of creation for the transaction in the originating external system.
+                customerId:
+                  type: string
+                  description: User ID identifying the user inside the originating external system.
+                  example: '607329'
+              required:
+              - id
+              - createdAt
+            channel:
+              type: string
+              description: External system identifier used to identify the payment channel. E.g. Store Address, App Name, Checkout Interface, etc.
+              example: nyc-store-1
+            payments:
+              type: array
+              items:
+                type: object
+                properties:
+                  amount:
+                    type: integer
+                    description: The total amount charged with a particular payment method, represented in the smallest currency unit (e.g., cents for USD). To obtain the value in dollars, divide by 100.
+                    format: int32
+                    example: 1337
+                  method:
+                    type: string
+                    enum:
+                    - Cash
+                    - DebitCard
+                    - CreditCard
+                    - Wire
+                    - GiftCard
+                    - Wallet
+                    - Other
+                    - Unknown
+                    default: Unknown
+                    description: The method used for the split payment.
+                required:
+                - amount
+              description: All external payment methods and amounts charged to execute the transaction. The sum of all amounts is the total amount.
+              example:
+              - method: Cash
+                amount: 10000
+              - method: DebitCard
+                amount: 5000
+            payload:
+              type: object
+              properties: {}
+              description: JSON payload with extra details required for future processing and analysis.
+          required:
+          - source
+          - payments
+      required:
+      - type
+      - attributes
+      description: Create external transaction request
+      x-tags:
+      - Model
+    ExternalTransaction:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - ExternalTransaction
+        attributes:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+              - Purchase
+              - Void
+              - Refund
+              default: Purchase
+              description: Type of the external transactions.
+            linkedExternalTransactionId:
+              type: string
+              format: uuid
+              description: The identifier of the original transaction for which this transaction is a Refund or Void. This field must be provided when the transaction type is 'Refund' or 'Void'.
+              example: 9f755746-13cb-4d0b-81f2-3b4f1b44f6d8
+            source:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: Transaction identifier inside the originating external system.
+                  example: 9f755746-13cb-4d0b-81f2-3b4f1b44f6d8
+                createdAt:
+                  type: string
+                  format: date-time
+                  description: Original date of creation for the transaction in the originating external system.
+                customerId:
+                  type: string
+                  description: User ID identifying the user inside the originating external system.
+                  example: '607329'
+              required:
+              - id
+              - createdAt
+            channel:
+              type: string
+              description: External system identifier used to identify the payment channel. E.g. Store Address, App Name, Checkout Interface, etc.
+              example: nyc-store-1
+            payments:
+              type: array
+              items:
+                type: object
+                properties:
+                  amount:
+                    type: integer
+                    description: The total amount charged with a particular payment method, represented in the smallest currency unit (e.g., cents for USD). To obtain the value in dollars, divide by 100.
+                    format: int32
+                    example: 1337
+                  method:
+                    type: string
+                    enum:
+                    - Cash
+                    - DebitCard
+                    - CreditCard
+                    - Wire
+                    - GiftCard
+                    - Wallet
+                    - Other
+                    - Unknown
+                    default: Unknown
+                    description: The method used for the split payment.
+                required:
+                - amount
+              description: All external payment methods and amounts charged to execute the transaction. The sum of all amounts is the total amount.
+              example:
+              - method: Cash
+                amount: 10000
+              - method: DebitCard
+                amount: 5000
+            payload:
+              type: object
+              properties: {}
+              description: JSON payload with extra details required for future processing and analysis.
+            updatedAt:
+              type: string
+              format: date-time
+              readOnly: true
+            createdAt:
+              type: string
+              format: date-time
+              readOnly: true
+          required:
+          - linkedExternalTransactionId
+          - source
+          - payments
+          - updatedAt
+          - createdAt
+        relationships:
+          type: object
+          properties:
+            linkedExternalTransaction:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                        example: 9f755746-13cb-4d0b-81f2-3b4f1b44f6d8
+                      type:
+                        type: string
+                        enum:
+                        - ExternalTransaction
+                    required:
+                    - id
+                    - type
+              required:
+              - data
+            user:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      type:
+                        type: string
+                        enum:
+                        - User
+                    required:
+                    - id
+                    - type
+              required:
+              - data
+      required:
+      - id
+      - type
+      - attributes
+      - relationships
+      description: ExternalTransaction
+      x-tags:
+      - Model
+    GetExternalTransaction:
+      type: object
+      properties:
+        data:
+          allOf:
+          - $ref: '#/components/schemas/ExternalTransaction'
+          - type: object
+            properties:
+              attributes:
+                $ref: '#/components/schemas/ExternalTransaction'
+          description: ExternalTransaction
+          x-tags:
+          - Model
+      required:
+      - data
+x-tagGroups:
+- name: Overview
+  tags:
+  - Introduction
+  - API Design
+- name: Users
+  tags:
+  - Users
+  - LinkedAccounts
+  - Identity Verification
+- name: Wallets
+  tags:
+  - Wallets
+- name: Gifts
+  tags:
+  - Gifts
+- name: Payments
+  tags:
+  - PaymentIntents
+  - Payments
+  - ExternalTransactions
+  - Simulations
+- name: Banking & KYC
+  tags:
+  - Banking
+  - Counterparties
+  - CounterpartyTransfers
+- name: Sweepstakes
+  tags:
+  - Sweepstakes
+- name: Rewards
+  tags:
+  - Rewards
+- name: Widgets
+  tags:
+  - Widgets
+- name: Webhooks
+  tags:
+  - Webhooks
+  - WebhookEvents
+  - Webhook Topics

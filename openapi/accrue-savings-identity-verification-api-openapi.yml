@@ -1,0 +1,1245 @@
+openapi: 3.2.0
+info:
+  version: 1.0.0
+  title: Accrue Merchant Identity Verification API
+  x-links:
+  - name: View Alternative Version
+    url: /api-fs/
+    description: View API documentation with alternative enum-based WebhookIncluded schema
+  description: Identity Verification provides knowledge-based authentication for sensitive account changes. Use these endpoints to challenge a user with profile and wallet questions, then apply verified phone or email updates with a single-use verification token.
+servers:
+- description: Production API
+  url: https://merchant-api.accruesavings.com
+- description: Sandbox API
+  url: https://merchant-api-sandbox.accruesavings.com
+tags:
+- name: Identity Verification
+  description: Identity Verification provides knowledge-based authentication for sensitive account changes. Use these endpoints to challenge a user with profile and wallet questions, then apply verified phone or email updates with a single-use verification token.
+paths:
+  /api/v1/users/:userIdentifier/identity-verification/challenges:
+    post:
+      operationId: createIdentityVerificationChallenge
+      tags:
+      - Identity Verification
+      summary: Create Identity Verification Challenge
+      description: Creates a knowledge-based identity verification challenge for a user. Returns three multiple-choice questions derived from the user's profile (name, date of birth), linked account masks, and qualifying wallet transactions. The user must have a complete profile with name and date of birth before a challenge can be generated.
+      parameters:
+      - schema:
+          type: string
+          description: Accrue `userId` or merchant `userReference` (`externalUserId` / `stableExternalUserId`). Accrue resolves the identifier automatically against active wallets for your merchant.
+          example: merchant-user-42
+        required: true
+        name: userIdentifier
+        in: path
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      responses:
+        '200':
+          description: Challenge created successfully.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/CreateIdentityVerificationChallengeResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/CreateIdentityVerificationChallengeErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/InsufficientVerificationDataResponse'
+        '404':
+          description: Not Found
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UserNotFoundForIdentityVerificationResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedIdentityVerificationErrorResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request POST \\\n  --url https://merchant-api.accruesavings.com/api/v1/users/:userIdentifier/identity-verification/challenges \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'POST',\n  url: 'https://merchant-api.accruesavings.com/api/v1/users/:userIdentifier/identity-verification/challenges',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"POST\", \"/api/v1/users/:userIdentifier/identity-verification/challenges\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/users/:userIdentifier/identity-verification/challenges")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Post.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/users/:userIdentifier/identity-verification/challenges\")\n  .post(null)\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/users/:userIdentifier/identity-verification/challenges\"\n\n\treq, _ := http.NewRequest(\"POST\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/users/:userIdentifier/identity-verification/challenges");
+
+          var request = new RestRequest(Method.POST);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/users/:userIdentifier/identity-verification/challenges');\n$request->setMethod(HTTP_METH_POST);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+  /api/v1/users/:userIdentifier/identity-verification/challenges/:challengeId/submissions:
+    post:
+      operationId: submitIdentityVerificationChallenge
+      tags:
+      - Identity Verification
+      summary: Submit Identity Verification Challenge
+      description: Submits answers for an active challenge. Each challenge allows up to three submission attempts. When all answers are correct, the response includes a single-use `verificationToken` that can be used to apply a verified profile update within 10 minutes.
+      parameters:
+      - schema:
+          type: string
+          description: Accrue `userId` or merchant `userReference` (`externalUserId` / `stableExternalUserId`). Accrue resolves the identifier automatically against active wallets for your merchant.
+          example: merchant-user-42
+        required: true
+        name: userIdentifier
+        in: path
+      - schema:
+          type: string
+          format: uuid
+          description: The challenge ID returned from the create challenge endpoint.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: challengeId
+        in: path
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              $ref: '#/components/schemas/SubmitIdentityVerificationChallengeRequest'
+      responses:
+        '200':
+          description: Submission processed. Check `passed` to determine whether a verification token was issued.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/SubmitIdentityVerificationChallengeResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/SubmitIdentityVerificationChallengeErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ChallengeNotFoundResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedIdentityVerificationErrorResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request POST \\\n  --url https://merchant-api.accruesavings.com/api/v1/users/:userIdentifier/identity-verification/challenges/:challengeId/submissions \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'POST',\n  url: 'https://merchant-api.accruesavings.com/api/v1/users/:userIdentifier/identity-verification/challenges/:challengeId/submissions',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"POST\", \"/api/v1/users/:userIdentifier/identity-verification/challenges/:challengeId/submissions\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/users/:userIdentifier/identity-verification/challenges/:challengeId/submissions")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Post.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/users/:userIdentifier/identity-verification/challenges/:challengeId/submissions\")\n  .post(null)\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/users/:userIdentifier/identity-verification/challenges/:challengeId/submissions\"\n\n\treq, _ := http.NewRequest(\"POST\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/users/:userIdentifier/identity-verification/challenges/:challengeId/submissions");
+
+          var request = new RestRequest(Method.POST);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/users/:userIdentifier/identity-verification/challenges/:challengeId/submissions');\n$request->setMethod(HTTP_METH_POST);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+  /api/v1/users/:userIdentifier/identity-verification/profile-updates:
+    post:
+      operationId: applyVerifiedProfileUpdate
+      tags:
+      - Identity Verification
+      summary: Apply Verified Profile Update
+      description: Applies a phone number and/or email update after the user passes identity verification. Requires a valid, unused `verificationToken` from a successful challenge submission. At least one of `phoneNumber` or `email` must be provided. Changing the phone number clears the user's Better Auth session link and marks the updated contact fields as unverified.
+      parameters:
+      - schema:
+          type: string
+          description: Accrue `userId` or merchant `userReference` (`externalUserId` / `stableExternalUserId`). Accrue resolves the identifier automatically against active wallets for your merchant.
+          example: merchant-user-42
+        required: true
+        name: userIdentifier
+        in: path
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              $ref: '#/components/schemas/ApplyVerifiedProfileUpdateRequest'
+      responses:
+        '200':
+          description: Profile update applied successfully.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ApplyVerifiedProfileUpdateResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ApplyVerifiedProfileUpdateErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ApplyVerifiedProfileUpdateNotFoundResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedIdentityVerificationErrorResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request POST \\\n  --url https://merchant-api.accruesavings.com/api/v1/users/:userIdentifier/identity-verification/profile-updates \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'POST',\n  url: 'https://merchant-api.accruesavings.com/api/v1/users/:userIdentifier/identity-verification/profile-updates',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"POST\", \"/api/v1/users/:userIdentifier/identity-verification/profile-updates\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/users/:userIdentifier/identity-verification/profile-updates")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Post.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/users/:userIdentifier/identity-verification/profile-updates\")\n  .post(null)\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/users/:userIdentifier/identity-verification/profile-updates\"\n\n\treq, _ := http.NewRequest(\"POST\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/users/:userIdentifier/identity-verification/profile-updates");
+
+          var request = new RestRequest(Method.POST);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/users/:userIdentifier/identity-verification/profile-updates');\n$request->setMethod(HTTP_METH_POST);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+components:
+  schemas:
+    CreateIdentityVerificationChallengeResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/IdentityVerificationChallenge'
+      required:
+      - data
+    ApplyVerifiedProfileUpdateNotFoundResponse:
+      anyOf:
+      - $ref: '#/components/schemas/UserNotFoundForIdentityVerificationResponse'
+      - $ref: '#/components/schemas/ChallengeNotFoundResponse'
+    ApplyVerifiedProfileUpdateRequest:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+              - ProfileUpdate
+            attributes:
+              type: object
+              properties:
+                verificationToken:
+                  type: string
+                  description: Single-use token from a successful challenge submission.
+                  example: pvt_a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456
+                phoneNumber:
+                  type: string
+                  description: New phone number in E.164 format (for example, `+12125551234`).
+                  example: '+12125551234'
+                email:
+                  type: string
+                  format: email
+                  description: New email address.
+                  example: user@example.com
+              required:
+              - verificationToken
+          required:
+          - type
+          - attributes
+      required:
+      - data
+    MaxAttemptsExceededResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - MaxAttemptsExceeded
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: MaxAttemptsExceeded
+        title:
+          type: string
+          description: Generic title for the error.
+          example: Max Attempts Exceeded
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - The maximum number of verification attempts has been exceeded.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/users/:userIdentifier/identity-verification/challenges/123e4567-e89b-12d3-a456-426614174000/submissions
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/users/:userIdentifier/identity-verification/challenges/123e4567-e89b-12d3-a456-426614174000/submissions
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    CreateIdentityVerificationChallengeErrorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - CooldownActive
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: CooldownActive
+        title:
+          type: string
+          description: Generic title for the error.
+          example: Verification Cooldown Active
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Identity verification is temporarily unavailable after a failed attempt. Try again later.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2026-06-17T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/users/:userIdentifier/identity-verification/challenges
+            retryAfter:
+              type: string
+              format: date-time
+              description: ISO-8601 timestamp when a new challenge can be created.
+              example: '2026-06-17T13:30:00.000Z'
+          required:
+          - environment
+          - timestamp
+          - path
+          - retryAfter
+          example:
+            environment: sandbox
+            timestamp: '2026-06-17T12:00:00.000Z'
+            path: /api/v1/users/:userIdentifier/identity-verification/challenges
+            retryAfter: '2026-06-17T13:30:00.000Z'
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    IdentityVerificationResult:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - IdentityVerificationResult
+        attributes:
+          type: object
+          properties:
+            passed:
+              type: boolean
+              description: Whether the user answered all questions correctly.
+              example: true
+            verificationToken:
+              type:
+              - string
+              - 'null'
+              description: Single-use token required to apply a verified profile update. Present only when `passed` is `true`. Valid for 10 minutes.
+              example: pvt_a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456
+            expiresAt:
+              type:
+              - string
+              - 'null'
+              format: date-time
+              description: ISO-8601 timestamp when the verification token expires. Present only when `passed` is `true`.
+              example: '2026-06-17T12:40:00.000Z'
+            failureReason:
+              type:
+              - string
+              - 'null'
+              enum:
+              - IncorrectAnswer
+              - ChallengeExpired
+              - MaxAttemptsExceeded
+              description: Reason the submission did not pass. `null` when `passed` is `true`.
+              example: IncorrectAnswer
+            updatedAt:
+              type: string
+              format: date-time
+              readOnly: true
+            createdAt:
+              type: string
+              format: date-time
+              readOnly: true
+          required:
+          - passed
+          - verificationToken
+          - expiresAt
+          - failureReason
+          - updatedAt
+          - createdAt
+      required:
+      - id
+      - type
+      - attributes
+      description: Outcome of an identity verification challenge submission.
+      x-tags:
+      - Model
+    SubmitIdentityVerificationChallengeResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/IdentityVerificationResult'
+      required:
+      - data
+    SubmitIdentityVerificationChallengeErrorResponse:
+      anyOf:
+      - $ref: '#/components/schemas/ChallengeExpiredResponse'
+      - $ref: '#/components/schemas/ChallengeFailedResponse'
+      - $ref: '#/components/schemas/MaxAttemptsExceededResponse'
+      - $ref: '#/components/schemas/IdentityVerificationValidationErrorResponse'
+    ChallengeNotFoundResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 404
+        code:
+          type: string
+          enum:
+          - ChallengeNotFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: ChallengeNotFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: Challenge Not Found
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - The verification challenge was not found.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/users/:userIdentifier/identity-verification/challenges/123e4567-e89b-12d3-a456-426614174000/submissions
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/users/:userIdentifier/identity-verification/challenges/123e4567-e89b-12d3-a456-426614174000/submissions
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    ChallengeFailedResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - ChallengeFailed
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: ChallengeFailed
+        title:
+          type: string
+          description: Generic title for the error.
+          example: Challenge Failed
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - The verification challenge is no longer active.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/users/:userIdentifier/identity-verification/challenges/123e4567-e89b-12d3-a456-426614174000/submissions
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/users/:userIdentifier/identity-verification/challenges/123e4567-e89b-12d3-a456-426614174000/submissions
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    SubmitIdentityVerificationChallengeRequest:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+              - IdentityVerificationSubmission
+            attributes:
+              type: object
+              properties:
+                answers:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      questionId:
+                        type: string
+                        description: The `id` of the question being answered.
+                        example: q_4e8d9f0a
+                      optionId:
+                        type: string
+                        description: The `id` of the selected option.
+                        example: opt_7f3a2b1c
+                    required:
+                    - questionId
+                    - optionId
+                  description: One answer per question in the active challenge.
+                metadata:
+                  type: object
+                  additionalProperties: {}
+                  description: Optional partner metadata stored with the verification attempt.
+              required:
+              - answers
+          required:
+          - type
+          - attributes
+      required:
+      - data
+    UserNotFoundForIdentityVerificationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 404
+        code:
+          type: string
+          enum:
+          - UserNotFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: UserNotFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: User Not Found
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - The user was not found for this merchant.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/users/:userIdentifier/identity-verification/challenges
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/users/:userIdentifier/identity-verification/challenges
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    IdentityVerificationValidationErrorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - ValidationError
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: ValidationError
+        title:
+          type: string
+          description: Generic title for the error.
+          example: Validation Error
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - One or more identity verification fields are invalid. Ensure challengeId is a valid UUID in the URL path, question/option IDs match the active challenge, or the user identifier is unambiguous for your merchant.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/users/:userIdentifier/identity-verification/profile-updates
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/users/:userIdentifier/identity-verification/profile-updates
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    IdentityVerificationChallenge:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - IdentityVerificationChallenge
+        attributes:
+          type: object
+          properties:
+            challengeId:
+              type: string
+              format: uuid
+              description: Unique identifier for this verification challenge.
+              example: 123e4567-e89b-12d3-a456-426614174000
+            expiresAt:
+              type: string
+              format: date-time
+              description: ISO-8601 timestamp when the challenge expires. Challenges are valid for 30 minutes.
+              example: '2026-06-17T12:30:00.000Z'
+            questions:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Opaque question identifier. Submit answers using this value.
+                    example: q_4e8d9f0a
+                  prompt:
+                    type: string
+                    description: Question text presented to the user.
+                    example: What is your full name?
+                  options:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: Opaque option identifier. Submit this value with the parent question.
+                          example: opt_7f3a2b1c
+                        label:
+                          type: string
+                          description: Human-readable option text shown to the user.
+                          example: Jane Doe
+                      required:
+                      - id
+                      - label
+                    minItems: 2
+                    description: Multiple-choice options for the question.
+                required:
+                - id
+                - prompt
+                - options
+              description: Three knowledge-based authentication questions generated from the user's profile, linked accounts, and wallet activity.
+            updatedAt:
+              type: string
+              format: date-time
+              readOnly: true
+            createdAt:
+              type: string
+              format: date-time
+              readOnly: true
+          required:
+          - challengeId
+          - expiresAt
+          - questions
+          - updatedAt
+          - createdAt
+      required:
+      - id
+      - type
+      - attributes
+      description: An active identity verification challenge with multiple-choice questions.
+      x-tags:
+      - Model
+    InsufficientVerificationDataResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 403
+        code:
+          type: string
+          enum:
+          - InsufficientVerificationData
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: InsufficientVerificationData
+        title:
+          type: string
+          description: Generic title for the error.
+          example: Insufficient Verification Data
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - This user does not have enough profile data to generate verification questions.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/users/:userIdentifier/identity-verification/challenges
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/users/:userIdentifier/identity-verification/challenges
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    ApplyVerifiedProfileUpdateResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/ProfileUpdateResult'
+      required:
+      - data
+    ChallengeExpiredResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - ChallengeExpired
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: ChallengeExpired
+        title:
+          type: string
+          description: Generic title for the error.
+          example: Challenge Expired
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - The verification challenge has expired.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/users/:userIdentifier/identity-verification/challenges/123e4567-e89b-12d3-a456-426614174000/submissions
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/users/:userIdentifier/identity-verification/challenges/123e4567-e89b-12d3-a456-426614174000/submissions
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    ProfileUpdateResult:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - ProfileUpdateResult
+        attributes:
+          type: object
+          properties:
+            phoneNumber:
+              type:
+              - string
+              - 'null'
+              description: The user's phone number after the update, in E.164 format.
+              example: '+12125551234'
+            email:
+              type:
+              - string
+              - 'null'
+              description: The user's email address after the update.
+              example: user@example.com
+            appliedAt:
+              type: string
+              format: date-time
+              description: ISO-8601 timestamp when the profile update was applied.
+              example: '2026-06-17T12:35:00.000Z'
+            updatedAt:
+              type: string
+              format: date-time
+              readOnly: true
+            createdAt:
+              type: string
+              format: date-time
+              readOnly: true
+          required:
+          - phoneNumber
+          - email
+          - appliedAt
+          - updatedAt
+          - createdAt
+      required:
+      - id
+      - type
+      - attributes
+      description: Confirmation of a verified profile update.
+      x-tags:
+      - Model
+    UnexpectedIdentityVerificationErrorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 500
+        code:
+          type: string
+          enum:
+          - UnexpectedError
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: UnexpectedError
+        title:
+          type: string
+          description: Generic title for the error.
+          example: Unexpected Error
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - An unexpected error occurred during identity verification.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/users/:userIdentifier/identity-verification
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/users/:userIdentifier/identity-verification
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    ApplyVerifiedProfileUpdateErrorResponse:
+      anyOf:
+      - $ref: '#/components/schemas/ChallengeExpiredResponse'
+      - $ref: '#/components/schemas/IdentityVerificationValidationErrorResponse'
+x-tagGroups:
+- name: Overview
+  tags:
+  - Introduction
+  - API Design
+- name: Users
+  tags:
+  - Users
+  - LinkedAccounts
+  - Identity Verification
+- name: Wallets
+  tags:
+  - Wallets
+- name: Gifts
+  tags:
+  - Gifts
+- name: Payments
+  tags:
+  - PaymentIntents
+  - Payments
+  - ExternalTransactions
+  - Simulations
+- name: Banking & KYC
+  tags:
+  - Banking
+  - Counterparties
+  - CounterpartyTransfers
+- name: Sweepstakes
+  tags:
+  - Sweepstakes
+- name: Rewards
+  tags:
+  - Rewards
+- name: Widgets
+  tags:
+  - Widgets
+- name: Webhooks
+  tags:
+  - Webhooks
+  - WebhookEvents
+  - Webhook Topics

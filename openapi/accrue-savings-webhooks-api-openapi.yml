@@ -1,0 +1,883 @@
+openapi: 3.2.0
+info:
+  version: 1.0.0
+  title: Accrue Merchant Webhooks API
+  x-links:
+  - name: View Alternative Version
+    url: /api-fs/
+    description: View API documentation with alternative enum-based WebhookIncluded schema
+  description: Webhook management APIs
+servers:
+- description: Production API
+  url: https://merchant-api.accruesavings.com
+- description: Sandbox API
+  url: https://merchant-api-sandbox.accruesavings.com
+tags:
+- name: Webhooks
+  description: Webhook management APIs
+paths:
+  /api/v1/webhooks:
+    post:
+      operationId: createWebhook
+      tags:
+      - Webhooks
+      summary: Create a webhook
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/CreateWebhook'
+              required:
+              - data
+      responses:
+        '201':
+          description: 201 Created
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/WebhookResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/WebhookErrorResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request POST \\\n  --url https://merchant-api.accruesavings.com/api/v1/webhooks \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'POST',\n  url: 'https://merchant-api.accruesavings.com/api/v1/webhooks',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"POST\", \"/api/v1/webhooks\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/webhooks")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Post.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/webhooks\")\n  .post(null)\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/webhooks\"\n\n\treq, _ := http.NewRequest(\"POST\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/webhooks");
+
+          var request = new RestRequest(Method.POST);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/webhooks');\n$request->setMethod(HTTP_METH_POST);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+    get:
+      operationId: getWebhooks
+      tags:
+      - Webhooks
+      summary: Get webhooks
+      parameters:
+      - schema:
+          type: number
+          minimum: 1
+          maximum: 50
+          default: 10
+          description: Maximum number of objects that will be returned. Can not be greater than 50.
+        required: false
+        name: page[limit]
+        in: query
+      - schema:
+          type: number
+          minimum: 0
+          default: 0
+          description: Offset from the beginning of the list of objects. Can not be negative.
+        required: false
+        name: page[offset]
+        in: query
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      responses:
+        '200':
+          description: 200 OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/WebhooksResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/WebhookValidationErrorResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request GET \\\n  --url 'https://merchant-api.accruesavings.com/api/v1/webhooks?page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE' \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'GET',\n  url: 'https://merchant-api.accruesavings.com/api/v1/webhooks',\n  qs: {'page[limit]': 'SOME_NUMBER_VALUE', 'page[offset]': 'SOME_NUMBER_VALUE'},\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"GET\", \"/api/v1/webhooks?page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/webhooks?page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Get.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/webhooks?page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE\")\n  .get()\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/webhooks?page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE\"\n\n\treq, _ := http.NewRequest(\"GET\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/webhooks?page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE");
+
+          var request = new RestRequest(Method.GET);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/webhooks');\n$request->setMethod(HTTP_METH_GET);\n\n$request->setQueryData([\n  'page[limit]' => 'SOME_NUMBER_VALUE',\n  'page[offset]' => 'SOME_NUMBER_VALUE'\n]);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+  /api/v1/webhooks/{webhookId}:
+    get:
+      operationId: getWebhook
+      tags:
+      - Webhooks
+      summary: Get a webhook
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: Webhook id
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: webhookId
+        in: path
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/GetWebhookResponse'
+        '404':
+          description: Not Found
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/WebhookNotFoundResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request GET \\\n  --url https://merchant-api.accruesavings.com/api/v1/webhooks/123e4567-e89b-12d3-a456-426614174000 \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'GET',\n  url: 'https://merchant-api.accruesavings.com/api/v1/webhooks/123e4567-e89b-12d3-a456-426614174000',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"GET\", \"/api/v1/webhooks/123e4567-e89b-12d3-a456-426614174000\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/webhooks/123e4567-e89b-12d3-a456-426614174000")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Get.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/webhooks/123e4567-e89b-12d3-a456-426614174000\")\n  .get()\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/webhooks/123e4567-e89b-12d3-a456-426614174000\"\n\n\treq, _ := http.NewRequest(\"GET\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/webhooks/123e4567-e89b-12d3-a456-426614174000");
+
+          var request = new RestRequest(Method.GET);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/webhooks/123e4567-e89b-12d3-a456-426614174000');\n$request->setMethod(HTTP_METH_GET);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+    patch:
+      operationId: updateWebhook
+      tags:
+      - Webhooks
+      summary: Update a webhook
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: Webhook id
+        required: true
+        name: webhookId
+        in: path
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              properties:
+                data:
+                  allOf:
+                  - $ref: '#/components/schemas/UpdateWebhook'
+                  - type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                        description: Webhook id
+                    required:
+                    - id
+                  description: Update webhook request
+                  x-tags:
+                  - Model
+              required:
+              - data
+      responses:
+        '200':
+          description: 200 OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/WebhookResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/WebhookErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/WebhookNotFoundResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request PATCH \\\n  --url https://merchant-api.accruesavings.com/api/v1/webhooks/%7BwebhookId%7D \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'PATCH',\n  url: 'https://merchant-api.accruesavings.com/api/v1/webhooks/%7BwebhookId%7D',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"PATCH\", \"/api/v1/webhooks/%7BwebhookId%7D\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/webhooks/%7BwebhookId%7D")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Patch.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/webhooks/%7BwebhookId%7D\")\n  .patch(null)\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/webhooks/%7BwebhookId%7D\"\n\n\treq, _ := http.NewRequest(\"PATCH\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/webhooks/%7BwebhookId%7D");
+
+          var request = new RestRequest(Method.PATCH);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\nHttpRequest::methodRegister('PATCH');\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/webhooks/%7BwebhookId%7D');\n$request->setMethod(HttpRequest::HTTP_METH_PATCH);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+    delete:
+      operationId: deleteWebhook
+      tags:
+      - Webhooks
+      summary: Delete a webhook
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: Webhook id
+        required: true
+        name: webhookId
+        in: path
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      responses:
+        '204':
+          description: 204 No Content
+        '404':
+          description: Not Found
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/WebhookNotFoundResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request DELETE \\\n  --url https://merchant-api.accruesavings.com/api/v1/webhooks/%7BwebhookId%7D \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'DELETE',\n  url: 'https://merchant-api.accruesavings.com/api/v1/webhooks/%7BwebhookId%7D',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"DELETE\", \"/api/v1/webhooks/%7BwebhookId%7D\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/webhooks/%7BwebhookId%7D")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Delete.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/webhooks/%7BwebhookId%7D\")\n  .delete(null)\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/webhooks/%7BwebhookId%7D\"\n\n\treq, _ := http.NewRequest(\"DELETE\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/webhooks/%7BwebhookId%7D");
+
+          var request = new RestRequest(Method.DELETE);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/webhooks/%7BwebhookId%7D');\n$request->setMethod(HTTP_METH_DELETE);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+components:
+  schemas:
+    WebhookNotFoundResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 404
+        code:
+          type: string
+        title:
+          type: string
+          description: Generic title for the error.
+          example: NotFoundException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - 'NotFoundException: Not Found'
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/webhooks/123e4567-e89b-12d3-a456-426614174000
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/webhooks/123e4567-e89b-12d3-a456-426614174000
+      required:
+      - id
+      - status
+      - title
+      - detail
+      - meta
+    WebhookValidationErrorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - BadRequest
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: BadRequest
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ValidationError
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Validation failed for data.attributes.url
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/webhooks
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/webhooks
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    CreateWebhook:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - Webhook
+        attributes:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            name:
+              type: string
+            url:
+              type: string
+              description: HTTPS endpoint that receives POST requests for subscribed events. If omitted or empty, events are still stored for this webhook (for example, via the webhook events API) but no HTTP delivery is attempted.
+            topics:
+              type: array
+              items:
+                type: string
+              description: 'Array of webhook topics to subscribe to. Use `''*''` to subscribe to all topics. Note: When using `''*''`, all new topics added in the future will automatically be sent to this webhook. You are responsible for handling any new or unknown topic types. The `''*''` wildcard cannot be combined with other topics.'
+              example:
+              - PaymentIntentCreated
+              - PaymentCreated
+          required:
+          - enabled
+          - name
+          - topics
+      required:
+      - type
+      - attributes
+      description: Create webhook request
+      x-tags:
+      - Model
+    UpdateWebhook:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - Webhook
+        attributes:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            name:
+              type: string
+            url:
+              type: string
+              description: HTTPS delivery endpoint. Set to empty or omit to stop HTTP delivery while continuing to record events for this webhook.
+            topics:
+              type: array
+              items:
+                type: string
+              description: 'Array of webhook topics to subscribe to. Use `''*''` to subscribe to all topics. Note: When using `''*''`, all new topics added in the future will automatically be sent to this webhook. You are responsible for handling any new or unknown topic types. The `''*''` wildcard cannot be combined with other topics.'
+              example:
+              - PaymentIntentCreated
+              - PaymentCreated
+      required:
+      - type
+      - attributes
+      description: Update webhook request
+      x-tags:
+      - Model
+    WebhookErrorResponse:
+      anyOf:
+      - $ref: '#/components/schemas/InvalidWebhookTopicsResponse'
+      - $ref: '#/components/schemas/WebhookValidationErrorResponse'
+    WebhooksResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Webhook'
+      required:
+      - data
+    WebhookResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Webhook'
+      required:
+      - data
+    GetWebhookResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Webhook'
+      required:
+      - data
+    Webhook:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - Webhook
+        attributes:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            name:
+              type: string
+            url:
+              type: string
+              description: HTTPS endpoint for webhook POST delivery. Empty when no URL was configured; events are still recorded for this webhook but no HTTP request is sent.
+            secret:
+              type: string
+              readOnly: true
+            topics:
+              type: array
+              items:
+                type: string
+              description: 'Array of webhook topics to subscribe to. Use `''*''` to subscribe to all topics. Note: When using `''*''`, all new topics added in the future will automatically be sent to this webhook. You are responsible for handling any new or unknown topic types. The `''*''` wildcard cannot be combined with other topics.'
+              example:
+              - PaymentIntentCreated
+              - PaymentCreated
+            updatedAt:
+              type: string
+              format: date-time
+              readOnly: true
+            createdAt:
+              type: string
+              format: date-time
+              readOnly: true
+          required:
+          - enabled
+          - name
+          - url
+          - secret
+          - topics
+          - updatedAt
+          - createdAt
+      required:
+      - id
+      - type
+      - attributes
+      description: ''
+      x-tags: Model
+    InvalidWebhookTopicsResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - InvalidTopics
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: InvalidTopics
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WebhookException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - If '*' is specified in topics, it must be the only topic. Cannot combine '*' with other topics.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/webhooks
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/webhooks
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+x-tagGroups:
+- name: Overview
+  tags:
+  - Introduction
+  - API Design
+- name: Users
+  tags:
+  - Users
+  - LinkedAccounts
+  - Identity Verification
+- name: Wallets
+  tags:
+  - Wallets
+- name: Gifts
+  tags:
+  - Gifts
+- name: Payments
+  tags:
+  - PaymentIntents
+  - Payments
+  - ExternalTransactions
+  - Simulations
+- name: Banking & KYC
+  tags:
+  - Banking
+  - Counterparties
+  - CounterpartyTransfers
+- name: Sweepstakes
+  tags:
+  - Sweepstakes
+- name: Rewards
+  tags:
+  - Rewards
+- name: Widgets
+  tags:
+  - Widgets
+- name: Webhooks
+  tags:
+  - Webhooks
+  - WebhookEvents
+  - Webhook Topics

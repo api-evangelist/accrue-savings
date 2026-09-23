@@ -1,0 +1,877 @@
+openapi: 3.2.0
+info:
+  version: 1.0.0
+  title: Accrue Merchant Counterparty Transfers API
+  x-links:
+  - name: View Alternative Version
+    url: /api-fs/
+    description: View API documentation with alternative enum-based WebhookIncluded schema
+  description: Counterparty Transfers represent movements of funds between two counterparties owned by the same partner. Use these endpoints to initiate, list, and retrieve counterparty-to-counterparty transfers.
+servers:
+- description: Production API
+  url: https://merchant-api.accruesavings.com
+- description: Sandbox API
+  url: https://merchant-api-sandbox.accruesavings.com
+tags:
+- name: CounterpartyTransfers
+  description: Counterparty Transfers represent movements of funds between two counterparties owned by the same partner. Use these endpoints to initiate, list, and retrieve counterparty-to-counterparty transfers.
+paths:
+  /api/v1/counterparty-transfers:
+    post:
+      operationId: createCounterpartyTransfer
+      tags:
+      - CounterpartyTransfers
+      summary: Create Counterparty Transfer
+      description: Initiate a transfer of funds between two counterparties owned by the authenticated partner.
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                      - CounterpartyTransfer
+                    attributes:
+                      type: object
+                      properties:
+                        fromCounterpartyId:
+                          type: string
+                          format: uuid
+                          description: ID of the source counterparty.
+                          example: 123e4567-e89b-12d3-a456-426614174000
+                        toCounterpartyId:
+                          type: string
+                          format: uuid
+                          description: ID of the destination counterparty.
+                          example: 123e4567-e89b-12d3-a456-426614174000
+                        amount:
+                          type: integer
+                          minimum: 1
+                          description: Amount in cents
+                          format: int32
+                          example: 1500
+                        idempotencyKey:
+                          type: string
+                          minLength: 1
+                          maxLength: 255
+                          description: Idempotency key to prevent duplicate transfers.
+                          example: transfer_12345
+                        metadata:
+                          type: object
+                          additionalProperties:
+                            type: string
+                          description: Optional string-keyed metadata associated with the transfer. Values must be strings; serialize numbers, booleans, or structured data as strings before sending (e.g. JSON.stringify).
+                          example:
+                            orderId: order_123
+                      required:
+                      - fromCounterpartyId
+                      - toCounterpartyId
+                      - amount
+                      - idempotencyKey
+                  required:
+                  - type
+                  - attributes
+              required:
+              - data
+      responses:
+        '201':
+          description: Counterparty transfer created successfully
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/CreateCounterpartyTransferResponse'
+        '400':
+          description: Validation error
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/CounterpartyTransferValidationResponse'
+        '403':
+          description: Forbidden — counterparty belongs to a different partner
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/CrossTenantCounterpartyTransferResponse'
+        '404':
+          description: Source or destination counterparty does not exist in the authenticated partner scope.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/CounterpartyNotFoundOnCreateResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request POST \\\n  --url https://merchant-api.accruesavings.com/api/v1/counterparty-transfers \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'POST',\n  url: 'https://merchant-api.accruesavings.com/api/v1/counterparty-transfers',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"POST\", \"/api/v1/counterparty-transfers\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/counterparty-transfers")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Post.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/counterparty-transfers\")\n  .post(null)\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/counterparty-transfers\"\n\n\treq, _ := http.NewRequest(\"POST\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/counterparty-transfers");
+
+          var request = new RestRequest(Method.POST);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/counterparty-transfers');\n$request->setMethod(HTTP_METH_POST);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+  /api/v1/counterparty-transfers/:
+    get:
+      operationId: listCounterpartyTransfers
+      tags:
+      - CounterpartyTransfers
+      summary: List Counterparty Transfers
+      description: List all counterparty transfers for the authenticated partner.
+      parameters:
+      - schema:
+          type: number
+          minimum: 1
+          maximum: 50
+          default: 10
+          description: Maximum number of objects that will be returned. Can not be greater than 50.
+        required: false
+        name: page[limit]
+        in: query
+      - schema:
+          type: number
+          minimum: 0
+          default: 0
+          description: Offset from the beginning of the list of objects. Can not be negative.
+        required: false
+        name: page[offset]
+        in: query
+      - schema:
+          type: string
+          format: uuid
+          description: Filter transfers by source counterparty ID.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: false
+        name: filter[fromCounterpartyId]
+        in: query
+      - schema:
+          type: string
+          format: uuid
+          description: Filter transfers by destination counterparty ID.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: false
+        name: filter[toCounterpartyId]
+        in: query
+      - schema:
+          type: string
+          enum:
+          - Pending
+          - Completed
+          - Failed
+          description: Filter transfers by status.
+          example: Completed
+        required: false
+        name: filter[status]
+        in: query
+      - schema:
+          type: string
+          format: date-time
+          description: Filter transfers created after this ISO 8601 datetime.
+          example: '2024-01-01T00:00:00.000Z'
+        required: false
+        name: filter[createdAfter]
+        in: query
+      - schema:
+          type: string
+          format: date-time
+          description: Filter transfers created before this ISO 8601 datetime.
+          example: '2024-12-31T23:59:59.999Z'
+        required: false
+        name: filter[createdBefore]
+        in: query
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ListCounterpartyTransfersResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/CounterpartyTransferQueryValidationErrorResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request GET \\\n  --url 'https://merchant-api.accruesavings.com/api/v1/counterparty-transfers/?page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE&filter%5BfromCounterpartyId%5D=123e4567-e89b-12d3-a456-426614174000&filter%5BtoCounterpartyId%5D=123e4567-e89b-12d3-a456-426614174000&filter%5Bstatus%5D=Completed&filter%5BcreatedAfter%5D=2024-01-01T00%3A00%3A00.000Z&filter%5BcreatedBefore%5D=2024-12-31T23%3A59%3A59.999Z' \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'GET',\n  url: 'https://merchant-api.accruesavings.com/api/v1/counterparty-transfers/',\n  qs: {\n    'page[limit]': 'SOME_NUMBER_VALUE',\n    'page[offset]': 'SOME_NUMBER_VALUE',\n    'filter[fromCounterpartyId]': '123e4567-e89b-12d3-a456-426614174000',\n    'filter[toCounterpartyId]': '123e4567-e89b-12d3-a456-426614174000',\n    'filter[status]': 'Completed',\n    'filter[createdAfter]': '2024-01-01T00:00:00.000Z',\n    'filter[createdBefore]': '2024-12-31T23:59:59.999Z'\n  },\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"GET\", \"/api/v1/counterparty-transfers/?page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE&filter%5BfromCounterpartyId%5D=123e4567-e89b-12d3-a456-426614174000&filter%5BtoCounterpartyId%5D=123e4567-e89b-12d3-a456-426614174000&filter%5Bstatus%5D=Completed&filter%5BcreatedAfter%5D=2024-01-01T00%3A00%3A00.000Z&filter%5BcreatedBefore%5D=2024-12-31T23%3A59%3A59.999Z\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/counterparty-transfers/?page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE&filter%5BfromCounterpartyId%5D=123e4567-e89b-12d3-a456-426614174000&filter%5BtoCounterpartyId%5D=123e4567-e89b-12d3-a456-426614174000&filter%5Bstatus%5D=Completed&filter%5BcreatedAfter%5D=2024-01-01T00%3A00%3A00.000Z&filter%5BcreatedBefore%5D=2024-12-31T23%3A59%3A59.999Z")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Get.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/counterparty-transfers/?page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE&filter%5BfromCounterpartyId%5D=123e4567-e89b-12d3-a456-426614174000&filter%5BtoCounterpartyId%5D=123e4567-e89b-12d3-a456-426614174000&filter%5Bstatus%5D=Completed&filter%5BcreatedAfter%5D=2024-01-01T00%3A00%3A00.000Z&filter%5BcreatedBefore%5D=2024-12-31T23%3A59%3A59.999Z\")\n  .get()\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/counterparty-transfers/?page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE&filter%5BfromCounterpartyId%5D=123e4567-e89b-12d3-a456-426614174000&filter%5BtoCounterpartyId%5D=123e4567-e89b-12d3-a456-426614174000&filter%5Bstatus%5D=Completed&filter%5BcreatedAfter%5D=2024-01-01T00%3A00%3A00.000Z&filter%5BcreatedBefore%5D=2024-12-31T23%3A59%3A59.999Z\"\n\n\treq, _ := http.NewRequest(\"GET\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/counterparty-transfers/?page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE&filter%5BfromCounterpartyId%5D=123e4567-e89b-12d3-a456-426614174000&filter%5BtoCounterpartyId%5D=123e4567-e89b-12d3-a456-426614174000&filter%5Bstatus%5D=Completed&filter%5BcreatedAfter%5D=2024-01-01T00%3A00%3A00.000Z&filter%5BcreatedBefore%5D=2024-12-31T23%3A59%3A59.999Z");
+
+          var request = new RestRequest(Method.GET);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/counterparty-transfers/');\n$request->setMethod(HTTP_METH_GET);\n\n$request->setQueryData([\n  'page[limit]' => 'SOME_NUMBER_VALUE',\n  'page[offset]' => 'SOME_NUMBER_VALUE',\n  'filter[fromCounterpartyId]' => '123e4567-e89b-12d3-a456-426614174000',\n  'filter[toCounterpartyId]' => '123e4567-e89b-12d3-a456-426614174000',\n  'filter[status]' => 'Completed',\n  'filter[createdAfter]' => '2024-01-01T00:00:00.000Z',\n  'filter[createdBefore]' => '2024-12-31T23:59:59.999Z'\n]);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+  /api/v1/counterparty-transfers/:counterpartyTransferId:
+    get:
+      operationId: getCounterpartyTransfer
+      tags:
+      - CounterpartyTransfers
+      summary: Get Counterparty Transfer
+      description: Get a specific counterparty transfer by ID.
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: ID of the counterparty transfer to fetch.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: counterpartyTransferId
+        in: path
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/GetCounterpartyTransferResponse'
+        '404':
+          description: Not Found — no counterparty transfer with this id exists in the authenticated partner scope.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/CounterpartyTransferNotFoundResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request GET \\\n  --url https://merchant-api.accruesavings.com/api/v1/counterparty-transfers/:counterpartyTransferId \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'GET',\n  url: 'https://merchant-api.accruesavings.com/api/v1/counterparty-transfers/:counterpartyTransferId',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"GET\", \"/api/v1/counterparty-transfers/:counterpartyTransferId\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/counterparty-transfers/:counterpartyTransferId")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Get.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/counterparty-transfers/:counterpartyTransferId\")\n  .get()\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/counterparty-transfers/:counterpartyTransferId\"\n\n\treq, _ := http.NewRequest(\"GET\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/counterparty-transfers/:counterpartyTransferId");
+
+          var request = new RestRequest(Method.GET);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/counterparty-transfers/:counterpartyTransferId');\n$request->setMethod(HTTP_METH_GET);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+components:
+  schemas:
+    CounterpartyTransferQueryValidationErrorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - BadRequest
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: BadRequest
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ValidationError
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - 'Validation failed for page[limit]: expected number'
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/counterparty-transfers/
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/counterparty-transfers/
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    CounterpartyTransfer:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - CounterpartyTransfer
+        attributes:
+          type: object
+          properties:
+            updatedAt:
+              type: string
+              format: date-time
+              readOnly: true
+            createdAt:
+              type: string
+              format: date-time
+              readOnly: true
+            fromCounterpartyId:
+              type: string
+              format: uuid
+              description: ID of the source counterparty.
+              example: 123e4567-e89b-12d3-a456-426614174000
+            toCounterpartyId:
+              type: string
+              format: uuid
+              description: ID of the destination counterparty.
+              example: 123e4567-e89b-12d3-a456-426614174000
+            amount:
+              type: integer
+              minimum: 1
+              description: Amount in cents
+              format: int32
+              example: 1500
+            status:
+              type: string
+              enum:
+              - Pending
+              - Completed
+              - Failed
+              description: Current status of the counterparty transfer.
+              example: Completed
+            idempotencyKey:
+              type: string
+              minLength: 1
+              maxLength: 255
+              description: Idempotency key to prevent duplicate transfers.
+              example: transfer_12345
+            externalLedgerTransactionId:
+              type:
+              - string
+              - 'null'
+              description: The external ledger transaction ID from the payment provider, if available.
+              example: lt_abc123
+            failureReason:
+              type:
+              - string
+              - 'null'
+              description: Reason for transfer failure, if applicable.
+            metadata:
+              type:
+              - object
+              - 'null'
+              additionalProperties:
+                type: string
+              description: Optional string-keyed metadata associated with the transfer. Values must be strings; serialize numbers, booleans, or structured data as strings before sending (e.g. JSON.stringify).
+              example:
+                orderId: order_123
+          required:
+          - updatedAt
+          - createdAt
+      required:
+      - id
+      - type
+      - attributes
+      description: A counterparty transfer represents a movement of funds between two counterparties.
+      x-tags:
+      - Model
+    GetCounterpartyTransferResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/CounterpartyTransfer'
+      required:
+      - data
+    CounterpartyTransferValidationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - ValidationFailed
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: ValidationFailed
+        title:
+          type: string
+          description: Generic title for the error.
+          example: CounterpartyTransferValidationException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Insufficient balance
+          - Same source and destination
+          - Invalid amount (must be > 0)
+          - Idempotency-key conflict (key reused with a different payload)
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/counterparty-transfers
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/counterparty-transfers
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    CounterpartyTransferNotFoundResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 404
+        code:
+          type: string
+          enum:
+          - TransferNotFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: TransferNotFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: CounterpartyTransferNotFoundException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Counterparty transfer with ID '123e4567-e89b-12d3-a456-426614174000' not found in the authenticated partner scope.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/counterparty-transfers/123e4567-e89b-12d3-a456-426614174000
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/counterparty-transfers/123e4567-e89b-12d3-a456-426614174000
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    CreateCounterpartyTransferResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/CounterpartyTransfer'
+      required:
+      - data
+    CrossTenantCounterpartyTransferResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 403
+        code:
+          type: string
+          enum:
+          - CrossTenantTransfer
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: CrossTenantTransfer
+        title:
+          type: string
+          description: Generic title for the error.
+          example: CounterpartyTransferValidationException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Counterparty does not belong to the authenticated partner.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/counterparty-transfers
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/counterparty-transfers
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    ListCounterpartyTransfersResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CounterpartyTransfer'
+        meta:
+          type: object
+          properties:
+            total:
+              type: number
+              example: 1
+            limit:
+              type: number
+              example: 10
+            offset:
+              type: number
+              example: 0
+          required:
+          - total
+          - limit
+          - offset
+      required:
+      - data
+      - meta
+    CounterpartyNotFoundOnCreateResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 404
+        code:
+          type: string
+          enum:
+          - CounterpartyNotFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: CounterpartyNotFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: CounterpartyTransferNotFoundException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - One or both counterparties referenced in the request do not exist.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/counterparty-transfers
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/counterparty-transfers
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+x-tagGroups:
+- name: Overview
+  tags:
+  - Introduction
+  - API Design
+- name: Users
+  tags:
+  - Users
+  - LinkedAccounts
+  - Identity Verification
+- name: Wallets
+  tags:
+  - Wallets
+- name: Gifts
+  tags:
+  - Gifts
+- name: Payments
+  tags:
+  - PaymentIntents
+  - Payments
+  - ExternalTransactions
+  - Simulations
+- name: Banking & KYC
+  tags:
+  - Banking
+  - Counterparties
+  - CounterpartyTransfers
+- name: Sweepstakes
+  tags:
+  - Sweepstakes
+- name: Rewards
+  tags:
+  - Rewards
+- name: Widgets
+  tags:
+  - Widgets
+- name: Webhooks
+  tags:
+  - Webhooks
+  - WebhookEvents
+  - Webhook Topics

@@ -1,0 +1,386 @@
+openapi: 3.2.0
+info:
+  version: 1.0.0
+  title: Accrue Merchant Sweepstakes API
+  x-links:
+  - name: View Alternative Version
+    url: /api-fs/
+    description: View API documentation with alternative enum-based WebhookIncluded schema
+  description: Sweepstakes campaigns give users the chance to win prizes by participating in merchant-sponsored promotions. Each campaign is linked to a specific merchant and tracks user entries. Users can earn entries through actions like purchases, and winners are selected based on campaign rules. Sweepstakes add an engaging layer of excitement and reward to the user experience.
+servers:
+- description: Production API
+  url: https://merchant-api.accruesavings.com
+- description: Sandbox API
+  url: https://merchant-api-sandbox.accruesavings.com
+tags:
+- name: Sweepstakes
+  description: Sweepstakes campaigns give users the chance to win prizes by participating in merchant-sponsored promotions. Each campaign is linked to a specific merchant and tracks user entries. Users can earn entries through actions like purchases, and winners are selected based on campaign rules. Sweepstakes add an engaging layer of excitement and reward to the user experience.
+paths:
+  /api/v1/sweepstakes/{sweepstakesId}/results:
+    post:
+      operationId: addSweepstakesResults
+      tags:
+      - Sweepstakes
+      summary: Add Sweepstakes Results
+      parameters:
+      - schema:
+          type: string
+          description: Sweepstakes ID
+        required: true
+        name: sweepstakesId
+        in: path
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/SweepstakesResults'
+              required:
+              - data
+      responses:
+        '201':
+          description: 201 Created
+        '400':
+          description: Bad Request
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/AddSweepstakesResultsErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedSweepstakesErrorResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request POST \\\n  --url https://merchant-api.accruesavings.com/api/v1/sweepstakes/%7BsweepstakesId%7D/results \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'POST',\n  url: 'https://merchant-api.accruesavings.com/api/v1/sweepstakes/%7BsweepstakesId%7D/results',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"POST\", \"/api/v1/sweepstakes/%7BsweepstakesId%7D/results\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/sweepstakes/%7BsweepstakesId%7D/results")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Post.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/sweepstakes/%7BsweepstakesId%7D/results\")\n  .post(null)\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/sweepstakes/%7BsweepstakesId%7D/results\"\n\n\treq, _ := http.NewRequest(\"POST\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/sweepstakes/%7BsweepstakesId%7D/results");
+
+          var request = new RestRequest(Method.POST);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/sweepstakes/%7BsweepstakesId%7D/results');\n$request->setMethod(HTTP_METH_POST);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+components:
+  schemas:
+    UnexpectedSweepstakesErrorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 500
+        code:
+          type: string
+          enum:
+          - UnexpectedError
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: UnexpectedError
+        title:
+          type: string
+          description: Generic title for the error.
+          example: SweepstakesException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - An unexpected error occurred.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/sweepstakes/{sweepstakesId}/results
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/sweepstakes/{sweepstakesId}/results
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    SweepstakesResults:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - SweepstakesResults
+        attributes:
+          type: object
+          properties:
+            customer:
+              type: object
+              properties:
+                idType:
+                  type: string
+                  enum:
+                  - ID
+                  - PhoneNumber
+                  default: PhoneNumber
+                  description: Type of ID used to identify the customer.
+                  example: PhoneNumber
+                id:
+                  type: string
+                  description: User phone number recorded during checkout.
+                  example: '+12125550001'
+              required:
+              - id
+          required:
+          - customer
+      required:
+      - id
+      - type
+      - attributes
+      description: SweepstakesResults
+      x-tags:
+      - Model
+    SweepstakesNotFoundResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - SweepstakesNotFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: SweepstakesNotFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: SweepstakesException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Sweepstakes not found.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/sweepstakes/{sweepstakesId}/results
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/sweepstakes/{sweepstakesId}/results
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    AddSweepstakesResultsErrorResponse:
+      anyOf:
+      - $ref: '#/components/schemas/SweepstakesRequestInvalidResponse'
+      - $ref: '#/components/schemas/SweepstakesNotFoundResponse'
+    SweepstakesRequestInvalidResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - InvalidRequest
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: InvalidRequest
+        title:
+          type: string
+          description: Generic title for the error.
+          example: SweepstakesException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Invalid request.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/sweepstakes/{sweepstakesId}/results
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/sweepstakes/{sweepstakesId}/results
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+x-tagGroups:
+- name: Overview
+  tags:
+  - Introduction
+  - API Design
+- name: Users
+  tags:
+  - Users
+  - LinkedAccounts
+  - Identity Verification
+- name: Wallets
+  tags:
+  - Wallets
+- name: Gifts
+  tags:
+  - Gifts
+- name: Payments
+  tags:
+  - PaymentIntents
+  - Payments
+  - ExternalTransactions
+  - Simulations
+- name: Banking & KYC
+  tags:
+  - Banking
+  - Counterparties
+  - CounterpartyTransfers
+- name: Sweepstakes
+  tags:
+  - Sweepstakes
+- name: Rewards
+  tags:
+  - Rewards
+- name: Widgets
+  tags:
+  - Widgets
+- name: Webhooks
+  tags:
+  - Webhooks
+  - WebhookEvents
+  - Webhook Topics

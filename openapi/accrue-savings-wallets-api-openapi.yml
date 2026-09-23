@@ -1,0 +1,3405 @@
+openapi: 3.2.0
+info:
+  version: 1.0.0
+  title: Accrue Merchant Wallets API
+  x-links:
+  - name: View Alternative Version
+    url: /api-fs/
+    description: View API documentation with alternative enum-based WebhookIncluded schema
+  description: Wallets are where users save money and collect rewards for future payments to merchants. Each wallet is linked to a specific merchant and tracks the balance of deposits and rewards. Users can contribute to their wallet's balance as part of their payment planning, while also accruing rewards.
+servers:
+- description: Production API
+  url: https://merchant-api.accruesavings.com
+- description: Sandbox API
+  url: https://merchant-api-sandbox.accruesavings.com
+tags:
+- name: Wallets
+  description: Wallets are where users save money and collect rewards for future payments to merchants. Each wallet is linked to a specific merchant and tracks the balance of deposits and rewards. Users can contribute to their wallet's balance as part of their payment planning, while also accruing rewards.
+paths:
+  /api/v1/wallets/:walletId:
+    get:
+      operationId: getWallet
+      tags:
+      - Wallets
+      summary: Get Wallet
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: ID of the wallet to fetch.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: false
+        name: walletId
+        in: path
+      - schema:
+          type: string
+          description: 'Comma-separated list of resources to include. Supported resources: `user`'
+        required: false
+        name: include
+        in: query
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/GetWalletResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/GetWalletErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/WalletNotFoundResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedErrorForWalletResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request GET \\\n  --url 'https://merchant-api.accruesavings.com/api/v1/wallets/:walletId?include=SOME_STRING_VALUE' \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'GET',\n  url: 'https://merchant-api.accruesavings.com/api/v1/wallets/:walletId',\n  qs: {include: 'SOME_STRING_VALUE'},\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"GET\", \"/api/v1/wallets/:walletId?include=SOME_STRING_VALUE\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/wallets/:walletId?include=SOME_STRING_VALUE")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Get.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/wallets/:walletId?include=SOME_STRING_VALUE\")\n  .get()\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/wallets/:walletId?include=SOME_STRING_VALUE\"\n\n\treq, _ := http.NewRequest(\"GET\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/wallets/:walletId?include=SOME_STRING_VALUE");
+
+          var request = new RestRequest(Method.GET);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/wallets/:walletId');\n$request->setMethod(HTTP_METH_GET);\n\n$request->setQueryData([\n  'include' => 'SOME_STRING_VALUE'\n]);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+  /api/v1/wallets/barcode/{lookUpId}:
+    get:
+      operationId: getWalletByBarcode
+      tags:
+      - Wallets
+      summary: Get Wallet by Barcode
+      description: 'Fetch a wallet by barcode `lookUpId`.
+
+
+        The barcode is validated and scoped to the merchant derived from the request. Use `include=user` to request user information.'
+      parameters:
+      - schema:
+          type: string
+          description: Lookup identifier for the barcode
+          example: SCAN-LOOKUP-ID
+        required: true
+        name: lookUpId
+        in: path
+      - schema:
+          type: string
+          description: 'Comma-separated list of resources to include. Supported resources: `user`'
+        required: false
+        name: include
+        in: query
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/GetWalletByBarcodeResponse'
+        '400':
+          description: Barcode expired or invalid
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/WalletBarcodeExpiredOrInvalidResponse'
+        '404':
+          description: Wallet for barcode not found
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/WalletForBarcodeNotFoundResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request GET \\\n  --url 'https://merchant-api.accruesavings.com/api/v1/wallets/barcode/SCAN-LOOKUP-ID?include=SOME_STRING_VALUE' \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'GET',\n  url: 'https://merchant-api.accruesavings.com/api/v1/wallets/barcode/SCAN-LOOKUP-ID',\n  qs: {include: 'SOME_STRING_VALUE'},\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"GET\", \"/api/v1/wallets/barcode/SCAN-LOOKUP-ID?include=SOME_STRING_VALUE\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/wallets/barcode/SCAN-LOOKUP-ID?include=SOME_STRING_VALUE")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Get.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/wallets/barcode/SCAN-LOOKUP-ID?include=SOME_STRING_VALUE\")\n  .get()\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/wallets/barcode/SCAN-LOOKUP-ID?include=SOME_STRING_VALUE\"\n\n\treq, _ := http.NewRequest(\"GET\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/wallets/barcode/SCAN-LOOKUP-ID?include=SOME_STRING_VALUE");
+
+          var request = new RestRequest(Method.GET);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/wallets/barcode/SCAN-LOOKUP-ID');\n$request->setMethod(HTTP_METH_GET);\n\n$request->setQueryData([\n  'include' => 'SOME_STRING_VALUE'\n]);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+  /api/v1/wallets:
+    post:
+      operationId: createWallet
+      tags:
+      - Wallets
+      summary: Create Wallet
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                      - Wallet
+                    attributes:
+                      type: object
+                      properties:
+                        userId:
+                          type: string
+                          format: uuid
+                          description: The ID of the user to associate with this wallet.
+                          example: 123e4567-e89b-12d3-a456-426614174000
+                      required:
+                      - userId
+                  required:
+                  - type
+                  - attributes
+              required:
+              - data
+      responses:
+        '201':
+          description: 201 Created
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/CreateWalletResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/CreateWalletErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedErrorForWalletResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request POST \\\n  --url https://merchant-api.accruesavings.com/api/v1/wallets \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'POST',\n  url: 'https://merchant-api.accruesavings.com/api/v1/wallets',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"POST\", \"/api/v1/wallets\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/wallets")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Post.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/wallets\")\n  .post(null)\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/wallets\"\n\n\treq, _ := http.NewRequest(\"POST\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/wallets");
+
+          var request = new RestRequest(Method.POST);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/wallets');\n$request->setMethod(HTTP_METH_POST);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+  /api/v1/wallets/:walletId/balance:
+    get:
+      operationId: getWalletBalance
+      tags:
+      - Wallets
+      summary: Get Wallet Balance
+      parameters:
+      - schema:
+          type: string
+          description: ID of the wallet for which the balance is being fetched.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: false
+        name: walletId
+        in: path
+      - schema:
+          type: string
+          description: 'Comma-separated list of resources to include. Supported resources: `user`'
+        required: false
+        name: include
+        in: query
+      - schema:
+          type: string
+          description: Attached User Profile Reference ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: false
+        name: userReference
+        in: query
+      - schema:
+          type: integer
+          description: Purchase amount in cents. When provided, conditional reward calculations may use this value (e.g. minimum purchase thresholds).
+          example: 5000
+        required: false
+        name: purchaseAmount
+        in: query
+      - schema:
+          type: boolean
+          description: When true, the response includes the withdrawable amount in the balance.
+          example: true
+        required: false
+        name: includeWithdrawableAmount
+        in: query
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/GetWalletBalanceResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/GetWalletBalanceErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/NoWalletFoundForBalanceResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedErrorForWalletResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request GET \\\n  --url 'https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/balance?include=SOME_STRING_VALUE&userReference=123e4567-e89b-12d3-a456-426614174000&purchaseAmount=5000&includeWithdrawableAmount=true' \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'GET',\n  url: 'https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/balance',\n  qs: {\n    include: 'SOME_STRING_VALUE',\n    userReference: '123e4567-e89b-12d3-a456-426614174000',\n    purchaseAmount: '5000',\n    includeWithdrawableAmount: 'true'\n  },\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"GET\", \"/api/v1/wallets/:walletId/balance?include=SOME_STRING_VALUE&userReference=123e4567-e89b-12d3-a456-426614174000&purchaseAmount=5000&includeWithdrawableAmount=true\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/balance?include=SOME_STRING_VALUE&userReference=123e4567-e89b-12d3-a456-426614174000&purchaseAmount=5000&includeWithdrawableAmount=true")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Get.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/balance?include=SOME_STRING_VALUE&userReference=123e4567-e89b-12d3-a456-426614174000&purchaseAmount=5000&includeWithdrawableAmount=true\")\n  .get()\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/balance?include=SOME_STRING_VALUE&userReference=123e4567-e89b-12d3-a456-426614174000&purchaseAmount=5000&includeWithdrawableAmount=true\"\n\n\treq, _ := http.NewRequest(\"GET\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/balance?include=SOME_STRING_VALUE&userReference=123e4567-e89b-12d3-a456-426614174000&purchaseAmount=5000&includeWithdrawableAmount=true");
+
+          var request = new RestRequest(Method.GET);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/balance');\n$request->setMethod(HTTP_METH_GET);\n\n$request->setQueryData([\n  'include' => 'SOME_STRING_VALUE',\n  'userReference' => '123e4567-e89b-12d3-a456-426614174000',\n  'purchaseAmount' => '5000',\n  'includeWithdrawableAmount' => 'true'\n]);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+  /api/v1/wallets/:
+    get:
+      operationId: listWallets
+      tags:
+      - Wallets
+      summary: List Wallets
+      parameters:
+      - schema:
+          type: string
+          description: Filter the list of objects by the value of the phoneNumber field.
+        required: false
+        name: filter[phoneNumber]
+        in: query
+      - schema:
+          type: string
+          description: Filter the list of objects by the value of the email field.
+        required: false
+        name: filter[email]
+        in: query
+      - schema:
+          type: string
+          description: Filter the list of objects by the value of the referenceId field.
+        required: false
+        name: filter[referenceId]
+        in: query
+      - schema:
+          type: number
+          minimum: 1
+          maximum: 50
+          default: 10
+          description: Maximum number of objects that will be returned. Can not be greater than 50.
+        required: false
+        name: page[limit]
+        in: query
+      - schema:
+          type: number
+          minimum: 0
+          default: 0
+          description: Offset from the beginning of the list of objects. Can not be negative.
+        required: false
+        name: page[offset]
+        in: query
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ListWalletsResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/WalletQueryValidationErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedErrorForWalletResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request GET \\\n  --url 'https://merchant-api.accruesavings.com/api/v1/wallets/?filter%5BphoneNumber%5D=SOME_STRING_VALUE&filter%5Bemail%5D=SOME_STRING_VALUE&filter%5BreferenceId%5D=SOME_STRING_VALUE&page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE' \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'GET',\n  url: 'https://merchant-api.accruesavings.com/api/v1/wallets/',\n  qs: {\n    'filter[phoneNumber]': 'SOME_STRING_VALUE',\n    'filter[email]': 'SOME_STRING_VALUE',\n    'filter[referenceId]': 'SOME_STRING_VALUE',\n    'page[limit]': 'SOME_NUMBER_VALUE',\n    'page[offset]': 'SOME_NUMBER_VALUE'\n  },\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"GET\", \"/api/v1/wallets/?filter%5BphoneNumber%5D=SOME_STRING_VALUE&filter%5Bemail%5D=SOME_STRING_VALUE&filter%5BreferenceId%5D=SOME_STRING_VALUE&page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/wallets/?filter%5BphoneNumber%5D=SOME_STRING_VALUE&filter%5Bemail%5D=SOME_STRING_VALUE&filter%5BreferenceId%5D=SOME_STRING_VALUE&page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Get.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/wallets/?filter%5BphoneNumber%5D=SOME_STRING_VALUE&filter%5Bemail%5D=SOME_STRING_VALUE&filter%5BreferenceId%5D=SOME_STRING_VALUE&page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE\")\n  .get()\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/wallets/?filter%5BphoneNumber%5D=SOME_STRING_VALUE&filter%5Bemail%5D=SOME_STRING_VALUE&filter%5BreferenceId%5D=SOME_STRING_VALUE&page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE\"\n\n\treq, _ := http.NewRequest(\"GET\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/wallets/?filter%5BphoneNumber%5D=SOME_STRING_VALUE&filter%5Bemail%5D=SOME_STRING_VALUE&filter%5BreferenceId%5D=SOME_STRING_VALUE&page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE");
+
+          var request = new RestRequest(Method.GET);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/wallets/');\n$request->setMethod(HTTP_METH_GET);\n\n$request->setQueryData([\n  'filter[phoneNumber]' => 'SOME_STRING_VALUE',\n  'filter[email]' => 'SOME_STRING_VALUE',\n  'filter[referenceId]' => 'SOME_STRING_VALUE',\n  'page[limit]' => 'SOME_NUMBER_VALUE',\n  'page[offset]' => 'SOME_NUMBER_VALUE'\n]);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+  /api/v1/wallets/:walletId/transactions:
+    post:
+      operationId: createOneTimeDeposit
+      tags:
+      - Wallets
+      summary: Create One-Time Deposit
+      description: 'Create a one-time deposit transaction for a wallet using an existing linked account.
+
+
+        Merchants can optionally include a `disbursement` array to split a portion of the total deposit among one or more counterparties. Any undisbursed amount is credited to the consumer''s wallet.
+
+
+        Processing fees reported in `charges.fee` are collected from the counterparty configured as the Default for Fees on your merchant account.
+
+
+        **Example:** A consumer deposits $13.00 (1300 cents) with a $3.00 (300 cents) disbursement to counterparty A. Counterparty A receives $3.00 and the consumer''s wallet is credited the remaining $10.00 (1000 cents).'
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: The wallet ID to deposit to.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: walletId
+        in: path
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                      - OneTimeDeposit
+                    attributes:
+                      type: object
+                      properties:
+                        amount:
+                          type: integer
+                          minimum: 100
+                          description: The amount to deposit, represented in the smallest currency unit (e.g., cents for USD). Minimum is 100 (e.g., $1.00). To obtain the value in dollars, divide by 100.
+                          format: int32
+                          example: 1000
+                        idempotencyKey:
+                          type: string
+                          format: uuid
+                          description: A unique key (UUID) to ensure idempotency of the request. Reusing the same key will not create multiple deposits.
+                          example: 123e4567-e89b-12d3-a456-426614174000
+                        linkedAccountId:
+                          type: string
+                          format: uuid
+                          description: The linked account ID to use for the deposit.
+                          example: 123e4567-e89b-12d3-a456-426614174000
+                        disbursement:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              amount:
+                                type: integer
+                                minimum: 1
+                                description: The fee amount included in the total deposit amount, represented in the smallest currency unit (e.g., cents for USD). This amount will be disbursed to the specified counterparty. The remaining amount (deposit amount - disbursement amount) will be credited to the user's wallet.
+                                format: int32
+                                example: 300
+                              counterpartyId:
+                                type: string
+                                format: uuid
+                                description: The ID of the counterparty who will receive the disbursement amount.
+                                example: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                              remit:
+                                type: boolean
+                                description: Deprecated. This field is accepted but always treated as `true` regardless of the value provided. All disbursements are remitted directly. Will be removed in a future version.
+                                example: true
+                                deprecated: true
+                            required:
+                            - amount
+                            - counterpartyId
+                          description: Optional array of fee disbursements included in the total deposit amount. When provided, the specified amounts will be disbursed to their respective counterparties, and the remainder will be credited to the user's wallet.
+                          example:
+                          - amount: 300
+                            counterpartyId: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                        risk:
+                          type: object
+                          properties:
+                            deviceSessionId:
+                              type: string
+                              description: Device session ID used for risk assessment. Optional but recommended for production traffic.
+                          required:
+                          - deviceSessionId
+                      required:
+                      - amount
+                      - idempotencyKey
+                      - linkedAccountId
+                  required:
+                  - type
+                  - attributes
+              required:
+              - data
+      responses:
+        '201':
+          description: 201 Created
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/CreateOneTimeDepositResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/CreateOneTimeDepositErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/CreateOneTimeDepositNotFoundResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedErrorForWalletResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request POST \\\n  --url https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/transactions \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'POST',\n  url: 'https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/transactions',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"POST\", \"/api/v1/wallets/:walletId/transactions\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/transactions")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Post.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/transactions\")\n  .post(null)\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/transactions\"\n\n\treq, _ := http.NewRequest(\"POST\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/transactions");
+
+          var request = new RestRequest(Method.POST);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/transactions');\n$request->setMethod(HTTP_METH_POST);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+    get:
+      operationId: listTransactions
+      tags:
+      - Wallets
+      summary: List Transactions
+      description: List all transactions for a wallet
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: The wallet ID to list transactions for.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: walletId
+        in: path
+      - schema:
+          type: number
+          minimum: 1
+          maximum: 50
+          default: 10
+          description: Maximum number of objects that will be returned. Can not be greater than 50.
+        required: false
+        name: page[limit]
+        in: query
+      - schema:
+          type: number
+          minimum: 0
+          default: 0
+          description: Offset from the beginning of the list of objects. Can not be negative.
+        required: false
+        name: page[offset]
+        in: query
+      - schema:
+          type: string
+          description: Transaction type filter. Currently only "NonRecurring" transactions are returned; other values will return an empty list.
+          example: NonRecurring
+        required: false
+        name: type
+        in: query
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ListTransactionsResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ListTransactionsErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ListTransactionsNotFoundResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedErrorForWalletResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request GET \\\n  --url 'https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/transactions?page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE&type=NonRecurring' \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'GET',\n  url: 'https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/transactions',\n  qs: {\n    'page[limit]': 'SOME_NUMBER_VALUE',\n    'page[offset]': 'SOME_NUMBER_VALUE',\n    type: 'NonRecurring'\n  },\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"GET\", \"/api/v1/wallets/:walletId/transactions?page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE&type=NonRecurring\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/transactions?page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE&type=NonRecurring")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Get.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/transactions?page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE&type=NonRecurring\")\n  .get()\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/transactions?page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE&type=NonRecurring\"\n\n\treq, _ := http.NewRequest(\"GET\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/transactions?page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE&type=NonRecurring");
+
+          var request = new RestRequest(Method.GET);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/transactions');\n$request->setMethod(HTTP_METH_GET);\n\n$request->setQueryData([\n  'page[limit]' => 'SOME_NUMBER_VALUE',\n  'page[offset]' => 'SOME_NUMBER_VALUE',\n  'type' => 'NonRecurring'\n]);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+  /api/v1/wallets/:walletId/withdraw:
+    post:
+      operationId: closedLoopWithdraw
+      tags:
+      - Wallets
+      summary: Closed-Loop Withdraw
+      description: Withdraw funds from a wallet back to the user's linked account(s). The amount is split across linked accounts. Requires the wallet to have withdrawable balance (see Get Wallet Balance with `includeWithdrawableAmount=true`).
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: The wallet ID to withdraw from.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: walletId
+        in: path
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                      - Withdraw
+                    attributes:
+                      type: object
+                      properties:
+                        amount:
+                          type: integer
+                          minimum: 100
+                          description: The amount to withdraw, in the smallest currency unit (e.g., cents for USD). Minimum is 100 (e.g., $1.00). Must not exceed the wallet's withdrawable amount.
+                          format: int32
+                          example: 5000
+                      required:
+                      - amount
+                  required:
+                  - type
+                  - attributes
+              required:
+              - data
+      responses:
+        '201':
+          description: 201 Created
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ClosedLoopWithdrawResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ClosedLoopWithdrawErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ClosedLoopWithdrawNotFoundResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedErrorForWalletResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request POST \\\n  --url https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/withdraw \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'POST',\n  url: 'https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/withdraw',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"POST\", \"/api/v1/wallets/:walletId/withdraw\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/withdraw")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Post.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/withdraw\")\n  .post(null)\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/withdraw\"\n\n\treq, _ := http.NewRequest(\"POST\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/withdraw");
+
+          var request = new RestRequest(Method.POST);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/withdraw');\n$request->setMethod(HTTP_METH_POST);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+  /api/v1/wallets/:walletId/transactions/:transactionId:
+    get:
+      operationId: getTransaction
+      tags:
+      - Wallets
+      summary: Get Transaction
+      description: Get a specific transaction by ID
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: The wallet ID.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: walletId
+        in: path
+      - schema:
+          type: string
+          format: uuid
+          description: The transaction ID.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: transactionId
+        in: path
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/GetTransactionResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/GetTransactionErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/GetTransactionNotFoundResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedErrorForWalletResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request GET \\\n  --url https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/transactions/:transactionId \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'GET',\n  url: 'https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/transactions/:transactionId',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"GET\", \"/api/v1/wallets/:walletId/transactions/:transactionId\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/transactions/:transactionId")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Get.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/transactions/:transactionId\")\n  .get()\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/transactions/:transactionId\"\n\n\treq, _ := http.NewRequest(\"GET\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/transactions/:transactionId");
+
+          var request = new RestRequest(Method.GET);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/transactions/:transactionId');\n$request->setMethod(HTTP_METH_GET);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+components:
+  schemas:
+    WalletAlreadyExistsResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - WalletAlreadyExists
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: WalletAlreadyExists
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WalletValidationException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - A wallet for this user and merchant already exists.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    MerchantIsDisabledForWalletResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - MerchantIsDisabled
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: MerchantIsDisabled
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WalletValidationException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - The merchant is currently disabled.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    ClosedLoopWithdrawNotFoundResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 404
+        code:
+          type: string
+          enum:
+          - WalletNotFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: WalletNotFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WalletNotFoundException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Wallet with ID '{walletId}' not found.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    NoWalletFoundForBalanceResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 404
+        code:
+          type: string
+          enum:
+          - WalletNotFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: WalletNotFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WalletNotFoundException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - No wallet found for the provided parameters.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000/balance
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000/balance
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    DepositFailedAtCardProcessorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - DepositFailedAtCardProcessor
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: DepositFailedAtCardProcessor
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WalletValidationException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Deposit failed at card processor. Please try again or contact support.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+            timestamp:
+              type: string
+              format: date-time
+            path:
+              type: string
+            originalCode:
+              type: string
+              description: 'The original card processor response code. This field is only present for card deposit failures. For bank transfer (ACH) deposit failures, different error codes are returned (e.g., InsufficientFunds, ExceedACHLimit, LinkedAccountDisconnected) and this field is not included. Response codes are categorized by their prefix:
+
+                - **10xxx**: Approved - The payment request was successful.
+
+                - **20xxx**: Soft declines - The payment request was declined, though subsequent attempts may succeed.
+
+                - **30xxx**: Hard declines - The request was declined. Most hard declines require the issuer or cardholder to fix any outstanding issues before you can retry.
+
+                - **4xxxx**: Risk responses - The request raised a risk response. The response_code and status depend on the action specified in your Fraud Detection risk strategies.
+
+                - **50xxx**: Card payout declines - The card payout request was declined.'
+              example: '20005'
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000/transactions
+            originalCode: '20005'
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    ListTransactionsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transaction'
+        meta:
+          type: object
+          properties:
+            total:
+              type: number
+              example: 1
+            limit:
+              type: number
+              example: 10
+            offset:
+              type: number
+              example: 0
+          required:
+          - total
+          - limit
+          - offset
+      required:
+      - data
+      - meta
+    ExceedsMaxOneTimeDepositAmountResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - ExceedsMaxOneTimeDepositAmount
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: ExceedsMaxOneTimeDepositAmount
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WalletValidationException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Deposit amount exceeds the merchant maximum.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000/transactions
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000/transactions
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    WalletNotFoundResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 404
+        code:
+          type: string
+          enum:
+          - WalletNotFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: WalletNotFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WalletNotFoundException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Wallet with ID '{walletId}' not found.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    GetWalletByBarcodeResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Wallet'
+        included:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                description: Unique identifier for the object.
+                readOnly: true
+              type:
+                type: string
+                enum:
+                - User
+              attributes:
+                type: object
+                properties:
+                  disabled:
+                    type: boolean
+                    description: Flag to indicate if the user account is disabled.
+                  publicId:
+                    type: string
+                    description: The public identifier for the user.
+                  profile:
+                    type: object
+                    properties:
+                      firstName:
+                        type: string
+                      lastName:
+                        type: string
+                      email:
+                        type: string
+                        format: email
+                      phoneNumber:
+                        type: string
+                  attachedProfile:
+                    type: object
+                    properties:
+                      referenceId:
+                        type: string
+                        description: Deprecated. Use stableReferenceId instead. Legacy merchant-scoped user identifier. Immutable once set.
+                        deprecated: true
+                        example: Any string identifier provided by you.
+                      stableReferenceId:
+                        type: string
+                        description: Stable merchant-scoped user identifier. Required for all new integrations; immutable once set. The field remains absent in some requests only to support existing merchants migrating from referenceId. When set, becomes the effectiveReferenceId.
+                        example: stable-abc-123
+                      effectiveReferenceId:
+                        type: string
+                        description: Computed field (read-only). Equals stableReferenceId when set, otherwise falls back to referenceId. Use as the canonical user identifier.
+                        example: stable-abc-123
+                      email:
+                        type: string
+                        example: User email address kept in your system.
+                      phoneNumber:
+                        type: string
+                        example: User phone number kept in your system.
+                  updatedAt:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                  createdAt:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                required:
+                - updatedAt
+                - createdAt
+            required:
+            - id
+            - type
+            - attributes
+      required:
+      - data
+      - included
+    CreateWalletErrorResponse:
+      anyOf:
+      - $ref: '#/components/schemas/WalletUserNotFoundResponse'
+      - $ref: '#/components/schemas/WalletAlreadyExistsResponse'
+      - $ref: '#/components/schemas/PhoneNumberBannedForWalletResponse'
+      - $ref: '#/components/schemas/MerchantIsDisabledForWalletResponse'
+      - $ref: '#/components/schemas/InvalidIdentifierForWalletResponse'
+      - $ref: '#/components/schemas/InvalidUuidSyntaxForWalletResponse'
+    WalletQueryValidationErrorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - BadRequest
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: BadRequest
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ValidationError
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - 'Validation failed for page[limit]: expected number'
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    CreateOneTimeDepositNotFoundResponse:
+      anyOf:
+      - $ref: '#/components/schemas/WalletNotFoundResponse'
+      - $ref: '#/components/schemas/TransactionNotFoundResponse'
+    InvalidIdentifierForWalletResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - InvalidIdentifier
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: InvalidIdentifier
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WalletValidationException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Invalid merchant or reward profile identifier provided.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    WalletUserNotFoundResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - UserNotFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: UserNotFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WalletValidationException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - User with ID '{userId}' not found.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    KycNotCompletedResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - NotAllowed
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: NotAllowed
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WalletValidationException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - KYC is not completed for this wallet.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000/transactions
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000/transactions
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    ListWalletsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                description: Unique identifier for the object.
+                readOnly: true
+              type:
+                type: string
+                enum:
+                - Wallet
+              attributes:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum:
+                    - Active
+                    - ClosingWithClosedLoop
+                    - ManualReview
+                    - Closed
+                    default: Active
+                    description: The current status of the wallet.
+                  closedAt:
+                    type:
+                    - string
+                    - 'null'
+                    format: date-time
+                    description: The date and time when the wallet was closed.
+                  updatedAt:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                  createdAt:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                required:
+                - updatedAt
+                - createdAt
+              relationships:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                          type:
+                            type: string
+                            enum:
+                            - User
+                        required:
+                        - id
+                        - type
+                    required:
+                    - data
+            required:
+            - id
+            - type
+            - attributes
+            - relationships
+        meta:
+          type: object
+          properties:
+            total:
+              type: number
+              example: 1
+            limit:
+              type: number
+              example: 10
+            offset:
+              type: number
+              example: 0
+          required:
+          - total
+          - limit
+          - offset
+      required:
+      - data
+      - meta
+    CreateWalletResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: Unique identifier for the object.
+              readOnly: true
+            type:
+              type: string
+              enum:
+              - Wallet
+            attributes:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum:
+                  - Active
+                  - ClosingWithClosedLoop
+                  - ManualReview
+                  - Closed
+                  default: Active
+                  description: The current status of the wallet.
+                closedAt:
+                  type:
+                  - string
+                  - 'null'
+                  format: date-time
+                  description: The date and time when the wallet was closed.
+                updatedAt:
+                  type: string
+                  format: date-time
+                  readOnly: true
+                createdAt:
+                  type: string
+                  format: date-time
+                  readOnly: true
+              required:
+              - updatedAt
+              - createdAt
+          required:
+          - id
+          - type
+          - attributes
+      required:
+      - data
+    CreateOneTimeDepositErrorResponse:
+      anyOf:
+      - $ref: '#/components/schemas/InvalidIdentifierForWalletResponse'
+      - $ref: '#/components/schemas/KycNotCompletedResponse'
+      - $ref: '#/components/schemas/DepositFailedAtCardProcessorResponse'
+      - $ref: '#/components/schemas/ExceedsMaxOneTimeDepositAmountResponse'
+      - $ref: '#/components/schemas/InvalidUuidSyntaxForWalletResponse'
+    GetWalletBalanceResponse:
+      type: object
+      properties:
+        data:
+          allOf:
+          - $ref: '#/components/schemas/Wallet'
+          - type: object
+            properties:
+              attributes:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum:
+                    - Active
+                    - ClosingWithClosedLoop
+                    - ManualReview
+                    - Closed
+                    default: Active
+                    description: The current status of the wallet.
+                  closedAt:
+                    type:
+                    - string
+                    - 'null'
+                    format: date-time
+                    description: The date and time when the wallet was closed.
+                  updatedAt:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                  createdAt:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                  balance:
+                    type: object
+                    properties:
+                      available:
+                        type: object
+                        properties:
+                          deposit:
+                            type: number
+                            description: Funds deposited by the user.
+                          reward:
+                            type: object
+                            properties:
+                              accrue:
+                                type: number
+                              merchant:
+                                type: number
+                              total:
+                                type: number
+                            required:
+                            - accrue
+                            - merchant
+                            - total
+                            description: Issued rewards.
+                          total:
+                            type: number
+                            description: Deposits and rewards combined.
+                        required:
+                        - deposit
+                        - reward
+                        - total
+                        description: Funds available immediately.
+                      pending:
+                        type: object
+                        properties:
+                          deposit:
+                            type: number
+                            description: Funds deposited by the user.
+                          reward:
+                            type: object
+                            properties:
+                              accrue:
+                                type: number
+                              merchant:
+                                type: number
+                              total:
+                                type: number
+                            required:
+                            - accrue
+                            - merchant
+                            - total
+                            description: Issued rewards.
+                          total:
+                            type: number
+                            description: Deposits and rewards combined.
+                        required:
+                        - deposit
+                        - reward
+                        - total
+                        description: Funds currently pending for funding transactions.
+                      reserved:
+                        type: object
+                        properties:
+                          total:
+                            type: number
+                            description: Deposits and rewards combined.
+                        required:
+                        - total
+                        description: Funds currently reserved for upcoming payment captures.
+                      total:
+                        type: object
+                        properties:
+                          deposit:
+                            type: number
+                            description: Funds deposited by the user.
+                          reward:
+                            type: object
+                            properties:
+                              accrue:
+                                type: number
+                              merchant:
+                                type: number
+                              total:
+                                type: number
+                            required:
+                            - accrue
+                            - merchant
+                            - total
+                            description: Issued rewards.
+                          total:
+                            type: number
+                            description: Deposits and rewards combined.
+                        required:
+                        - deposit
+                        - reward
+                        - total
+                        description: Total balance with all funds combined.
+                    required:
+                    - available
+                    - pending
+                    - reserved
+                    - total
+                required:
+                - updatedAt
+                - createdAt
+                - balance
+                example:
+                  balance:
+                    available:
+                      deposit: 1000
+                      reward:
+                        accrue: 20
+                        merchant: 180
+                        total: 200
+                      total: 1200
+                    pending:
+                      deposit: 0
+                      reward:
+                        accrue: 0
+                        merchant: 0
+                        total: 0
+                      total: 0
+                    reserved:
+                      total: 600
+                    total:
+                      deposit: 1500
+                      reward:
+                        accrue: 30
+                        merchant: 270
+                        total: 300
+                      total: 1800
+          description: Balance of a Wallet
+          x-tags:
+          - Model
+      required:
+      - data
+    WalletForBarcodeNotFoundResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 404
+        code:
+          type: string
+          enum:
+          - WalletForBarcodeNotFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: WalletForBarcodeNotFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ErrorResponseDto
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Wallet for barcode not found
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets/barcode/SCAN-LOOKUP-ID
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets/barcode/SCAN-LOOKUP-ID
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    WalletBarcodeExpiredOrInvalidResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - WalletIdentifierExpired
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: WalletIdentifierExpired
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ErrorResponseDto
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Barcode has expired.
+          - Barcode has exceeded maximum uses.
+          - Barcode does not belong to this merchant.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets/barcode/SCAN-LOOKUP-ID
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets/barcode/SCAN-LOOKUP-ID
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    Wallet:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - Wallet
+        attributes:
+          type: object
+          properties:
+            status:
+              type: string
+              enum:
+              - Active
+              - ClosingWithClosedLoop
+              - ManualReview
+              - Closed
+              default: Active
+              description: The current status of the wallet.
+            closedAt:
+              type:
+              - string
+              - 'null'
+              format: date-time
+              description: The date and time when the wallet was closed.
+            updatedAt:
+              type: string
+              format: date-time
+              readOnly: true
+            createdAt:
+              type: string
+              format: date-time
+              readOnly: true
+          required:
+          - updatedAt
+          - createdAt
+        relationships:
+          type: object
+          properties:
+            user:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                    type:
+                      type: string
+                      enum:
+                      - User
+                  required:
+                  - id
+                  - type
+              required:
+              - data
+      required:
+      - id
+      - type
+      - attributes
+      - relationships
+      description: A wallet
+      x-tags:
+      - Model
+    ClosedLoopWithdrawErrorResponse:
+      anyOf:
+      - $ref: '#/components/schemas/InvalidIdentifierForWalletResponse'
+      - $ref: '#/components/schemas/InvalidUuidSyntaxForWalletResponse'
+    GetTransactionErrorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - BadRequest
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: BadRequest
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ValidationError
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - 'invalid input syntax for type uuid: "{uuid}"'
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    CreateOneTimeDepositResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: The transaction ID. This is the same value as `attributes.transactionId`.
+              example: 123e4567-e89b-12d3-a456-426614174000
+            type:
+              type: string
+              enum:
+              - OneTimeDeposit
+            attributes:
+              type: object
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                  description: Transaction ID.
+                  example: 123e4567-e89b-12d3-a456-426614174000
+                transactionId:
+                  type: string
+                  format: uuid
+                  description: The ID of the created transaction. Same value as `id`.
+                  example: 123e4567-e89b-12d3-a456-426614174000
+                status:
+                  type: string
+                  enum:
+                  - Pending
+                  - Cleared
+                  - Failed
+                  description: The status of the created transaction. New deposits are typically created in `Pending` status until they are cleared or fail.
+                  example: Pending
+                amount:
+                  type: integer
+                  description: The total amount charged to the user, represented in the smallest currency unit (e.g., cents for USD).
+                  format: int32
+                  example: 1300
+                disbursement:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      counterpartyId:
+                        type: string
+                        format: uuid
+                        description: The ID of the counterparty who will receive the net disbursement.
+                        example: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                      amount:
+                        type: integer
+                        description: The total disbursement amount from the deposit, represented in the smallest currency unit (e.g., cents for USD).
+                        format: int32
+                        example: 300
+                      fee:
+                        type: integer
+                        description: Accrue's fee deducted from the disbursement amount. Always returns 0.
+                        format: int32
+                        example: 0
+                        deprecated: true
+                      remit:
+                        type: boolean
+                        description: Deprecated. Always returns `true`. All disbursements are remitted directly. Will be removed in a future version.
+                        example: true
+                        deprecated: true
+                    required:
+                    - counterpartyId
+                    - amount
+                    - fee
+                    - remit
+                  description: Breakdown of fee disbursements included in the deposit, if any were provided.
+                  example:
+                  - counterpartyId: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                    amount: 300
+                    fee: 0
+                    remit: true
+                charges:
+                  type: object
+                  properties:
+                    fee:
+                      type: object
+                      properties:
+                        amount:
+                          type: integer
+                          minimum: 0
+                          description: Fee amount in cents
+                          format: int32
+                          example: 150
+                        type:
+                          type: string
+                          description: Fee type identifier (e.g., 'ACHFee', 'CardFee')
+                          example: ACHFee
+                      required:
+                      - amount
+                      - type
+                      description: Processing fee details
+                  description: Charges applied to this deposit.
+                deductions:
+                  type: object
+                  properties:
+                    fee:
+                      type: integer
+                      minimum: 0
+                      description: Accrue processing fee in cents
+                      format: int32
+                      example: 150
+                  required:
+                  - fee
+                  description: Legacy charges breakdown. Use `charges` instead.
+                  deprecated: true
+              required:
+              - id
+              - transactionId
+              - status
+              - amount
+          required:
+          - id
+          - type
+          - attributes
+      required:
+      - data
+    PhoneNumberBannedForWalletResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - NotAllowed
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: NotAllowed
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WalletValidationException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - The given phone number is not allowed to create a wallet.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    GetWalletResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Wallet'
+        included:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                description: Unique identifier for the object.
+                readOnly: true
+              type:
+                type: string
+                enum:
+                - User
+              attributes:
+                type: object
+                properties:
+                  disabled:
+                    type: boolean
+                    description: Flag to indicate if the user account is disabled.
+                  publicId:
+                    type: string
+                    description: The public identifier for the user.
+                  profile:
+                    type: object
+                    properties:
+                      firstName:
+                        type: string
+                      lastName:
+                        type: string
+                      email:
+                        type: string
+                        format: email
+                      phoneNumber:
+                        type: string
+                  attachedProfile:
+                    type: object
+                    properties:
+                      referenceId:
+                        type: string
+                        description: Deprecated. Use stableReferenceId instead. Legacy merchant-scoped user identifier. Immutable once set.
+                        deprecated: true
+                        example: Any string identifier provided by you.
+                      stableReferenceId:
+                        type: string
+                        description: Stable merchant-scoped user identifier. Required for all new integrations; immutable once set. The field remains absent in some requests only to support existing merchants migrating from referenceId. When set, becomes the effectiveReferenceId.
+                        example: stable-abc-123
+                      effectiveReferenceId:
+                        type: string
+                        description: Computed field (read-only). Equals stableReferenceId when set, otherwise falls back to referenceId. Use as the canonical user identifier.
+                        example: stable-abc-123
+                      email:
+                        type: string
+                        example: User email address kept in your system.
+                      phoneNumber:
+                        type: string
+                        example: User phone number kept in your system.
+                  updatedAt:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                  createdAt:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                required:
+                - updatedAt
+                - createdAt
+            required:
+            - id
+            - type
+            - attributes
+      required:
+      - data
+      - included
+    ListTransactionsErrorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - BadRequest
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: BadRequest
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ValidationError
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - 'invalid input syntax for type uuid: "{uuid}"'
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    InvalidUuidSyntaxForWalletResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - BadRequest
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: BadRequest
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ValidationError
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - 'invalid input syntax for type uuid: "{uuid}"'
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    GetTransactionResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Transaction'
+      required:
+      - data
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - Transaction
+        attributes:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: Transaction ID
+              example: 123e4567-e89b-12d3-a456-426614174000
+            walletId:
+              type: string
+              format: uuid
+              description: The wallet ID associated with this transaction
+              example: 123e4567-e89b-12d3-a456-426614174000
+            type:
+              type: string
+              description: The type of transaction
+              example: NonRecurring
+            status:
+              type: string
+              enum:
+              - Pending
+              - Cleared
+              - Failed
+              description: The current status of the transaction
+              example: Cleared
+            amount:
+              type: integer
+              description: The transaction amount, represented in the smallest currency unit (e.g., cents for USD). To obtain the value in dollars, divide by 100.
+              format: int32
+              example: 9999
+            createdAt:
+              type: string
+              format: date-time
+              description: The date and time when the transaction was created
+              example: '2024-01-15T10:30:00Z'
+            clearedAt:
+              type: string
+              format: date-time
+              description: The date and time when the transaction was cleared (undefined if not yet cleared)
+              readOnly: true
+            charges:
+              type: object
+              properties:
+                fee:
+                  type: object
+                  properties:
+                    amount:
+                      type: integer
+                      minimum: 0
+                      description: Fee amount in cents
+                      format: int32
+                      example: 150
+                    type:
+                      type: string
+                      description: Fee type identifier (e.g., 'ACHFee', 'CardFee').
+                      example: ACHFee
+                  required:
+                  - amount
+                  - type
+                  description: Processing fee details
+              description: Charges applied to this transaction.
+          required:
+          - id
+          - walletId
+          - type
+          - status
+          - amount
+          - createdAt
+      required:
+      - id
+      - type
+      - attributes
+      description: A transaction
+      x-tags:
+      - Model
+    TransactionNotFoundResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 404
+        code:
+          type: string
+          enum:
+          - TransactionNotFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: TransactionNotFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: TransactionNotFoundException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Transaction with ID '{transactionId}' not found.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000/transactions/123e4567-e89b-12d3-a456-426614174000
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000/transactions/123e4567-e89b-12d3-a456-426614174000
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    GetTransactionNotFoundResponse:
+      anyOf:
+      - $ref: '#/components/schemas/WalletNotFoundResponse'
+      - $ref: '#/components/schemas/TransactionNotFoundResponse'
+    ListTransactionsNotFoundResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 404
+        code:
+          type: string
+          enum:
+          - WalletNotFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: WalletNotFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WalletNotFoundException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Wallet with ID '{walletId}' not found.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    UnexpectedErrorForWalletResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 500
+        code:
+          type: string
+          enum:
+          - UnexpectedError
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: UnexpectedError
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WalletException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - An unexpected error occurred.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    GetWalletErrorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - BadRequest
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: BadRequest
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ValidationError
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - 'invalid input syntax for type uuid: "{uuid}"'
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    MultipleWalletsFoundResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - MultipleWalletsFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: MultipleWalletsFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WalletValidationException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Multiple wallets found for the provided user reference. Please use a more specific identifier.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000/balance
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000/balance
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    ClosedLoopWithdrawResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: The wallet ID. Same as the `walletId` path parameter.
+              example: 123e4567-e89b-12d3-a456-426614174000
+            type:
+              type: string
+              enum:
+              - Withdraw
+            attributes:
+              type: object
+              properties:
+                split:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      linkedAccountId:
+                        type: string
+                        format: uuid
+                        description: The linked account ID that received (or will receive) this portion of the withdrawal.
+                        example: 123e4567-e89b-12d3-a456-426614174000
+                      institutionName:
+                        type: string
+                        description: Name of the financial institution for the linked account.
+                        example: Example Bank
+                      accountMask:
+                        type: string
+                        description: Masked account number (e.g., last four digits) for display.
+                        example: '1234'
+                      amount:
+                        type: integer
+                        description: Amount in cents allocated to this linked account.
+                        example: 2500
+                    required:
+                    - linkedAccountId
+                    - institutionName
+                    - accountMask
+                    - amount
+                  description: Breakdown of the withdrawal across linked accounts. Each item indicates how much is allocated to each account.
+              required:
+              - split
+          required:
+          - id
+          - type
+          - attributes
+      required:
+      - data
+    GetWalletBalanceErrorResponse:
+      anyOf:
+      - $ref: '#/components/schemas/MultipleWalletsFoundResponse'
+      - $ref: '#/components/schemas/InvalidUuidSyntaxForWalletResponse'
+x-tagGroups:
+- name: Overview
+  tags:
+  - Introduction
+  - API Design
+- name: Users
+  tags:
+  - Users
+  - LinkedAccounts
+  - Identity Verification
+- name: Wallets
+  tags:
+  - Wallets
+- name: Gifts
+  tags:
+  - Gifts
+- name: Payments
+  tags:
+  - PaymentIntents
+  - Payments
+  - ExternalTransactions
+  - Simulations
+- name: Banking & KYC
+  tags:
+  - Banking
+  - Counterparties
+  - CounterpartyTransfers
+- name: Sweepstakes
+  tags:
+  - Sweepstakes
+- name: Rewards
+  tags:
+  - Rewards
+- name: Widgets
+  tags:
+  - Widgets
+- name: Webhooks
+  tags:
+  - Webhooks
+  - WebhookEvents
+  - Webhook Topics

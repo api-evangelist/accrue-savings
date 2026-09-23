@@ -1,0 +1,530 @@
+openapi: 3.2.0
+info:
+  version: 1.0.0
+  title: Accrue Merchant Linked Accounts API
+  x-links:
+  - name: View Alternative Version
+    url: /api-fs/
+    description: View API documentation with alternative enum-based WebhookIncluded schema
+  description: Linked Accounts represent payment methods that users have connected to their Accrue account. These accounts can be used for funding payments or topping up the wallet.
+servers:
+- description: Production API
+  url: https://merchant-api.accruesavings.com
+- description: Sandbox API
+  url: https://merchant-api-sandbox.accruesavings.com
+tags:
+- name: Linked Accounts
+  description: Linked Accounts represent payment methods that users have connected to their Accrue account. These accounts can be used for funding payments or topping up the wallet.
+paths:
+  /api/v1/users/:userId/linked-accounts:
+    get:
+      operationId: getLinkedAccounts
+      tags:
+      - Linked Accounts
+      summary: Get Linked Accounts for User
+      description: Retrieves all linked bank accounts for a specific user. These accounts can be used for funding payments by providing the linkedAccountId when creating a payment.
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: The ID of the user whose linked accounts to retrieve.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: userId
+        in: path
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/GetLinkedAccountsResponse'
+        '400':
+          description: Bad Request. The user has no wallet with your account.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/LinkedAccountInvalidUserResponse'
+        '404':
+          description: Not Found. The user does not exist.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/LinkedAccountUserNotFoundResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedLinkedAccountErrorResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request GET \\\n  --url https://merchant-api.accruesavings.com/api/v1/users/:userId/linked-accounts \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'GET',\n  url: 'https://merchant-api.accruesavings.com/api/v1/users/:userId/linked-accounts',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"GET\", \"/api/v1/users/:userId/linked-accounts\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/users/:userId/linked-accounts")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Get.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/users/:userId/linked-accounts\")\n  .get()\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/users/:userId/linked-accounts\"\n\n\treq, _ := http.NewRequest(\"GET\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/users/:userId/linked-accounts");
+
+          var request = new RestRequest(Method.GET);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/users/:userId/linked-accounts');\n$request->setMethod(HTTP_METH_GET);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+  /api/v1/users/:userId/linked-accounts/:linkedAccountId:
+    delete:
+      operationId: deleteLinkedAccount
+      tags:
+      - Linked Accounts
+      summary: Remove a Linked Account
+      description: 'Removes a linked bank account for one of your users. This has the same effect as the user removing it themselves: any scheduled funding or round-ups using the account are stopped, and the account is deactivated with the bank linking provider. This cannot be undone — the user must link and verify the account again. The request is idempotent: removing an account that is already gone also returns 204, so it is safe to retry after a timeout.'
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: The ID of the user who owns the linked account.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: userId
+        in: path
+      - schema:
+          type: string
+          format: uuid
+          description: The ID of the linked account to remove.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: linkedAccountId
+        in: path
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      responses:
+        '204':
+          description: No Content. Also returned when the linked account was already removed.
+        '400':
+          description: Bad Request. The user has no wallet with your account.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/LinkedAccountInvalidUserResponse'
+        '403':
+          description: The linked account does not belong to the specified user.
+        '404':
+          description: Not Found. The user does not exist.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/LinkedAccountUserNotFoundResponse'
+        '409':
+          description: 'The account cannot be removed right now: either a payment funded by it is still in flight, or the account may also be in use outside your integration. Complete or cancel the payment, or ask the user to remove the account from their Accrue account.'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request DELETE \\\n  --url https://merchant-api.accruesavings.com/api/v1/users/:userId/linked-accounts/:linkedAccountId \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'DELETE',\n  url: 'https://merchant-api.accruesavings.com/api/v1/users/:userId/linked-accounts/:linkedAccountId',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"DELETE\", \"/api/v1/users/:userId/linked-accounts/:linkedAccountId\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/users/:userId/linked-accounts/:linkedAccountId")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Delete.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/users/:userId/linked-accounts/:linkedAccountId\")\n  .delete(null)\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/users/:userId/linked-accounts/:linkedAccountId\"\n\n\treq, _ := http.NewRequest(\"DELETE\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/users/:userId/linked-accounts/:linkedAccountId");
+
+          var request = new RestRequest(Method.DELETE);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/users/:userId/linked-accounts/:linkedAccountId');\n$request->setMethod(HTTP_METH_DELETE);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+components:
+  schemas:
+    UnexpectedLinkedAccountErrorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 500
+        code:
+          type: string
+          enum:
+          - UnexpectedError
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: UnexpectedError
+        title:
+          type: string
+          description: Generic title for the error.
+          example: LinkedAccountException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - An unexpected error occurred.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/users/123e4567-e89b-12d3-a456-426614174000/linked-accounts
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/users/123e4567-e89b-12d3-a456-426614174000/linked-accounts
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    LinkedAccountInvalidUserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - InvalidUser
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: InvalidUser
+        title:
+          type: string
+          description: Generic title for the error.
+          example: LinkedAccountException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - User '{userId}' does not have a wallet with this merchant.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/users/123e4567-e89b-12d3-a456-426614174000/linked-accounts
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/users/123e4567-e89b-12d3-a456-426614174000/linked-accounts
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    GetLinkedAccountsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                description: Unique identifier for the object.
+                readOnly: true
+              type:
+                type: string
+                enum:
+                - LinkedAccount
+              attributes:
+                type: object
+                properties:
+                  provider:
+                    type: string
+                    enum:
+                    - Meld
+                    - Plaid
+                    - Checkout
+                    description: The provider used to link the bank account.
+                  status:
+                    type: string
+                    enum:
+                    - Connected
+                    - Disconnected
+                    - Pending
+                    description: The current status of the linked account.
+                  accountType:
+                    type: string
+                    enum:
+                    - checking
+                    - savings
+                    - debit
+                    - creditCard
+                    - fundingCreditCard
+                    - pending
+                    description: The type of the linked account.
+                  accountName:
+                    type: string
+                    description: The name of the account as provided by the institution.
+                    example: Plaid Checking
+                  accountMask:
+                    type: string
+                    description: The masked account number (typically last 4 digits).
+                    example: '0000'
+                  institutionName:
+                    type: string
+                    description: The name of the financial institution.
+                    example: Plaid Bank
+                  institutionId:
+                    type: string
+                    description: The unique identifier for the institution.
+                    example: ins_109508
+                  updatedAt:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                  createdAt:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                required:
+                - updatedAt
+                - createdAt
+            required:
+            - id
+            - type
+            - attributes
+      required:
+      - data
+    LinkedAccountUserNotFoundResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 404
+        code:
+          type: string
+          enum:
+          - LinkedAccountNotFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: LinkedAccountNotFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: LinkedAccountNotFoundException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - User '{userId}' not found.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/users/123e4567-e89b-12d3-a456-426614174000/linked-accounts
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/users/123e4567-e89b-12d3-a456-426614174000/linked-accounts
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+x-tagGroups:
+- name: Overview
+  tags:
+  - Introduction
+  - API Design
+- name: Users
+  tags:
+  - Users
+  - LinkedAccounts
+  - Identity Verification
+- name: Wallets
+  tags:
+  - Wallets
+- name: Gifts
+  tags:
+  - Gifts
+- name: Payments
+  tags:
+  - PaymentIntents
+  - Payments
+  - ExternalTransactions
+  - Simulations
+- name: Banking & KYC
+  tags:
+  - Banking
+  - Counterparties
+  - CounterpartyTransfers
+- name: Sweepstakes
+  tags:
+  - Sweepstakes
+- name: Rewards
+  tags:
+  - Rewards
+- name: Widgets
+  tags:
+  - Widgets
+- name: Webhooks
+  tags:
+  - Webhooks
+  - WebhookEvents
+  - Webhook Topics

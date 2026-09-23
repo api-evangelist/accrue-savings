@@ -1,0 +1,57 @@
+{
+  "provider": "accrue-savings",
+  "sources": [
+    "_original/accrue-savings-merchant-api-openapi.yaml"
+  ],
+  "outputs": [
+    "accrue-savings-banking-api-openapi.yml",
+    "accrue-savings-counterparties-api-openapi.yml",
+    "accrue-savings-counterpartytransfers-api-openapi.yml",
+    "accrue-savings-externaltransactions-api-openapi.yml",
+    "accrue-savings-gifts-api-openapi.yml",
+    "accrue-savings-identity-verification-api-openapi.yml",
+    "accrue-savings-linkedaccounts-api-openapi.yml",
+    "accrue-savings-paymentintents-api-openapi.yml",
+    "accrue-savings-payments-api-openapi.yml",
+    "accrue-savings-rewards-api-openapi.yml",
+    "accrue-savings-simulations-api-openapi.yml",
+    "accrue-savings-sweepstakes-api-openapi.yml",
+    "accrue-savings-users-api-openapi.yml",
+    "accrue-savings-wallets-api-openapi.yml",
+    "accrue-savings-webhook-topics-api-openapi.yml",
+    "accrue-savings-webhookevents-api-openapi.yml",
+    "accrue-savings-webhooks-api-openapi.yml",
+    "accrue-savings-widgets-api-openapi.yml"
+  ],
+  "archived": [
+    "deleted 3 superseded output(s) from the previous generation"
+  ],
+  "errors": [],
+  "warnings": [],
+  "notes": [
+    "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
+    "accrue-savings-merchant-api-openapi.yaml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "superseded outputs removed: accrue-savings-linked-accounts-api-openapi.yml, accrue-savings-payment-intents-api-openapi.yml, accrue-savings-webhook-events-api-openapi.yml",
+    "apis.yml register: written (+3 apis, 18 total)"
+  ],
+  "skipped": [
+    "accrue-savings-banking-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "accrue-savings-counterparties-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "accrue-savings-counterpartytransfers-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "accrue-savings-externaltransactions-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "accrue-savings-gifts-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "accrue-savings-identity-verification-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "accrue-savings-linked-accounts-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "accrue-savings-payment-intents-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "accrue-savings-payments-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "accrue-savings-rewards-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "accrue-savings-simulations-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "accrue-savings-sweepstakes-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "accrue-savings-users-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "accrue-savings-wallets-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "accrue-savings-webhook-events-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "accrue-savings-webhook-topics-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "accrue-savings-webhooks-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "accrue-savings-widgets-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
+}

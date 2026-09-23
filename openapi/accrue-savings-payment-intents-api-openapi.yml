@@ -1,0 +1,2138 @@
+openapi: 3.2.0
+info:
+  version: 1.0.0
+  title: Accrue Merchant Payment Intents API
+  x-links:
+  - name: View Alternative Version
+    url: /api-fs/
+    description: View API documentation with alternative enum-based WebhookIncluded schema
+  description: Payment Intents represent a commitment to pay a specified amount, allowing for a structured process to handle payments from initiation to completion.
+servers:
+- description: Production API
+  url: https://merchant-api.accruesavings.com
+- description: Sandbox API
+  url: https://merchant-api-sandbox.accruesavings.com
+tags:
+- name: Payment Intents
+  description: Payment Intents represent a commitment to pay a specified amount, allowing for a structured process to handle payments from initiation to completion.
+paths:
+  /api/v1/payment-intents:
+    post:
+      operationId: createPaymentIntent
+      tags:
+      - Payment Intents
+      summary: Create a Payment Intent
+      description: 'Create a payment intent using `amount` and exactly one of `walletId` or `lookUpId`.
+
+
+        When `walletId` is provided, the wallet is validated for the request merchant.
+
+
+        When `lookUpId` is provided, the scanned string is resolved as a wallet barcode first; if no wallet barcode matches, it is resolved as a gift identifier. Never send a gift `data.id` as `walletId`. A wallet barcode `lookUpId` follows the wallet scan-and-pay flow.
+
+
+        Gift look-ups skip KYC. `balance.available` is the remaining spendable amount (gift remaining, or wallet available).
+
+
+        For a **gift** `lookUpId`, point-of-sale should first fetch remaining via Get Gift by lookUpId (`/api/v1/gifts/{lookUpId}`), then POST this endpoint with the **same** scanned string as `lookUpId`. Authorize returns a Payment whose `links.virtualDebitCard` is the gift virtual debit card. Gift remaining is spent later by card-present authorization of that card; authorize does not debit the gift reserve.'
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/CreatePaymentIntent'
+              required:
+              - data
+      responses:
+        '201':
+          description: Created
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/CreatePaymentIntentResponse'
+        '400':
+          description: Invalid amount or wallet identifier validation failed
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/CreatePaymentIntentInvalidResponse'
+        '403':
+          description: Wallet access denied
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/CreatePaymentIntentWalletAccessDeniedResponse'
+        '404':
+          description: Wallet identifier not found
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/CreatePaymentIntentWalletNotFoundResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request POST \\\n  --url https://merchant-api.accruesavings.com/api/v1/payment-intents \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'POST',\n  url: 'https://merchant-api.accruesavings.com/api/v1/payment-intents',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"POST\", \"/api/v1/payment-intents\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/payment-intents")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Post.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/payment-intents\")\n  .post(null)\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/payment-intents\"\n\n\treq, _ := http.NewRequest(\"POST\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/payment-intents");
+
+          var request = new RestRequest(Method.POST);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/payment-intents');\n$request->setMethod(HTTP_METH_POST);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+    get:
+      operationId: listPaymentIntents
+      tags:
+      - Payment Intents
+      summary: List Payment Intents
+      parameters:
+      - schema:
+          type: string
+          description: Filter the list of objects by the value of the initiator field.
+        required: false
+        name: filter[initiator]
+        in: query
+      - schema:
+          type: string
+          description: Filter the list of objects by the value of the status field.
+        required: false
+        name: filter[status]
+        in: query
+      - schema:
+          type: string
+          description: Filter the list of objects by the value of the paymentMethod field.
+        required: false
+        name: filter[paymentMethod]
+        in: query
+      - schema:
+          type: number
+          minimum: 1
+          maximum: 50
+          default: 10
+          description: Maximum number of objects that will be returned. Can not be greater than 50.
+        required: false
+        name: page[limit]
+        in: query
+      - schema:
+          type: number
+          minimum: 0
+          default: 0
+          description: Offset from the beginning of the list of objects. Can not be negative.
+        required: false
+        name: page[offset]
+        in: query
+      - schema:
+          type: string
+          default: sort=-createdAt
+          description: Sorts the list of objects by the given criteria. The sort parameter value is a comma separated list of sort criteria. Each sort criteria is a field name optionally followed by a minus sign (-) to indicate descending order. Ascending order is assumed if no minus sign is present. The sort criteria are applied in the order in which they appear in the sort parameter.
+        required: false
+        name: sort
+        in: query
+      - schema:
+          type: string
+          description: 'Comma-separated list of resources to include. Supported resources: `client`,`payments`,`balance`'
+        required: true
+        name: include
+        in: query
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ListPaymentIntentsResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/PaymentIntentQueryValidationErrorResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request GET \\\n  --url 'https://merchant-api.accruesavings.com/api/v1/payment-intents?filter%5Binitiator%5D=SOME_STRING_VALUE&filter%5Bstatus%5D=SOME_STRING_VALUE&filter%5BpaymentMethod%5D=SOME_STRING_VALUE&page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE&sort=SOME_STRING_VALUE&include=SOME_STRING_VALUE' \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'GET',\n  url: 'https://merchant-api.accruesavings.com/api/v1/payment-intents',\n  qs: {\n    'filter[initiator]': 'SOME_STRING_VALUE',\n    'filter[status]': 'SOME_STRING_VALUE',\n    'filter[paymentMethod]': 'SOME_STRING_VALUE',\n    'page[limit]': 'SOME_NUMBER_VALUE',\n    'page[offset]': 'SOME_NUMBER_VALUE',\n    sort: 'SOME_STRING_VALUE',\n    include: 'SOME_STRING_VALUE'\n  },\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"GET\", \"/api/v1/payment-intents?filter%5Binitiator%5D=SOME_STRING_VALUE&filter%5Bstatus%5D=SOME_STRING_VALUE&filter%5BpaymentMethod%5D=SOME_STRING_VALUE&page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE&sort=SOME_STRING_VALUE&include=SOME_STRING_VALUE\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/payment-intents?filter%5Binitiator%5D=SOME_STRING_VALUE&filter%5Bstatus%5D=SOME_STRING_VALUE&filter%5BpaymentMethod%5D=SOME_STRING_VALUE&page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE&sort=SOME_STRING_VALUE&include=SOME_STRING_VALUE")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Get.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/payment-intents?filter%5Binitiator%5D=SOME_STRING_VALUE&filter%5Bstatus%5D=SOME_STRING_VALUE&filter%5BpaymentMethod%5D=SOME_STRING_VALUE&page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE&sort=SOME_STRING_VALUE&include=SOME_STRING_VALUE\")\n  .get()\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/payment-intents?filter%5Binitiator%5D=SOME_STRING_VALUE&filter%5Bstatus%5D=SOME_STRING_VALUE&filter%5BpaymentMethod%5D=SOME_STRING_VALUE&page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE&sort=SOME_STRING_VALUE&include=SOME_STRING_VALUE\"\n\n\treq, _ := http.NewRequest(\"GET\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/payment-intents?filter%5Binitiator%5D=SOME_STRING_VALUE&filter%5Bstatus%5D=SOME_STRING_VALUE&filter%5BpaymentMethod%5D=SOME_STRING_VALUE&page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE&sort=SOME_STRING_VALUE&include=SOME_STRING_VALUE");
+
+          var request = new RestRequest(Method.GET);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/payment-intents');\n$request->setMethod(HTTP_METH_GET);\n\n$request->setQueryData([\n  'filter[initiator]' => 'SOME_STRING_VALUE',\n  'filter[status]' => 'SOME_STRING_VALUE',\n  'filter[paymentMethod]' => 'SOME_STRING_VALUE',\n  'page[limit]' => 'SOME_NUMBER_VALUE',\n  'page[offset]' => 'SOME_NUMBER_VALUE',\n  'sort' => 'SOME_STRING_VALUE',\n  'include' => 'SOME_STRING_VALUE'\n]);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+  /api/v1/payment-intents/{paymentIntentId}:
+    get:
+      operationId: getPaymentIntent
+      tags:
+      - Payment Intents
+      summary: Get a Payment Intent
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: Payment Intent ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: paymentIntentId
+        in: path
+      - schema:
+          type: string
+          description: 'Comma-separated list of resources to include. Supported resources: `client`,`payments`'
+        required: false
+        name: include
+        in: query
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/GetPaymentIntentResponse'
+        '404':
+          description: Not Found
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/PaymentIntentNotFoundResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request GET \\\n  --url 'https://merchant-api.accruesavings.com/api/v1/payment-intents/123e4567-e89b-12d3-a456-426614174000?include=SOME_STRING_VALUE' \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'GET',\n  url: 'https://merchant-api.accruesavings.com/api/v1/payment-intents/123e4567-e89b-12d3-a456-426614174000',\n  qs: {include: 'SOME_STRING_VALUE'},\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"GET\", \"/api/v1/payment-intents/123e4567-e89b-12d3-a456-426614174000?include=SOME_STRING_VALUE\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/payment-intents/123e4567-e89b-12d3-a456-426614174000?include=SOME_STRING_VALUE")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Get.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/payment-intents/123e4567-e89b-12d3-a456-426614174000?include=SOME_STRING_VALUE\")\n  .get()\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/payment-intents/123e4567-e89b-12d3-a456-426614174000?include=SOME_STRING_VALUE\"\n\n\treq, _ := http.NewRequest(\"GET\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/payment-intents/123e4567-e89b-12d3-a456-426614174000?include=SOME_STRING_VALUE");
+
+          var request = new RestRequest(Method.GET);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/payment-intents/123e4567-e89b-12d3-a456-426614174000');\n$request->setMethod(HTTP_METH_GET);\n\n$request->setQueryData([\n  'include' => 'SOME_STRING_VALUE'\n]);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+  /api/v1/payment-intents/{paymentIntentId}/authorize:
+    post:
+      operationId: authorizePayment
+      tags:
+      - Payment Intents
+      summary: Authorize Payment
+      description: 'Authorize a payment intent, creating a `Payment`. For wallet payment intents this also reserves wallet funds.
+
+
+        If the payment intent was already authorized (an active payment exists), the existing payment is returned without re-authorizing.
+
+
+        When the client has a card processor configured, processor authorization runs inline before the response is returned — for both wallet and gift payment intents. On success, `included` Payment resources may include `meta.processor` with an opaque processor payload. On processor decline, the payment is marked `Failed` and the endpoint returns `402`.
+
+
+        For a gift `lookUpId` payment intent, authorize still creates a `Payment` and, when a card processor is configured, still runs processor authorization inline. It does not debit the gift reserve or reserve wallet funds. After a successful authorize, load the Payment''s `links.virtualDebitCard` via Get Virtual Debit Card (`/api/v1/payments/{paymentId}/card`). Card-present authorization of that card is what spends remaining gift balance.
+
+
+        Optional `data.attributes.channel` and `data.attributes.risk.deviceSessionId` are forwarded to wallet authorization. When a wallet is attached, `data.attributes.balance` on the returned payment intent may be present.'
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: Payment Intent ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: paymentIntentId
+        in: path
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/AuthorizePaymentIntent'
+              required:
+              - data
+      responses:
+        '201':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/AuthorizePaymentResponse'
+        '402':
+          description: Authorization failed for the desired amount
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/AuthorizePaymentIntentFailedResponse'
+        '403':
+          description: Client/Payment Intent mismatch
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/AuthorizePaymentIntentForbiddenResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request POST \\\n  --url https://merchant-api.accruesavings.com/api/v1/payment-intents/123e4567-e89b-12d3-a456-426614174000/authorize \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'POST',\n  url: 'https://merchant-api.accruesavings.com/api/v1/payment-intents/123e4567-e89b-12d3-a456-426614174000/authorize',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"POST\", \"/api/v1/payment-intents/123e4567-e89b-12d3-a456-426614174000/authorize\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/payment-intents/123e4567-e89b-12d3-a456-426614174000/authorize")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Post.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/payment-intents/123e4567-e89b-12d3-a456-426614174000/authorize\")\n  .post(null)\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/payment-intents/123e4567-e89b-12d3-a456-426614174000/authorize\"\n\n\treq, _ := http.NewRequest(\"POST\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/payment-intents/123e4567-e89b-12d3-a456-426614174000/authorize");
+
+          var request = new RestRequest(Method.POST);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/payment-intents/123e4567-e89b-12d3-a456-426614174000/authorize');\n$request->setMethod(HTTP_METH_POST);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+components:
+  schemas:
+    CreatePaymentIntentResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: Unique identifier for the object.
+              readOnly: true
+            type:
+              type: string
+              enum:
+              - PaymentIntent
+            attributes:
+              type: object
+              properties:
+                balance:
+                  $ref: '#/components/schemas/PaymentIntentBalanceInformation'
+                billingAddress:
+                  type:
+                  - object
+                  - 'null'
+                  properties:
+                    street:
+                      type:
+                      - string
+                      - 'null'
+                    street2:
+                      type:
+                      - string
+                      - 'null'
+                    city:
+                      type:
+                      - string
+                      - 'null'
+                    state:
+                      type:
+                      - string
+                      - 'null'
+                    postalCode:
+                      type:
+                      - string
+                      - 'null'
+                    country:
+                      type:
+                      - string
+                      - 'null'
+                  required:
+                  - street
+                  - street2
+                  - city
+                  - state
+                  - postalCode
+                  - country
+                email:
+                  type:
+                  - string
+                  - 'null'
+                  format: email
+                error:
+                  type:
+                  - string
+                  - 'null'
+                  enum:
+                  - LinkedAccountUnverified
+                  - LinkedAccountDisconnected
+                  - LinkedAccountMissing
+                  - InsufficientBalance
+                  - MissingFullName
+                  - WrongEmail
+                  - InvalidKycStatus
+                  description: Specific error associated with the current invalid status.
+                expiresAt:
+                  type:
+                  - string
+                  - 'null'
+                  format: date-time
+                  description: The datetime at which the payment intent is set to expire. After this time, the intent cannot be promoted to a payment and is considered expired.
+                  readOnly: true
+                fullName:
+                  type:
+                  - string
+                  - 'null'
+                phoneNumber:
+                  type:
+                  - string
+                  - 'null'
+                amount:
+                  type: integer
+                  description: Total purchase amount in cents.
+                  format: int32
+                  example: 3600
+                reference:
+                  type:
+                  - string
+                  - 'null'
+                  description: Reference to the data inside an external system.
+                  example: MERCHANT-GENERATED-TOKEN
+                status:
+                  type: string
+                  enum:
+                  - Promotable
+                  - PromotedToPayment
+                  - Invalid
+                  - Expired
+                  - Canceled
+                  description: The current status of the payment intent. Each status represents a different stage in the payment intent lifecycle, from creation to completion or cancellation.
+                  example: Promotable
+                userId:
+                  type:
+                  - string
+                  - 'null'
+                walletId:
+                  type:
+                  - string
+                  - 'null'
+                  description: The ID of the wallet for which the payment intent is created.
+                  example: 123e4567-e89b-12d3-a456-426614174000
+                updatedAt:
+                  type: string
+                  format: date-time
+                  readOnly: true
+                createdAt:
+                  type: string
+                  format: date-time
+                  readOnly: true
+              required:
+              - balance
+              - updatedAt
+              - createdAt
+          required:
+          - id
+          - type
+          - attributes
+      required:
+      - data
+    AuthorizePaymentIntent:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - AuthorizePaymentIntent
+        attributes:
+          type: object
+          properties:
+            amount:
+              type: integer
+              description: Total purchase amount in cents
+              format: int32
+            reference:
+              type: string
+              description: Reference to the payment inside an external system (e.g. cart or order ID).
+              example: order-12345
+            channel:
+              anyOf:
+              - type: string
+                description: External channel identifier (e.g. app name, store outlet ID, checkout interface).
+                example: ORG-1
+              - type: object
+                properties:
+                  type:
+                    type: string
+                    enum:
+                    - App
+                    - Store
+                    description: Channel type.
+                  id:
+                    type: string
+                    description: Channel identifier in the external system.
+                    example: ORG-1
+                required:
+                - type
+                - id
+                description: Structured payment channel reference.
+            risk:
+              type: object
+              properties:
+                deviceSessionId:
+                  type: string
+                  description: Device session ID used for risk assessment. Optional but recommended for production traffic.
+              required:
+              - deviceSessionId
+          required:
+          - amount
+        meta:
+          type: object
+          properties:
+            processor:
+              description: Pass-through object sent to the active card processor integration. The shape is integration-specific and is not a stable, versioned public contract. Accrue provides the required fields during merchant onboarding.
+              example:
+                type: card-terminal
+                posId: POS-001
+          description: Optional JSON:API `meta` on the authorize request. Omit when the processor does not require additional parameters.
+      required:
+      - id
+      - type
+      - attributes
+      description: AuthorizePaymentIntent
+      x-tags:
+      - Model
+    AuthorizePaymentIntentFailedResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 402
+        code:
+          type: string
+          enum:
+          - Failed
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: Failed
+        title:
+          type: string
+          description: Generic title for the error.
+          example: PaymentAuthorizationFailedException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Authorization failed for the desired amount
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/payment-intents/{paymentIntentId}/authorize
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/payment-intents/{paymentIntentId}/authorize
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    CreatePaymentIntentInvalidResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - InvalidAmountOrWalletIdentifier
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: InvalidAmountOrWalletIdentifier
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ErrorResponseDto
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Invalid amount or wallet identifier validation failed
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/payment-intents
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/payment-intents
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    PaymentIntentBalanceInformation:
+      type: object
+      properties:
+        available:
+          type: integer
+          description: Available wallet balance in cents
+          format: int32
+          example: 1500
+        eligibleReward:
+          type: integer
+          description: Eligible reward amount for this transaction in cents
+          format: int32
+          example: 500
+        upperLimit:
+          type: integer
+          description: Maximum checkout amount supported for this purchase, in cents
+          format: int32
+          example: 103600
+      required:
+      - available
+      - eligibleReward
+      - upperLimit
+      description: Balance for this payment intent. `available` is the remaining spendable amount in cents (gift remaining for a gift lookUpId, or wallet available for a wallet).
+      x-tags:
+      - Model
+    PaymentIntent:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - PaymentIntent
+        attributes:
+          type: object
+          properties:
+            balance:
+              allOf:
+              - $ref: '#/components/schemas/PaymentIntentBalanceInformation'
+              - description: Optional wallet balance information
+            billingAddress:
+              type:
+              - object
+              - 'null'
+              properties:
+                street:
+                  type:
+                  - string
+                  - 'null'
+                street2:
+                  type:
+                  - string
+                  - 'null'
+                city:
+                  type:
+                  - string
+                  - 'null'
+                state:
+                  type:
+                  - string
+                  - 'null'
+                postalCode:
+                  type:
+                  - string
+                  - 'null'
+                country:
+                  type:
+                  - string
+                  - 'null'
+              required:
+              - street
+              - street2
+              - city
+              - state
+              - postalCode
+              - country
+            email:
+              type:
+              - string
+              - 'null'
+              format: email
+            error:
+              type:
+              - string
+              - 'null'
+              enum:
+              - LinkedAccountUnverified
+              - LinkedAccountDisconnected
+              - LinkedAccountMissing
+              - InsufficientBalance
+              - MissingFullName
+              - WrongEmail
+              - InvalidKycStatus
+              description: Specific error associated with the current invalid status.
+            expiresAt:
+              type:
+              - string
+              - 'null'
+              format: date-time
+              description: The datetime at which the payment intent is set to expire. After this time, the intent cannot be promoted to a payment and is considered expired.
+              readOnly: true
+            fullName:
+              type:
+              - string
+              - 'null'
+            phoneNumber:
+              type:
+              - string
+              - 'null'
+            amount:
+              type: integer
+              description: Total purchase amount in cents.
+              format: int32
+              example: 3600
+            reference:
+              type:
+              - string
+              - 'null'
+              description: Reference to the data inside an external system.
+              example: MERCHANT-GENERATED-TOKEN
+            status:
+              type: string
+              enum:
+              - Promotable
+              - PromotedToPayment
+              - Invalid
+              - Expired
+              - Canceled
+              description: The current status of the payment intent. Each status represents a different stage in the payment intent lifecycle, from creation to completion or cancellation.
+            userId:
+              type:
+              - string
+              - 'null'
+            walletId:
+              type:
+              - string
+              - 'null'
+              description: The ID of the wallet for which the payment intent is created.
+              example: 123e4567-e89b-12d3-a456-426614174000
+            updatedAt:
+              type: string
+              format: date-time
+              readOnly: true
+            createdAt:
+              type: string
+              format: date-time
+              readOnly: true
+          required:
+          - updatedAt
+          - createdAt
+        relationships:
+          type: object
+          properties:
+            payments:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      type:
+                        type: string
+                        enum:
+                        - Payment
+                    required:
+                    - id
+                    - type
+              required:
+              - data
+      required:
+      - id
+      - type
+      - attributes
+      - relationships
+      description: A transaction
+      x-tags:
+      - Model
+    CreatePaymentIntentWalletNotFoundResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 404
+        code:
+          type: string
+          enum:
+          - WalletIdentifierNotFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: WalletIdentifierNotFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ErrorResponseDto
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Wallet identifier not found
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/payment-intents
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/payment-intents
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    ListPaymentIntentsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            allOf:
+            - $ref: '#/components/schemas/PaymentIntent'
+            - type: object
+              properties:
+                attributes:
+                  type: object
+                  properties:
+                    balance:
+                      allOf:
+                      - $ref: '#/components/schemas/PaymentIntentBalanceInformation'
+                      - description: Optional wallet balance information
+                    billingAddress:
+                      type:
+                      - object
+                      - 'null'
+                      properties:
+                        street:
+                          type:
+                          - string
+                          - 'null'
+                        street2:
+                          type:
+                          - string
+                          - 'null'
+                        city:
+                          type:
+                          - string
+                          - 'null'
+                        state:
+                          type:
+                          - string
+                          - 'null'
+                        postalCode:
+                          type:
+                          - string
+                          - 'null'
+                        country:
+                          type:
+                          - string
+                          - 'null'
+                      required:
+                      - street
+                      - street2
+                      - city
+                      - state
+                      - postalCode
+                      - country
+                    email:
+                      type:
+                      - string
+                      - 'null'
+                      format: email
+                    error:
+                      type:
+                      - string
+                      - 'null'
+                      enum:
+                      - LinkedAccountUnverified
+                      - LinkedAccountDisconnected
+                      - LinkedAccountMissing
+                      - InsufficientBalance
+                      - MissingFullName
+                      - WrongEmail
+                      - InvalidKycStatus
+                      description: Specific error associated with the current invalid status.
+                    expiresAt:
+                      type:
+                      - string
+                      - 'null'
+                      format: date-time
+                      description: The datetime at which the payment intent is set to expire. After this time, the intent cannot be promoted to a payment and is considered expired.
+                      readOnly: true
+                    fullName:
+                      type:
+                      - string
+                      - 'null'
+                    phoneNumber:
+                      type:
+                      - string
+                      - 'null'
+                    amount:
+                      type: integer
+                      description: Total purchase amount in cents.
+                      format: int32
+                      example: 3600
+                    reference:
+                      type:
+                      - string
+                      - 'null'
+                      description: Reference to the data inside an external system.
+                      example: MERCHANT-GENERATED-TOKEN
+                    status:
+                      type: string
+                      enum:
+                      - Promotable
+                      - PromotedToPayment
+                      - Invalid
+                      - Expired
+                      - Canceled
+                      description: The current status of the payment intent. Each status represents a different stage in the payment intent lifecycle, from creation to completion or cancellation.
+                      example: RequiresAction
+                    userId:
+                      type:
+                      - string
+                      - 'null'
+                    walletId:
+                      type:
+                      - string
+                      - 'null'
+                      description: The ID of the wallet for which the payment intent is created.
+                      example: 123e4567-e89b-12d3-a456-426614174000
+                    updatedAt:
+                      type: string
+                      format: date-time
+                      readOnly: true
+                    createdAt:
+                      type: string
+                      format: date-time
+                      readOnly: true
+                  required:
+                  - updatedAt
+                  - createdAt
+            description: A transaction
+            x-tags:
+            - Model
+        meta:
+          type: object
+          properties:
+            total:
+              type: number
+              example: 1
+            limit:
+              type: number
+              example: 10
+            offset:
+              type: number
+              example: 0
+          required:
+          - total
+          - limit
+          - offset
+      required:
+      - data
+      - meta
+    CreatePaymentIntent:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - CreatePaymentIntent
+        attributes:
+          type: object
+          properties:
+            amount:
+              type: integer
+              description: Amount to be charged in cents
+              format: int32
+              example: 3600
+            walletId:
+              type: string
+              format: uuid
+              description: Wallet identifier to validate. Optional alternative to `lookUpId`. Provide exactly one of `walletId` or `lookUpId`.
+              example: 123e4567-e89b-12d3-a456-426614174000
+            lookUpId:
+              type: string
+              description: Scanned lookup identifier. Optional alternative to `walletId`. May be a wallet barcode or a gift identifier; wallet barcode resolution wins. For gift spend, send this same string — never send the gift `data.id` as `walletId`. See [Get Gift by lookUpId](/api#tag/Gifts/operation/getGiftByLookUpId).
+          required:
+          - amount
+          oneOf:
+          - required:
+            - walletId
+          - required:
+            - lookUpId
+      required:
+      - id
+      - type
+      - attributes
+      description: CreatePaymentIntent
+      x-tags:
+      - Model
+    AuthorizePaymentResponse:
+      type: object
+      properties:
+        data:
+          allOf:
+          - $ref: '#/components/schemas/PaymentIntent'
+          - type: object
+            properties:
+              attributes:
+                type: object
+                properties:
+                  balance:
+                    allOf:
+                    - $ref: '#/components/schemas/PaymentIntentBalanceInformation'
+                    - description: Balance information for a payment intent
+                  billingAddress:
+                    type:
+                    - object
+                    - 'null'
+                    properties:
+                      street:
+                        type:
+                        - string
+                        - 'null'
+                      street2:
+                        type:
+                        - string
+                        - 'null'
+                      city:
+                        type:
+                        - string
+                        - 'null'
+                      state:
+                        type:
+                        - string
+                        - 'null'
+                      postalCode:
+                        type:
+                        - string
+                        - 'null'
+                      country:
+                        type:
+                        - string
+                        - 'null'
+                    required:
+                    - street
+                    - street2
+                    - city
+                    - state
+                    - postalCode
+                    - country
+                  email:
+                    type:
+                    - string
+                    - 'null'
+                    format: email
+                  error:
+                    type:
+                    - string
+                    - 'null'
+                    enum:
+                    - LinkedAccountUnverified
+                    - LinkedAccountDisconnected
+                    - LinkedAccountMissing
+                    - InsufficientBalance
+                    - MissingFullName
+                    - WrongEmail
+                    - InvalidKycStatus
+                    description: Specific error associated with the current invalid status.
+                  expiresAt:
+                    type:
+                    - string
+                    - 'null'
+                    format: date-time
+                    description: The datetime at which the payment intent is set to expire. After this time, the intent cannot be promoted to a payment and is considered expired.
+                    readOnly: true
+                  fullName:
+                    type:
+                    - string
+                    - 'null'
+                  phoneNumber:
+                    type:
+                    - string
+                    - 'null'
+                  amount:
+                    type: integer
+                    description: Total purchase amount in cents.
+                    format: int32
+                    example: 3600
+                  reference:
+                    type:
+                    - string
+                    - 'null'
+                    description: Reference to the data inside an external system.
+                    example: MERCHANT-GENERATED-TOKEN
+                  status:
+                    type: string
+                    enum:
+                    - Promotable
+                    - PromotedToPayment
+                    - Invalid
+                    - Expired
+                    - Canceled
+                    description: The current status of the payment intent. Each status represents a different stage in the payment intent lifecycle, from creation to completion or cancellation.
+                    example: PromotedToPayment
+                  userId:
+                    type:
+                    - string
+                    - 'null'
+                  walletId:
+                    type:
+                    - string
+                    - 'null'
+                    description: The ID of the wallet for which the payment intent is created.
+                    example: 123e4567-e89b-12d3-a456-426614174000
+                  updatedAt:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                  createdAt:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                required:
+                - updatedAt
+                - createdAt
+          description: A transaction
+          x-tags:
+          - Model
+        included:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                description: Unique identifier for the object.
+                readOnly: true
+              type:
+                type: string
+                enum:
+                - Payment
+              attributes:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    example: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                  status:
+                    type: string
+                    enum:
+                    - Canceled
+                    - Created
+                    - Failed
+                    - Processing
+                    - Returned
+                    - Sent
+                    description: After authorize, the payment is typically `Created` until capture or settlement advances it.
+                    example: Created
+                  amount:
+                    type: integer
+                    format: int32
+                    example: 9999
+                  channel:
+                    type:
+                    - string
+                    - 'null'
+                    description: External system identifier used to identify the payment channel. E.g. App Name, Activity ID, Checkout Interface, etc.
+                    example: ORG-1
+                  reference:
+                    type:
+                    - string
+                    - 'null'
+                    description: Reference to the data inside an external system.
+                    example: MERCHANT-GENERATED-TOKEN
+                  disbursement:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        counterpartyId:
+                          type: string
+                          format: uuid
+                          description: The ID of the counterparty to whom the funds are being disbursed.
+                          example: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                        amount:
+                          type: integer
+                          description: The total amount charged with a particular payment method, represented in the smallest currency unit (e.g., cents for USD). To obtain the value in dollars, divide by 100.
+                          format: int32
+                          example: 1337
+                        fee:
+                          type: integer
+                          description: The fee assigned to this particular disbursement based on the whole payment fee, represented in the smallest currency unit (e.g., cents for USD). To obtain the value in dollars, divide by 100.
+                          format: int32
+                          deprecated: true
+                          example: 10
+                        remit:
+                          type: boolean
+                          description: Deprecated. Always returns `true`. All disbursements are remitted directly. Will be removed in a future version.
+                          example: true
+                          deprecated: true
+                      required:
+                      - counterpartyId
+                      - amount
+                      - fee
+                      - remit
+                    description: Array of disbursements associated with this payment, including counterparty IDs, amounts, and fees.
+                    example:
+                    - counterpartyId: 9f755746-13cb-4d0b-81f2-3b4f1b44f6d8
+                      amount: 800
+                      fee: 10
+                      remit: true
+                    - counterpartyId: 4cf95060-dd01-42ac-9020-8ca42004920d
+                      amount: 200
+                      fee: 5
+                      remit: true
+                  charges:
+                    type: object
+                    properties:
+                      fee:
+                        type: object
+                        properties:
+                          amount:
+                            type: integer
+                            minimum: 0
+                            description: Fee amount in cents
+                            format: int32
+                            example: 150
+                          type:
+                            type: string
+                            description: Fee type identifier
+                            example: pay_by_wallet
+                        required:
+                        - amount
+                        - type
+                        description: Processing fee details
+                      rewards:
+                        type: integer
+                        minimum: 0
+                        description: Rewards amount spent from wallet balance, in cents
+                        format: int32
+                        example: 1000
+                    description: Charges applied to this payment.
+                  deductions:
+                    type: object
+                    properties:
+                      rewards:
+                        type: integer
+                        minimum: 0
+                        description: Rewards amount spent from wallet balance, in cents
+                        format: int32
+                        example: 1000
+                      fees:
+                        type: integer
+                        minimum: 0
+                        description: Processing fees charged, in cents
+                        format: int32
+                        example: 150
+                    required:
+                    - rewards
+                    - fees
+                    description: Legacy charges breakdown. Use `charges` instead.
+                    deprecated: true
+                  expiresAt:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                  updatedAt:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                  createdAt:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                required:
+                - amount
+                - expiresAt
+                - updatedAt
+                - createdAt
+              links:
+                type: object
+                properties:
+                  virtualDebitCard:
+                    type: string
+                    example: https://secure-api.accruesavings.com/api/v1/payments/497f6eca-6276-4993-bfeb-53cbbbba6f08/card
+                required:
+                - virtualDebitCard
+              meta:
+                type: object
+                properties:
+                  processor:
+                    description: Opaque object reflecting the raw response from a third-party processor API call. The structure varies depending on which upstream call produced it and is not part of a stable, versioned contract.
+                description: Optional metadata on the Payment resource. Omitted when no processor payload is attached to the response.
+            required:
+            - id
+            - type
+            - attributes
+            - links
+      required:
+      - data
+      - included
+    AuthorizePaymentIntentForbiddenResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 403
+        code:
+          type: string
+          enum:
+          - Forbidden
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: Forbidden
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ForbiddenException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Client does not have access to this payment intent
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/payment-intents/{paymentIntentId}/authorize
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/payment-intents/{paymentIntentId}/authorize
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    GetPaymentIntentResponse:
+      type: object
+      properties:
+        data:
+          allOf:
+          - $ref: '#/components/schemas/PaymentIntent'
+          - type: object
+            properties:
+              attributes:
+                type: object
+                properties:
+                  balance:
+                    allOf:
+                    - $ref: '#/components/schemas/PaymentIntentBalanceInformation'
+                    - description: Optional wallet balance information
+                  billingAddress:
+                    type:
+                    - object
+                    - 'null'
+                    properties:
+                      street:
+                        type:
+                        - string
+                        - 'null'
+                      street2:
+                        type:
+                        - string
+                        - 'null'
+                      city:
+                        type:
+                        - string
+                        - 'null'
+                      state:
+                        type:
+                        - string
+                        - 'null'
+                      postalCode:
+                        type:
+                        - string
+                        - 'null'
+                      country:
+                        type:
+                        - string
+                        - 'null'
+                    required:
+                    - street
+                    - street2
+                    - city
+                    - state
+                    - postalCode
+                    - country
+                  email:
+                    type:
+                    - string
+                    - 'null'
+                    format: email
+                  error:
+                    type:
+                    - string
+                    - 'null'
+                    enum:
+                    - LinkedAccountUnverified
+                    - LinkedAccountDisconnected
+                    - LinkedAccountMissing
+                    - InsufficientBalance
+                    - MissingFullName
+                    - WrongEmail
+                    - InvalidKycStatus
+                    description: Specific error associated with the current invalid status.
+                  expiresAt:
+                    type:
+                    - string
+                    - 'null'
+                    format: date-time
+                    description: The datetime at which the payment intent is set to expire. After this time, the intent cannot be promoted to a payment and is considered expired.
+                    readOnly: true
+                  fullName:
+                    type:
+                    - string
+                    - 'null'
+                  phoneNumber:
+                    type:
+                    - string
+                    - 'null'
+                  amount:
+                    type: integer
+                    description: Total purchase amount in cents.
+                    format: int32
+                    example: 3600
+                  reference:
+                    type:
+                    - string
+                    - 'null'
+                    description: Reference to the data inside an external system.
+                    example: MERCHANT-GENERATED-TOKEN
+                  status:
+                    type: string
+                    enum:
+                    - Promotable
+                    - PromotedToPayment
+                    - Invalid
+                    - Expired
+                    - Canceled
+                    description: The current status of the payment intent. Each status represents a different stage in the payment intent lifecycle, from creation to completion or cancellation.
+                    example: PromotedToPayment
+                  userId:
+                    type:
+                    - string
+                    - 'null'
+                  walletId:
+                    type:
+                    - string
+                    - 'null'
+                    description: The ID of the wallet for which the payment intent is created.
+                    example: 123e4567-e89b-12d3-a456-426614174000
+                  updatedAt:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                  createdAt:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                required:
+                - updatedAt
+                - createdAt
+          description: A transaction
+          x-tags:
+          - Model
+        included:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                description: Unique identifier for the object.
+                readOnly: true
+              type:
+                type: string
+                enum:
+                - Payment
+              attributes:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    example: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                  status:
+                    type: string
+                    enum:
+                    - Canceled
+                    - Created
+                    - Failed
+                    - Processing
+                    - Returned
+                    - Sent
+                    description: After authorize, the payment is typically `Created` until capture or settlement advances it.
+                    example: Created
+                  amount:
+                    type: integer
+                    format: int32
+                    example: 9999
+                  channel:
+                    type:
+                    - string
+                    - 'null'
+                    description: External system identifier used to identify the payment channel. E.g. App Name, Activity ID, Checkout Interface, etc.
+                    example: ORG-1
+                  reference:
+                    type:
+                    - string
+                    - 'null'
+                    description: Reference to the data inside an external system.
+                    example: MERCHANT-GENERATED-TOKEN
+                  disbursement:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        counterpartyId:
+                          type: string
+                          format: uuid
+                          description: The ID of the counterparty to whom the funds are being disbursed.
+                          example: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                        amount:
+                          type: integer
+                          description: The total amount charged with a particular payment method, represented in the smallest currency unit (e.g., cents for USD). To obtain the value in dollars, divide by 100.
+                          format: int32
+                          example: 1337
+                        fee:
+                          type: integer
+                          description: The fee assigned to this particular disbursement based on the whole payment fee, represented in the smallest currency unit (e.g., cents for USD). To obtain the value in dollars, divide by 100.
+                          format: int32
+                          deprecated: true
+                          example: 10
+                        remit:
+                          type: boolean
+                          description: Deprecated. Always returns `true`. All disbursements are remitted directly. Will be removed in a future version.
+                          example: true
+                          deprecated: true
+                      required:
+                      - counterpartyId
+                      - amount
+                      - fee
+                      - remit
+                    description: Array of disbursements associated with this payment, including counterparty IDs, amounts, and fees.
+                    example:
+                    - counterpartyId: 9f755746-13cb-4d0b-81f2-3b4f1b44f6d8
+                      amount: 800
+                      fee: 10
+                      remit: true
+                    - counterpartyId: 4cf95060-dd01-42ac-9020-8ca42004920d
+                      amount: 200
+                      fee: 5
+                      remit: true
+                  charges:
+                    type: object
+                    properties:
+                      fee:
+                        type: object
+                        properties:
+                          amount:
+                            type: integer
+                            minimum: 0
+                            description: Fee amount in cents
+                            format: int32
+                            example: 150
+                          type:
+                            type: string
+                            description: Fee type identifier
+                            example: pay_by_wallet
+                        required:
+                        - amount
+                        - type
+                        description: Processing fee details
+                      rewards:
+                        type: integer
+                        minimum: 0
+                        description: Rewards amount spent from wallet balance, in cents
+                        format: int32
+                        example: 1000
+                    description: Charges applied to this payment.
+                  deductions:
+                    type: object
+                    properties:
+                      rewards:
+                        type: integer
+                        minimum: 0
+                        description: Rewards amount spent from wallet balance, in cents
+                        format: int32
+                        example: 1000
+                      fees:
+                        type: integer
+                        minimum: 0
+                        description: Processing fees charged, in cents
+                        format: int32
+                        example: 150
+                    required:
+                    - rewards
+                    - fees
+                    description: Legacy charges breakdown. Use `charges` instead.
+                    deprecated: true
+                  expiresAt:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                  updatedAt:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                  createdAt:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                required:
+                - amount
+                - expiresAt
+                - updatedAt
+                - createdAt
+              links:
+                type: object
+                properties:
+                  virtualDebitCard:
+                    type: string
+                    example: https://secure-api.accruesavings.com/api/v1/payments/497f6eca-6276-4993-bfeb-53cbbbba6f08/card
+                required:
+                - virtualDebitCard
+              meta:
+                type: object
+                properties:
+                  processor:
+                    description: Opaque object reflecting the raw response from a third-party processor API call. The structure varies depending on which upstream call produced it and is not part of a stable, versioned contract.
+                description: Optional metadata on the Payment resource. Omitted when no processor payload is attached to the response.
+            required:
+            - id
+            - type
+            - attributes
+            - links
+      required:
+      - data
+      - included
+    CreatePaymentIntentWalletAccessDeniedResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 403
+        code:
+          type: string
+          enum:
+          - WalletAccessDenied
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: WalletAccessDenied
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ErrorResponseDto
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Wallet identifier merchant mismatch
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/payment-intents
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/payment-intents
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    PaymentIntentNotFoundResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 404
+        code:
+          type: string
+        title:
+          type: string
+          description: Generic title for the error.
+          example: NotFoundException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - 'NotFoundException: Not Found'
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/payment-intents/123e4567-e89b-12d3-a456-426614174000
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/payment-intents/123e4567-e89b-12d3-a456-426614174000
+      required:
+      - id
+      - status
+      - title
+      - detail
+      - meta
+    PaymentIntentQueryValidationErrorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - BadRequest
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: BadRequest
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ValidationError
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - 'Validation failed for page[limit]: expected number'
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/payment-intents
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/payment-intents
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+x-tagGroups:
+- name: Overview
+  tags:
+  - Introduction
+  - API Design
+- name: Users
+  tags:
+  - Users
+  - LinkedAccounts
+  - Identity Verification
+- name: Wallets
+  tags:
+  - Wallets
+- name: Gifts
+  tags:
+  - Gifts
+- name: Payments
+  tags:
+  - PaymentIntents
+  - Payments
+  - ExternalTransactions
+  - Simulations
+- name: Banking & KYC
+  tags:
+  - Banking
+  - Counterparties
+  - CounterpartyTransfers
+- name: Sweepstakes
+  tags:
+  - Sweepstakes
+- name: Rewards
+  tags:
+  - Rewards
+- name: Widgets
+  tags:
+  - Widgets
+- name: Webhooks
+  tags:
+  - Webhooks
+  - WebhookEvents
+  - Webhook Topics

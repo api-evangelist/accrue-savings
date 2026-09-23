@@ -1,0 +1,2649 @@
+openapi: 3.2.0
+info:
+  version: 1.0.0
+  title: Accrue Merchant Simulations API
+  x-links:
+  - name: View Alternative Version
+    url: /api-fs/
+    description: View API documentation with alternative enum-based WebhookIncluded schema
+  description: Simulations are used to simulate payments authorizations and captures for Card Rails (Virtual Debit Cards).
+servers:
+- description: Production API
+  url: https://merchant-api.accruesavings.com
+- description: Sandbox API
+  url: https://merchant-api-sandbox.accruesavings.com
+tags:
+- name: Simulations
+  description: Simulations are used to simulate payments authorizations and captures for Card Rails (Virtual Debit Cards).
+paths:
+  /api/v1/simulation/{paymentId}/card/auth:
+    post:
+      operationId: simulateCardAuthorization
+      description: 'Simulate a card authorization request.
+
+
+        This endpoint will call our bank simulation service to authorize the amount specified.
+
+
+        After the request is received, system will create a `Authorization Request` resource, asynchronously, and it''s `authorizationRequestId` will be required to capture the funds using the Simulate Card Capture endpoint.
+
+
+        This `Authorization Request` resource can be fetched using the Get Authorization Request List endpoint.
+
+
+        **This endpoint is available for Card Rails (Virtual Debit Cards) only**.
+
+
+        Refer to Merchant API Guide for more information.'
+      summary: Simulate Card Authorization
+      tags:
+      - Simulations
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: Payment ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: paymentId
+        in: path
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/SimulateCardAuthorization'
+              required:
+              - data
+      responses:
+        '201':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                type: object
+                properties: {}
+        '400':
+          description: Bad Request
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/SimulateCardErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/SimulationPaymentNotFoundResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request POST \\\n  --url https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'POST',\n  url: 'https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"POST\", \"/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Post.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth\")\n  .post(null)\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth\"\n\n\treq, _ := http.NewRequest(\"POST\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth");
+
+          var request = new RestRequest(Method.POST);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth');\n$request->setMethod(HTTP_METH_POST);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+    get:
+      operationId: getAuthorizationRequestList
+      summary: Get Authorization Request List
+      description: 'Get a list of all the `Authorization Requests` for a given payment.
+
+
+        The `Authorization Requests` are created as a result of the Simulate Card Authorization endpoint.
+
+
+        **This endpoint is available for Card Rails (Virtual Debit Cards) only**.
+
+
+        Refer to Merchant API Guide for more information.'
+      tags:
+      - Simulations
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: Payment ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: paymentId
+        in: path
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ListAuthorizationRequestsResponse'
+        '404':
+          description: Not Found
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/SimulationPaymentNotFoundResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request GET \\\n  --url https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'GET',\n  url: 'https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"GET\", \"/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Get.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth\")\n  .get()\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth\"\n\n\treq, _ := http.NewRequest(\"GET\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth");
+
+          var request = new RestRequest(Method.GET);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth');\n$request->setMethod(HTTP_METH_GET);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+  /api/v1/simulation/{paymentId}/card/capture:
+    post:
+      operationId: simulateCardCapture
+      summary: Simulate Card Capture
+      description: 'Simulate a card capture request.
+
+
+        This endpoint will call our bank simulation service to capture the funds specified.
+
+
+        The `authorizationRequestId` is required to be passed in the request body.
+
+
+        The `authorizationRequestId` can be found in the `Authorization Request` resource, that was created as a result of the Simulate Card Authorization endpoint.
+
+
+        **This endpoint is available for Card Rails (Virtual Debit Cards) only**.
+
+
+        Refer to Merchant API Guide for more information.'
+      tags:
+      - Simulations
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: Payment ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: paymentId
+        in: path
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/SimulateCardCapture'
+              required:
+              - data
+      responses:
+        '201':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                type: object
+                properties: {}
+        '400':
+          description: Bad Request
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/SimulateCardErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/SimulationPaymentNotFoundResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request POST \\\n  --url https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/capture \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'POST',\n  url: 'https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/capture',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"POST\", \"/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/capture\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/capture")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Post.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/capture\")\n  .post(null)\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/capture\"\n\n\treq, _ := http.NewRequest(\"POST\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/capture");
+
+          var request = new RestRequest(Method.POST);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/capture');\n$request->setMethod(HTTP_METH_POST);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+    get:
+      operationId: getCapturesList
+      summary: Get Captures List
+      description: 'Get a list of all the `Captures` for a given payment.
+
+
+        The `Captures` are created as a result of the Simulate Card Authorization endpoint.
+
+
+        **This endpoint is available for Card Rails (Virtual Debit Cards) only**.
+
+
+        Refer to Merchant API Guide for more information.'
+      tags:
+      - Simulations
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: Payment ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: paymentId
+        in: path
+      - schema:
+          type: string
+          description: Filter the list of objects by the value of the method field.
+        required: false
+        name: filter[method]
+        in: query
+      - schema:
+          type: string
+          example: 'true'
+        required: false
+        name: filter[success]
+        in: query
+      - schema:
+          type: number
+          minimum: 1
+          maximum: 50
+          default: 10
+          description: Maximum number of objects that will be returned. Can not be greater than 50.
+        required: false
+        name: page[limit]
+        in: query
+      - schema:
+          type: number
+          minimum: 0
+          default: 0
+          description: Offset from the beginning of the list of objects. Can not be negative.
+        required: false
+        name: page[offset]
+        in: query
+      - schema:
+          type: string
+          default: sort=-createdAt
+          description: Sorts the list of objects by the given criteria. The sort parameter value is a comma separated list of sort criteria. Each sort criteria is a field name optionally followed by a minus sign (-) to indicate descending order. Ascending order is assumed if no minus sign is present. The sort criteria are applied in the order in which they appear in the sort parameter.
+        required: false
+        name: sort
+        in: query
+      - schema:
+          type: string
+          description: 'Comma-separated list of resources to include. Supported resources: `payments`'
+        required: false
+        name: include
+        in: query
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/CardCapturesRequestsResponse'
+        '404':
+          description: Not Found
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/SimulationPaymentNotFoundResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request GET \\\n  --url 'https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/capture?filter%5Bmethod%5D=SOME_STRING_VALUE&filter%5Bsuccess%5D=true&page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE&sort=SOME_STRING_VALUE&include=SOME_STRING_VALUE' \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'GET',\n  url: 'https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/capture',\n  qs: {\n    'filter[method]': 'SOME_STRING_VALUE',\n    'filter[success]': 'true',\n    'page[limit]': 'SOME_NUMBER_VALUE',\n    'page[offset]': 'SOME_NUMBER_VALUE',\n    sort: 'SOME_STRING_VALUE',\n    include: 'SOME_STRING_VALUE'\n  },\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"GET\", \"/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/capture?filter%5Bmethod%5D=SOME_STRING_VALUE&filter%5Bsuccess%5D=true&page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE&sort=SOME_STRING_VALUE&include=SOME_STRING_VALUE\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/capture?filter%5Bmethod%5D=SOME_STRING_VALUE&filter%5Bsuccess%5D=true&page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE&sort=SOME_STRING_VALUE&include=SOME_STRING_VALUE")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Get.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/capture?filter%5Bmethod%5D=SOME_STRING_VALUE&filter%5Bsuccess%5D=true&page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE&sort=SOME_STRING_VALUE&include=SOME_STRING_VALUE\")\n  .get()\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/capture?filter%5Bmethod%5D=SOME_STRING_VALUE&filter%5Bsuccess%5D=true&page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE&sort=SOME_STRING_VALUE&include=SOME_STRING_VALUE\"\n\n\treq, _ := http.NewRequest(\"GET\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/capture?filter%5Bmethod%5D=SOME_STRING_VALUE&filter%5Bsuccess%5D=true&page%5Blimit%5D=SOME_NUMBER_VALUE&page%5Boffset%5D=SOME_NUMBER_VALUE&sort=SOME_STRING_VALUE&include=SOME_STRING_VALUE");
+
+          var request = new RestRequest(Method.GET);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/capture');\n$request->setMethod(HTTP_METH_GET);\n\n$request->setQueryData([\n  'filter[method]' => 'SOME_STRING_VALUE',\n  'filter[success]' => 'true',\n  'page[limit]' => 'SOME_NUMBER_VALUE',\n  'page[offset]' => 'SOME_NUMBER_VALUE',\n  'sort' => 'SOME_STRING_VALUE',\n  'include' => 'SOME_STRING_VALUE'\n]);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+  /api/v1/simulation/{paymentId}/card/auth-capture:
+    post:
+      operationId: simulateCardAuthorizationCapture
+      description: 'Simulate a card authorization/capture request.
+
+
+        This endpoint aggregates the Simulate Card Authorization and Simulate Card Capture endpoints.
+
+
+        **This endpoint is available for Card Rails (Virtual Debit Cards) only**.
+
+
+        Refer to Merchant API Guide for more information.'
+      summary: Simulate Card Authorization/Capture
+      tags:
+      - Simulations
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: Payment ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: paymentId
+        in: path
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/SimulateCardAuthorizationCapture'
+              required:
+              - data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates whether the authorization/capture was successful.
+                    example: true
+                  error:
+                    type:
+                    - string
+                    - 'null'
+                    description: Error message if the authorization/capture was not successful.
+                    example: Error message
+                required:
+                - success
+                - error
+        '400':
+          description: Bad Request
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/SimulationCardAuthorizationValidationResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request POST \\\n  --url https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth-capture \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'POST',\n  url: 'https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth-capture',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"POST\", \"/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth-capture\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth-capture")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Post.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth-capture\")\n  .post(null)\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth-capture\"\n\n\treq, _ := http.NewRequest(\"POST\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth-capture");
+
+          var request = new RestRequest(Method.POST);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth-capture');\n$request->setMethod(HTTP_METH_POST);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+  /api/v1/simulation/wallets/{walletId}/backup-linked-account:
+    post:
+      operationId: createDemoBackupPaymentMethod
+      summary: Create Demo Backup Payment Method
+      description: 'Create a demo backup payment method (linked account) for a wallet in testing environments.
+
+
+        This endpoint simulates linking a bank account to a wallet for backup payment purposes without requiring actual bank account credentials or Plaid integration.
+
+
+        The created linked account can be used as a backup payment method for transactions when the primary funding source is insufficient.
+
+
+        **This endpoint is only available in development, sandbox, and local testing environments.**
+
+
+        The `testCardType` parameter is optional and allows you to specify which type of test card to simulate. If not provided, a default test card type will be used.'
+      tags:
+      - Simulations
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: Wallet ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: walletId
+        in: path
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                testCardType:
+                  type: string
+                  enum:
+                  - visa-us-credit
+                  - visa-gb-credit
+                  - visa-gb-debit
+                  - mastercard-mu-credit
+                  - mastercard-de-debit
+                  description: Test card type from Checkout.com that returns response code 10000 (successful transaction)
+                  example: visa-us-credit
+      responses:
+        '200':
+          description: Successfully created demo backup payment method
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/CreateDemoBackupPaymentMethodResponse'
+        '201':
+          description: Successfully created demo backup payment method
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/CreateDemoBackupPaymentMethodResponse'
+        '404':
+          description: Wallet not found
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request POST \\\n  --url https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/backup-linked-account \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000' \\\n  --header 'content-type: application/json' \\\n  --data '{\"testCardType\":\"visa-us-credit\"}'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'POST',\n  url: 'https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/backup-linked-account',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef',\n    'content-type': 'application/json'\n  },\n  body: {testCardType: 'visa-us-credit'},\n  json: true\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\npayload = \"{\\\"testCardType\\\":\\\"visa-us-credit\\\"}\"\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\",\n    'content-type': \"application/json\"\n    }\n\nconn.request(\"POST\", \"/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/backup-linked-account\", payload, headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/backup-linked-account")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Post.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+          request["content-type"] = ''application/json''
+
+          request.body = "{\"testCardType\":\"visa-us-credit\"}"
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nMediaType mediaType = MediaType.parse(\"application/json\");\nRequestBody body = RequestBody.create(mediaType, \"{\\\"testCardType\\\":\\\"visa-us-credit\\\"}\");\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/backup-linked-account\")\n  .post(body)\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .addHeader(\"content-type\", \"application/json\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"strings\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/backup-linked-account\"\n\n\tpayload := strings.NewReader(\"{\\\"testCardType\\\":\\\"visa-us-credit\\\"}\")\n\n\treq, _ := http.NewRequest(\"POST\", url, payload)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\treq.Header.Add(\"content-type\", \"application/json\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/backup-linked-account");
+
+          var request = new RestRequest(Method.POST);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          request.AddHeader("content-type", "application/json");
+
+          request.AddParameter("application/json", "{\"testCardType\":\"visa-us-credit\"}", ParameterType.RequestBody);
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/backup-linked-account');\n$request->setMethod(HTTP_METH_POST);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef',\n  'content-type' => 'application/json'\n]);\n\n$request->setBody('{\"testCardType\":\"visa-us-credit\"}');\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+  /api/v1/simulation/wallets/{walletId}/clear-pending/{type}:
+    post:
+      operationId: clearPendingTransactions
+      summary: Clear Pending Transactions
+      description: 'Clear pending transactions for a wallet by type (bank or card).
+
+
+        This endpoint will clear all pending transactions of the specified type for the given wallet.
+
+
+        **This endpoint is only available in development, sandbox, and local testing environments.**'
+      tags:
+      - Simulations
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: Wallet ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: walletId
+        in: path
+      - schema:
+          type: string
+          enum:
+          - bank
+          - card
+          description: Transaction type to clear. 'bank' for ACH/bank transactions, 'card' for card transactions.
+          example: bank
+        required: true
+        name: type
+        in: path
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      responses:
+        '204':
+          description: No Content - Transactions cleared successfully
+        '400':
+          description: Bad Request
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/InvalidTransactionTypeResponse'
+        '404':
+          description: Wallet not found
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/WalletNotFoundForSimulationResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request POST \\\n  --url https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/clear-pending/bank \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'POST',\n  url: 'https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/clear-pending/bank',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"POST\", \"/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/clear-pending/bank\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/clear-pending/bank")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Post.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/clear-pending/bank\")\n  .post(null)\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/clear-pending/bank\"\n\n\treq, _ := http.NewRequest(\"POST\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/clear-pending/bank");
+
+          var request = new RestRequest(Method.POST);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/clear-pending/bank');\n$request->setMethod(HTTP_METH_POST);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+  /api/v1/simulation/wallets/{walletId}/barcodes:
+    get:
+      operationId: listWalletBarcodes
+      summary: List Wallet Barcodes
+      description: 'List all barcodes for a wallet in testing environments.
+
+
+        Optionally include expired barcodes via `includeExpired`.
+
+
+        **This endpoint is only available in development, sandbox, and local testing environments.**'
+      tags:
+      - Simulations
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: Wallet ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: walletId
+        in: path
+      - schema:
+          type: boolean
+          description: Include expired barcodes. Defaults to false.
+          example: false
+        required: false
+        name: includeExpired
+        in: query
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ListWalletBarcodesResponse'
+        '404':
+          description: Wallet not found
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/WalletNotFoundForSimulationResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request GET \\\n  --url 'https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/barcodes?includeExpired=false' \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'GET',\n  url: 'https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/barcodes',\n  qs: {includeExpired: 'false'},\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"GET\", \"/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/barcodes?includeExpired=false\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/barcodes?includeExpired=false")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Get.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/barcodes?includeExpired=false\")\n  .get()\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/barcodes?includeExpired=false\"\n\n\treq, _ := http.NewRequest(\"GET\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/barcodes?includeExpired=false");
+
+          var request = new RestRequest(Method.GET);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/barcodes');\n$request->setMethod(HTTP_METH_GET);\n\n$request->setQueryData([\n  'includeExpired' => 'false'\n]);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+    post:
+      operationId: generateWalletBarcode
+      summary: Generate Wallet Barcode
+      description: 'Generate a barcode for a wallet in testing environments.
+
+
+        The barcode `lookUpId` can be used when creating payment intents or when fetching the barcode via Get Wallet Barcode.
+
+
+        **This endpoint is only available in development, sandbox, and local testing environments.**'
+      tags:
+      - Simulations
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: Wallet ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: walletId
+        in: path
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/GenerateWalletBarcode'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/GenerateWalletBarcodeResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/GenerateBarcodeValidationResponse'
+        '404':
+          description: Wallet not found
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/WalletNotFoundForSimulationResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request POST \\\n  --url https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/barcodes \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'POST',\n  url: 'https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/barcodes',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"POST\", \"/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/barcodes\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/barcodes")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Post.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/barcodes\")\n  .post(null)\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/barcodes\"\n\n\treq, _ := http.NewRequest(\"POST\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/barcodes");
+
+          var request = new RestRequest(Method.POST);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/barcodes');\n$request->setMethod(HTTP_METH_POST);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+  /api/v1/simulation/barcodes/{lookUpId}:
+    get:
+      operationId: getWalletBarcode
+      summary: Get Wallet Barcode
+      description: 'Fetch a barcode by its `lookUpId` in testing environments.
+
+
+        The `id` in the response is the wallet ID. Validation is scoped to the merchant derived from the request.
+
+
+        **This endpoint is only available in development, sandbox, and local testing environments.**'
+      tags:
+      - Simulations
+      parameters:
+      - schema:
+          type: string
+          description: Lookup identifier for the barcode
+          example: SCAN-LOOKUP-ID
+        required: true
+        name: lookUpId
+        in: path
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/GetWalletBarcodeResponse'
+        '400':
+          description: Barcode expired or invalid
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/BarcodeExpiredOrInvalidResponse'
+        '404':
+          description: Barcode not found
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/BarcodeNotFoundResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request GET \\\n  --url https://merchant-api.accruesavings.com/api/v1/simulation/barcodes/SCAN-LOOKUP-ID \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'GET',\n  url: 'https://merchant-api.accruesavings.com/api/v1/simulation/barcodes/SCAN-LOOKUP-ID',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"GET\", \"/api/v1/simulation/barcodes/SCAN-LOOKUP-ID\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/simulation/barcodes/SCAN-LOOKUP-ID")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Get.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/simulation/barcodes/SCAN-LOOKUP-ID\")\n  .get()\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/simulation/barcodes/SCAN-LOOKUP-ID\"\n\n\treq, _ := http.NewRequest(\"GET\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/simulation/barcodes/SCAN-LOOKUP-ID");
+
+          var request = new RestRequest(Method.GET);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/simulation/barcodes/SCAN-LOOKUP-ID');\n$request->setMethod(HTTP_METH_GET);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+  /api/v1/simulation/wallets/{walletId}/fail-transaction:
+    post:
+      operationId: failPendingTransaction
+      summary: Fail Pending Transaction
+      description: 'Fail a pending transaction for a wallet (ACH or card).
+
+
+        Fails a pending transaction either by transaction ID or the first pending transaction if no ID is provided.
+
+
+        An optional failure reason can be specified to simulate different failure scenarios.
+
+
+        **This endpoint is only available in development, sandbox, and local testing environments.**'
+      tags:
+      - Simulations
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: Wallet ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: walletId
+        in: path
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      requestBody:
+        required: false
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/FailPendingTransactionRequest'
+      responses:
+        '204':
+          description: No Content - Transaction failed successfully
+        '400':
+          description: Bad Request - Invalid transaction
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/InvalidTransactionResponse'
+        '404':
+          description: Wallet not found
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/WalletNotFoundForSimulationResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request POST \\\n  --url https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/fail-transaction \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'POST',\n  url: 'https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/fail-transaction',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"POST\", \"/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/fail-transaction\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/fail-transaction")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Post.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/fail-transaction\")\n  .post(null)\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/fail-transaction\"\n\n\treq, _ := http.NewRequest(\"POST\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/fail-transaction");
+
+          var request = new RestRequest(Method.POST);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/fail-transaction');\n$request->setMethod(HTTP_METH_POST);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+  /api/v1/simulation/counterparties/{counterpartyId}/deposits:
+    post:
+      operationId: simulateCounterpartyDeposit
+      summary: Simulate Counterparty Deposit
+      description: 'Simulate an incoming bank deposit into a counterparty''s Accrue deposit account.
+
+
+        Use this to credit a counterparty in development, sandbox, and local environments without sending a real ACH or wire.
+
+
+        The request is accepted immediately. The counterparty balance updates asynchronously after the incoming payment is processed, so a subsequent read may briefly show the previous balance.
+
+
+        The counterparty must already have an Accrue deposit account (`internalBankAccount` on the counterparty resource). Counterparties without one cannot receive simulated deposits.
+
+
+        **This endpoint is only available in development, sandbox, and local testing environments.**'
+      tags:
+      - Simulations
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: Counterparty ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: counterpartyId
+        in: path
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/SimulateCounterpartyDeposit'
+              required:
+              - data
+      responses:
+        '204':
+          description: No Content - Deposit simulation accepted
+        '400':
+          description: Invalid amount, or counterparty does not have an Accrue deposit account
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/CounterpartyDepositSimulationValidationResponse'
+        '404':
+          description: Counterparty not found
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/CounterpartyNotFoundForSimulationResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request POST \\\n  --url https://merchant-api.accruesavings.com/api/v1/simulation/counterparties/123e4567-e89b-12d3-a456-426614174000/deposits \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'POST',\n  url: 'https://merchant-api.accruesavings.com/api/v1/simulation/counterparties/123e4567-e89b-12d3-a456-426614174000/deposits',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"POST\", \"/api/v1/simulation/counterparties/123e4567-e89b-12d3-a456-426614174000/deposits\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/simulation/counterparties/123e4567-e89b-12d3-a456-426614174000/deposits")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Post.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/simulation/counterparties/123e4567-e89b-12d3-a456-426614174000/deposits\")\n  .post(null)\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/simulation/counterparties/123e4567-e89b-12d3-a456-426614174000/deposits\"\n\n\treq, _ := http.NewRequest(\"POST\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/simulation/counterparties/123e4567-e89b-12d3-a456-426614174000/deposits");
+
+          var request = new RestRequest(Method.POST);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/simulation/counterparties/123e4567-e89b-12d3-a456-426614174000/deposits');\n$request->setMethod(HTTP_METH_POST);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+components:
+  schemas:
+    WalletBarcode:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - WalletBarcode
+        attributes:
+          type: object
+          properties:
+            lookUpId:
+              type: string
+              description: Lookup identifier for the barcode. Used when creating payment intents or fetching the barcode.
+              example: SCAN-LOOKUP-ID
+            expiresAt:
+              type:
+              - string
+              - 'null'
+              format: date-time
+              description: When the barcode expires. Null if no expiry.
+              example: '2025-12-31T23:59:59.000Z'
+            usageLimit:
+              type:
+              - integer
+              - 'null'
+              description: Maximum number of times the barcode can be used. Null if unlimited.
+              format: int32
+            usageCount:
+              type: integer
+              description: Number of times the barcode has been used. Present in list/generate responses.
+              format: int32
+            referenceId:
+              type:
+              - string
+              - 'null'
+              description: External reference ID. Present when fetching barcode by lookUpId.
+              example: customer-reference-id
+            createdAt:
+              type: string
+              format: date-time
+              readOnly: true
+            updatedAt:
+              type: string
+              format: date-time
+              readOnly: true
+          required:
+          - lookUpId
+          - expiresAt
+          - createdAt
+          - updatedAt
+      required:
+      - id
+      - type
+      - attributes
+      description: WalletBarcode
+      x-tags:
+      - Model
+    CounterpartyNotFoundForSimulationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 404
+        code:
+          type: string
+          enum:
+          - NotFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: NotFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ErrorResponseDto
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Counterparty not found
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/simulation/counterparties/123e4567-e89b-12d3-a456-426614174000/deposits
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/simulation/counterparties/123e4567-e89b-12d3-a456-426614174000/deposits
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    CreateDemoBackupPaymentMethodResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/DemoBackupPaymentMethod'
+      required:
+      - data
+    SimulateCounterpartyDeposit:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - SimulateCounterpartyDeposit
+        attributes:
+          type: object
+          properties:
+            amount:
+              type: integer
+              minimum: 1
+              description: Amount to deposit in cents
+              format: int32
+              example: 10000
+          required:
+          - amount
+      required:
+      - id
+      - type
+      - attributes
+      description: SimulateCounterpartyDeposit
+      x-tags:
+      - Model
+    CounterpartyDepositSimulationValidationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - InvalidAmount
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: InvalidAmount
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ErrorResponseDto
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Amount must be a positive integer.
+          - Counterparty does not have an Accrue deposit account to receive external deposits.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/simulation/counterparties/123e4567-e89b-12d3-a456-426614174000/deposits
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/simulation/counterparties/123e4567-e89b-12d3-a456-426614174000/deposits
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    SimulationPaymentNotFoundResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 404
+        code:
+          type: string
+          enum:
+          - NotFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: NotFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: SimulationNotFoundException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - 'Payment not found for paymentId: {paymentId}'
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    WalletNotFoundForSimulationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 404
+        code:
+          type: string
+          enum:
+          - WalletNotFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: WalletNotFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ErrorResponseDto
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Wallet not found
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/clear-pending/bank
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/clear-pending/bank
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    GenerateWalletBarcodeResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/WalletBarcode'
+      required:
+      - data
+    FailPendingTransactionRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - FailPendingTransaction
+        attributes:
+          type: object
+          properties:
+            transactionId:
+              type: string
+              format: uuid
+              description: Optional transaction ID. If not provided, the first pending transaction will be failed.
+              example: 123e4567-e89b-12d3-a456-426614174000
+            reason:
+              type: string
+              enum:
+              - Canceled
+              - HardDecline
+              - SoftDecline
+              - Expired
+              - InsufficientFunds
+              - Reversed
+              - Unknown
+              description: Transaction failure reason applied when failing the pending transaction (ACH or card). If not provided, defaults to Unknown.
+              example: InsufficientFunds
+      required:
+      - id
+      - type
+      - attributes
+      description: Fail Pending Transaction request
+      x-tags:
+      - Model
+    AuthorizationRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - AuthorizationRequest
+        attributes:
+          type: object
+          properties:
+            paymentId:
+              type: string
+              format: uuid
+              description: Payment ID
+              example: 123e4567-e89b-12d3-a456-426614174000
+            walletId:
+              type: string
+              format: uuid
+              description: Wallet ID
+              example: 123e4567-e89b-12d3-a456-426614174000
+            status:
+              type: string
+              enum:
+              - Declined
+              - Approved
+              - Pending
+              - Canceled
+              description: Status
+              example: Approved
+            amount:
+              type: integer
+              description: Amount
+              format: int32
+              example: 9999
+            createdAt:
+              type: string
+              format: date-time
+              readOnly: true
+            updatedAt:
+              type: string
+              format: date-time
+              readOnly: true
+          required:
+          - paymentId
+          - walletId
+          - status
+          - amount
+          - createdAt
+          - updatedAt
+      required:
+      - id
+      - type
+      - attributes
+      description: AuthorizationRequest
+      x-tags:
+      - Model
+    GenerateWalletBarcode:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - GenerateWalletBarcode
+        attributes:
+          type: object
+          properties:
+            expiresAt:
+              type: string
+              format: date-time
+              description: When the barcode should expire. Omit for default expiration.
+              example: '2025-12-31T23:59:59.000Z'
+            usageLimit:
+              type: integer
+              description: Maximum number of times the barcode can be used. Omit for unlimited.
+              format: int32
+            reuseActive:
+              type: boolean
+              description: If true, reuses an active barcode when one exists instead of creating a new one.
+      required:
+      - id
+      - type
+      - attributes
+      description: Generate Wallet Barcode request
+      x-tags:
+      - Model
+    SimulateCardAuthorization:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - SimulateCardAuthorization
+        attributes:
+          type: object
+          properties:
+            amount:
+              type: integer
+              description: Amount to authorize in cents
+              format: int32
+          required:
+          - amount
+      required:
+      - id
+      - type
+      - attributes
+      description: SimulateCardAuthorization
+      x-tags:
+      - Model
+    ListWalletBarcodesResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/WalletBarcode'
+      required:
+      - data
+    ListAuthorizationRequestsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuthorizationRequest'
+      required:
+      - data
+    SimulationCardNotSupportedResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - WalletNotFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: WalletNotFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: SimulationException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - 'Payment does not support VDC authorization: {paymentId}'
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    CardCapturesRequestsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CardCapture'
+      required:
+      - data
+    CardCapture:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - Capture
+        attributes:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: Capture ID
+              example: 123e4567-e89b-12d3-a456-426614174000
+            amount:
+              type: integer
+              description: The total amount of the payment captured, represented in the smallest currency unit (e.g., cents for USD). To obtain the value in dollars, divide by 100.
+              format: int32
+              example: 9999
+            success:
+              type: boolean
+              description: Indicates whether the capture was successful.
+              example: true
+            method:
+              type: string
+              enum:
+              - BankRails
+              - VirtualDebitCard
+              description: The payment method used to capture the payment.
+              example: VirtualDebitCard
+            reference:
+              type:
+              - string
+              - 'null'
+              description: Reference to the data inside an external system.
+              example: MERCHANT-GENERATED-TOKEN
+            updatedAt:
+              type: string
+              format: date-time
+              readOnly: true
+            createdAt:
+              type: string
+              format: date-time
+              readOnly: true
+          required:
+          - id
+          - amount
+          - success
+          - method
+          - updatedAt
+          - createdAt
+      required:
+      - id
+      - type
+      - attributes
+      description: CardCapture
+      x-tags:
+      - Model
+    SimulationCardAuthorizationValidationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - InvalidAmount
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: InvalidAmount
+        title:
+          type: string
+          description: Generic title for the error.
+          example: SimulationValidationException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Amount must be greater than 0.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    BarcodeExpiredOrInvalidResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - InvalidTransaction
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: InvalidTransaction
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ErrorResponseDto
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Barcode has expired.
+          - Barcode has exceeded maximum uses.
+          - Barcode does not belong to this merchant.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/simulation/barcodes/SCAN-LOOKUP-ID
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/simulation/barcodes/SCAN-LOOKUP-ID
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    SimulateCardAuthorizationCapture:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - SimulateCardAuthorizationCapture
+        attributes:
+          type: object
+          properties:
+            amount:
+              type: integer
+              description: Amount to authorize/capture in cents
+              format: int32
+          required:
+          - amount
+      required:
+      - id
+      - type
+      - attributes
+      description: SimulateCardAuthorizationCapture
+      x-tags:
+      - Model
+    SimulateCardErrorResponse:
+      anyOf:
+      - $ref: '#/components/schemas/SimulationCardAuthorizationValidationResponse'
+      - $ref: '#/components/schemas/SimulationCardNotSupportedResponse'
+    SimulateCardCapture:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - SimulateCardCapture
+        attributes:
+          type: object
+          properties:
+            authorizationRequestId:
+              type: string
+              format: uuid
+              description: Authorization Request ID
+            amount:
+              type: integer
+              description: Amount to capture in cents
+              format: int32
+          required:
+          - authorizationRequestId
+          - amount
+      required:
+      - id
+      - type
+      - attributes
+      description: SimulateCardCapture
+      x-tags:
+      - Model
+    InvalidTransactionTypeResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - InvalidTransactionType
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: InvalidTransactionType
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ErrorResponseDto
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Invalid transaction type
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/clear-pending/bank
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/clear-pending/bank
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    InvalidTransactionResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - InvalidTransaction
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: InvalidTransaction
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ErrorResponseDto
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Invalid transaction
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/fail-transaction
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/fail-transaction
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    GetWalletBarcodeResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/WalletBarcode'
+      required:
+      - data
+    GenerateBarcodeValidationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - InvalidTransaction
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: InvalidTransaction
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ErrorResponseDto
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Cannot generate barcode for wallet. Ensure the wallet is active and KYC is approved.
+          - Failed to generate barcode for wallet.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/barcodes
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/barcodes
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    DemoBackupPaymentMethod:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - DemoBackupPaymentMethod
+        attributes:
+          type: object
+          properties:
+            linkedAccountId:
+              type: string
+              format: uuid
+              description: The ID of the created linked account that serves as the backup payment method
+              example: 123e4567-e89b-12d3-a456-426614174000
+            accountMask:
+              type: string
+              description: The last 4 digits of the account number
+              example: '1234'
+            institutionName:
+              type: string
+              description: The name of the financial institution
+              example: Test Bank
+            accountType:
+              type: string
+              description: The type of account (e.g., checking, savings)
+              example: checking
+            status:
+              type: string
+              description: The status of the linked account
+              example: active
+            updatedAt:
+              type: string
+              format: date-time
+              readOnly: true
+            createdAt:
+              type: string
+              format: date-time
+              readOnly: true
+          required:
+          - linkedAccountId
+          - accountMask
+          - institutionName
+          - accountType
+          - status
+          - updatedAt
+          - createdAt
+      required:
+      - id
+      - type
+      - attributes
+      description: Demo Backup Payment Method
+      x-tags:
+      - Model
+    BarcodeNotFoundResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 404
+        code:
+          type: string
+          enum:
+          - BarcodeNotFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: BarcodeNotFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ErrorResponseDto
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Barcode not found
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/simulation/barcodes/SCAN-LOOKUP-ID
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/simulation/barcodes/SCAN-LOOKUP-ID
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+x-tagGroups:
+- name: Overview
+  tags:
+  - Introduction
+  - API Design
+- name: Users
+  tags:
+  - Users
+  - LinkedAccounts
+  - Identity Verification
+- name: Wallets
+  tags:
+  - Wallets
+- name: Gifts
+  tags:
+  - Gifts
+- name: Payments
+  tags:
+  - PaymentIntents
+  - Payments
+  - ExternalTransactions
+  - Simulations
+- name: Banking & KYC
+  tags:
+  - Banking
+  - Counterparties
+  - CounterpartyTransfers
+- name: Sweepstakes
+  tags:
+  - Sweepstakes
+- name: Rewards
+  tags:
+  - Rewards
+- name: Widgets
+  tags:
+  - Widgets
+- name: Webhooks
+  tags:
+  - Webhooks
+  - WebhookEvents
+  - Webhook Topics

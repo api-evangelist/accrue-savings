@@ -1,0 +1,1381 @@
+openapi: 3.2.0
+info:
+  version: 1.0.0
+  title: Accrue Merchant Widgets API
+  x-links:
+  - name: View Alternative Version
+    url: /api-fs/
+    description: View API documentation with alternative enum-based WebhookIncluded schema
+  description: 'Widgets are components that are embedded into applications to enrich the user experience. Some of those require additional data loaded through API endpoints.
+
+
+    Learn more about the different widget types here.'
+servers:
+- description: Production API
+  url: https://merchant-api.accruesavings.com
+- description: Sandbox API
+  url: https://merchant-api-sandbox.accruesavings.com
+tags:
+- name: Widgets
+  description: 'Widgets are components that are embedded into applications to enrich the user experience. Some of those require additional data loaded through API endpoints.
+
+
+    Learn more about the different widget types here.'
+paths:
+  /api/v1/widgets/wallet/{walletId}:
+    get:
+      operationId: getWalletWidgetData
+      tags:
+      - Widgets
+      summary: Get Wallet Widget Data
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: Wallet ID for which widgets are loaded
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: walletId
+        in: path
+      - schema:
+          type: boolean
+          description: Include the Data Transfer Object field, containing widget data in a structured format.
+        required: false
+        name: includeDto
+        in: query
+      - schema:
+          type: integer
+          description: Purchase amount (in cents)
+          format: int32
+          example: 1000
+        required: false
+        name: purchaseAmount
+        in: query
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/GetWalletWidgetDataResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/WalletWidgetErrorResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request GET \\\n  --url 'https://merchant-api.accruesavings.com/api/v1/widgets/wallet/123e4567-e89b-12d3-a456-426614174000?includeDto=SOME_BOOLEAN_VALUE&purchaseAmount=1000' \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'GET',\n  url: 'https://merchant-api.accruesavings.com/api/v1/widgets/wallet/123e4567-e89b-12d3-a456-426614174000',\n  qs: {includeDto: 'SOME_BOOLEAN_VALUE', purchaseAmount: '1000'},\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"GET\", \"/api/v1/widgets/wallet/123e4567-e89b-12d3-a456-426614174000?includeDto=SOME_BOOLEAN_VALUE&purchaseAmount=1000\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/widgets/wallet/123e4567-e89b-12d3-a456-426614174000?includeDto=SOME_BOOLEAN_VALUE&purchaseAmount=1000")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Get.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/widgets/wallet/123e4567-e89b-12d3-a456-426614174000?includeDto=SOME_BOOLEAN_VALUE&purchaseAmount=1000\")\n  .get()\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/widgets/wallet/123e4567-e89b-12d3-a456-426614174000?includeDto=SOME_BOOLEAN_VALUE&purchaseAmount=1000\"\n\n\treq, _ := http.NewRequest(\"GET\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/widgets/wallet/123e4567-e89b-12d3-a456-426614174000?includeDto=SOME_BOOLEAN_VALUE&purchaseAmount=1000");
+
+          var request = new RestRequest(Method.GET);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/widgets/wallet/123e4567-e89b-12d3-a456-426614174000');\n$request->setMethod(HTTP_METH_GET);\n\n$request->setQueryData([\n  'includeDto' => 'SOME_BOOLEAN_VALUE',\n  'purchaseAmount' => '1000'\n]);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+  /api/v1/widgets/wallet:
+    get:
+      operationId: findWalletWidgetData
+      tags:
+      - Widgets
+      summary: Find Wallet Widget Data
+      parameters:
+      - schema:
+          type: boolean
+          description: Include the Data Transfer Object field, containing widget data in a structured format.
+        required: false
+        name: includeDto
+        in: query
+      - schema:
+          type: integer
+          description: Purchase amount (in cents)
+          format: int32
+          example: 1000
+        required: false
+        name: purchaseAmount
+        in: query
+      - schema:
+          type: string
+          description: Merchant-scoped user identifier (`stableReferenceId`). Preferred for new integrations.
+          example: stable-abc-123
+        required: false
+        name: filter[userReference]
+        in: query
+      - schema:
+          type: string
+          description: Legacy `referenceId`. Provide alongside `filter[userReference]` when the stable id may not be on file yet.
+          example: user-123
+        required: false
+        name: filter[secondaryUserReference]
+        in: query
+      - schema:
+          type: string
+          description: Filter the list of objects by the value of the phoneNumber field.
+        required: false
+        name: filter[phoneNumber]
+        in: query
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/GetWalletWidgetDataResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/vnd.api+json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/WalletWidgetErrorResponse'
+                - anyOf:
+                  - $ref: '#/components/schemas/NoWalletFoundResponse'
+                  - $ref: '#/components/schemas/MultipleWalletsFoundForWidgetResponse'
+                  - $ref: '#/components/schemas/InvalidIdentifierForWidgetResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request GET \\\n  --url 'https://merchant-api.accruesavings.com/api/v1/widgets/wallet?includeDto=SOME_BOOLEAN_VALUE&purchaseAmount=1000&filter%5BuserReference%5D=stable-abc-123&filter%5BsecondaryUserReference%5D=user-123&filter%5BphoneNumber%5D=SOME_STRING_VALUE' \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'GET',\n  url: 'https://merchant-api.accruesavings.com/api/v1/widgets/wallet',\n  qs: {\n    includeDto: 'SOME_BOOLEAN_VALUE',\n    purchaseAmount: '1000',\n    'filter[userReference]': 'stable-abc-123',\n    'filter[secondaryUserReference]': 'user-123',\n    'filter[phoneNumber]': 'SOME_STRING_VALUE'\n  },\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"GET\", \"/api/v1/widgets/wallet?includeDto=SOME_BOOLEAN_VALUE&purchaseAmount=1000&filter%5BuserReference%5D=stable-abc-123&filter%5BsecondaryUserReference%5D=user-123&filter%5BphoneNumber%5D=SOME_STRING_VALUE\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/widgets/wallet?includeDto=SOME_BOOLEAN_VALUE&purchaseAmount=1000&filter%5BuserReference%5D=stable-abc-123&filter%5BsecondaryUserReference%5D=user-123&filter%5BphoneNumber%5D=SOME_STRING_VALUE")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Get.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/widgets/wallet?includeDto=SOME_BOOLEAN_VALUE&purchaseAmount=1000&filter%5BuserReference%5D=stable-abc-123&filter%5BsecondaryUserReference%5D=user-123&filter%5BphoneNumber%5D=SOME_STRING_VALUE\")\n  .get()\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/widgets/wallet?includeDto=SOME_BOOLEAN_VALUE&purchaseAmount=1000&filter%5BuserReference%5D=stable-abc-123&filter%5BsecondaryUserReference%5D=user-123&filter%5BphoneNumber%5D=SOME_STRING_VALUE\"\n\n\treq, _ := http.NewRequest(\"GET\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/widgets/wallet?includeDto=SOME_BOOLEAN_VALUE&purchaseAmount=1000&filter%5BuserReference%5D=stable-abc-123&filter%5BsecondaryUserReference%5D=user-123&filter%5BphoneNumber%5D=SOME_STRING_VALUE");
+
+          var request = new RestRequest(Method.GET);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/widgets/wallet');\n$request->setMethod(HTTP_METH_GET);\n\n$request->setQueryData([\n  'includeDto' => 'SOME_BOOLEAN_VALUE',\n  'purchaseAmount' => '1000',\n  'filter[userReference]' => 'stable-abc-123',\n  'filter[secondaryUserReference]' => 'user-123',\n  'filter[phoneNumber]' => 'SOME_STRING_VALUE'\n]);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+  /api/v1/widgets/payment-intent/{paymentIntentId}/linked-account:
+    get:
+      operationId: getLinkedAccountWidgetData
+      tags:
+      - Widgets
+      summary: Get Linked Account Widget Data
+      description: 'This endpoint returns data for the Linked Account Widget.
+
+
+        If you prefer to build your own widget, you can use the `dto` field to get the data in a structured format.'
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: Payment Intent ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: paymentIntentId
+        in: path
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/GetLinkedAccountWidgetDataResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/LinkedAccountWidgetErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedWidgetErrorResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request GET \\\n  --url https://merchant-api.accruesavings.com/api/v1/widgets/payment-intent/123e4567-e89b-12d3-a456-426614174000/linked-account \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'GET',\n  url: 'https://merchant-api.accruesavings.com/api/v1/widgets/payment-intent/123e4567-e89b-12d3-a456-426614174000/linked-account',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"GET\", \"/api/v1/widgets/payment-intent/123e4567-e89b-12d3-a456-426614174000/linked-account\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/widgets/payment-intent/123e4567-e89b-12d3-a456-426614174000/linked-account")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Get.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/widgets/payment-intent/123e4567-e89b-12d3-a456-426614174000/linked-account\")\n  .get()\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/widgets/payment-intent/123e4567-e89b-12d3-a456-426614174000/linked-account\"\n\n\treq, _ := http.NewRequest(\"GET\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/widgets/payment-intent/123e4567-e89b-12d3-a456-426614174000/linked-account");
+
+          var request = new RestRequest(Method.GET);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/widgets/payment-intent/123e4567-e89b-12d3-a456-426614174000/linked-account');\n$request->setMethod(HTTP_METH_GET);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+  /api/v2/widgets/wallet/{walletId}:
+    get:
+      operationId: getWalletWidgetDataV2
+      tags:
+      - Widgets
+      summary: Get Wallet Widget Data (V2)
+      description: 'This endpoint returns data: null instead of 400 error when no wallet is found'
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: Wallet ID for which widgets are loaded
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: walletId
+        in: path
+      - schema:
+          type: boolean
+          description: Include the Data Transfer Object field, containing widget data in a structured format.
+        required: false
+        name: includeDto
+        in: query
+      - schema:
+          type: integer
+          description: Purchase amount (in cents)
+          format: int32
+          example: 1000
+        required: false
+        name: purchaseAmount
+        in: query
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/GetWalletWidgetDataV2Response'
+        '400':
+          description: Bad Request
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/WalletWidgetV2ErrorResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request GET \\\n  --url 'https://merchant-api.accruesavings.com/api/v2/widgets/wallet/123e4567-e89b-12d3-a456-426614174000?includeDto=SOME_BOOLEAN_VALUE&purchaseAmount=1000' \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'GET',\n  url: 'https://merchant-api.accruesavings.com/api/v2/widgets/wallet/123e4567-e89b-12d3-a456-426614174000',\n  qs: {includeDto: 'SOME_BOOLEAN_VALUE', purchaseAmount: '1000'},\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"GET\", \"/api/v2/widgets/wallet/123e4567-e89b-12d3-a456-426614174000?includeDto=SOME_BOOLEAN_VALUE&purchaseAmount=1000\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v2/widgets/wallet/123e4567-e89b-12d3-a456-426614174000?includeDto=SOME_BOOLEAN_VALUE&purchaseAmount=1000")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Get.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v2/widgets/wallet/123e4567-e89b-12d3-a456-426614174000?includeDto=SOME_BOOLEAN_VALUE&purchaseAmount=1000\")\n  .get()\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v2/widgets/wallet/123e4567-e89b-12d3-a456-426614174000?includeDto=SOME_BOOLEAN_VALUE&purchaseAmount=1000\"\n\n\treq, _ := http.NewRequest(\"GET\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v2/widgets/wallet/123e4567-e89b-12d3-a456-426614174000?includeDto=SOME_BOOLEAN_VALUE&purchaseAmount=1000");
+
+          var request = new RestRequest(Method.GET);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v2/widgets/wallet/123e4567-e89b-12d3-a456-426614174000');\n$request->setMethod(HTTP_METH_GET);\n\n$request->setQueryData([\n  'includeDto' => 'SOME_BOOLEAN_VALUE',\n  'purchaseAmount' => '1000'\n]);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+  /api/v2/widgets/wallet:
+    get:
+      operationId: findWalletWidgetDataV2
+      tags:
+      - Widgets
+      summary: Find Wallet Widget Data (V2)
+      description: 'This endpoint returns data: null instead of 400 error when no wallet is found'
+      parameters:
+      - schema:
+          type: boolean
+          description: Include the Data Transfer Object field, containing widget data in a structured format.
+        required: false
+        name: includeDto
+        in: query
+      - schema:
+          type: integer
+          description: Purchase amount (in cents)
+          format: int32
+          example: 1000
+        required: false
+        name: purchaseAmount
+        in: query
+      - schema:
+          type: string
+          description: Merchant-scoped user identifier (`stableReferenceId`). Preferred for new integrations.
+          example: stable-abc-123
+        required: false
+        name: filter[userReference]
+        in: query
+      - schema:
+          type: string
+          description: Legacy `referenceId`. Provide alongside `filter[userReference]` when the stable id may not be on file yet.
+          example: user-123
+        required: false
+        name: filter[secondaryUserReference]
+        in: query
+      - schema:
+          type: string
+          description: Filter the list of objects by the value of the phoneNumber field.
+        required: false
+        name: filter[phoneNumber]
+        in: query
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/FindWalletWidgetDataV2Response'
+        '400':
+          description: Bad Request
+          content:
+            application/vnd.api+json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/WalletWidgetV2ErrorResponse'
+                - anyOf:
+                  - $ref: '#/components/schemas/MultipleWalletsFoundForWidgetResponse'
+                  - $ref: '#/components/schemas/InvalidIdentifierForWidgetResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request GET \\\n  --url 'https://merchant-api.accruesavings.com/api/v2/widgets/wallet?includeDto=SOME_BOOLEAN_VALUE&purchaseAmount=1000&filter%5BuserReference%5D=stable-abc-123&filter%5BsecondaryUserReference%5D=user-123&filter%5BphoneNumber%5D=SOME_STRING_VALUE' \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'GET',\n  url: 'https://merchant-api.accruesavings.com/api/v2/widgets/wallet',\n  qs: {\n    includeDto: 'SOME_BOOLEAN_VALUE',\n    purchaseAmount: '1000',\n    'filter[userReference]': 'stable-abc-123',\n    'filter[secondaryUserReference]': 'user-123',\n    'filter[phoneNumber]': 'SOME_STRING_VALUE'\n  },\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"GET\", \"/api/v2/widgets/wallet?includeDto=SOME_BOOLEAN_VALUE&purchaseAmount=1000&filter%5BuserReference%5D=stable-abc-123&filter%5BsecondaryUserReference%5D=user-123&filter%5BphoneNumber%5D=SOME_STRING_VALUE\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v2/widgets/wallet?includeDto=SOME_BOOLEAN_VALUE&purchaseAmount=1000&filter%5BuserReference%5D=stable-abc-123&filter%5BsecondaryUserReference%5D=user-123&filter%5BphoneNumber%5D=SOME_STRING_VALUE")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Get.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v2/widgets/wallet?includeDto=SOME_BOOLEAN_VALUE&purchaseAmount=1000&filter%5BuserReference%5D=stable-abc-123&filter%5BsecondaryUserReference%5D=user-123&filter%5BphoneNumber%5D=SOME_STRING_VALUE\")\n  .get()\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v2/widgets/wallet?includeDto=SOME_BOOLEAN_VALUE&purchaseAmount=1000&filter%5BuserReference%5D=stable-abc-123&filter%5BsecondaryUserReference%5D=user-123&filter%5BphoneNumber%5D=SOME_STRING_VALUE\"\n\n\treq, _ := http.NewRequest(\"GET\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v2/widgets/wallet?includeDto=SOME_BOOLEAN_VALUE&purchaseAmount=1000&filter%5BuserReference%5D=stable-abc-123&filter%5BsecondaryUserReference%5D=user-123&filter%5BphoneNumber%5D=SOME_STRING_VALUE");
+
+          var request = new RestRequest(Method.GET);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v2/widgets/wallet');\n$request->setMethod(HTTP_METH_GET);\n\n$request->setQueryData([\n  'includeDto' => 'SOME_BOOLEAN_VALUE',\n  'purchaseAmount' => '1000',\n  'filter[userReference]' => 'stable-abc-123',\n  'filter[secondaryUserReference]' => 'user-123',\n  'filter[phoneNumber]' => 'SOME_STRING_VALUE'\n]);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+  /api/v1/widgets/session:
+    post:
+      operationId: createWidgetSession
+      tags:
+      - Widgets
+      summary: Create Widget Session
+      description: Creates a new widget session that can be used to authenticate and interact with Accrue widgets. The session token returned should be passed to the widget for authentication.
+      parameters:
+      - schema:
+          type: string
+          format: uuid
+          description: The unique identifier of the client making the request. This header is required to retrieve the client-specific configuration and ensure that the response is tailored to the client's settings and permissions.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        required: true
+        name: Client-ID
+        in: header
+      - schema:
+          type: string
+          format: uuid
+          description: Secure secret to access privileged endpoints.
+          example: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef
+        required: true
+        name: Authorization
+        in: header
+      requestBody:
+        content:
+          application/vnd.api+json:
+            schema:
+              $ref: '#/components/schemas/CreateWidgetSessionRequest'
+      responses:
+        '200':
+          description: Widget session created successfully
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/CreateWidgetSessionResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/WidgetSessionValidationErrorResponse'
+      x-codeSamples:
+      - lang: Shell
+        source: "curl --request POST \\\n  --url https://merchant-api.accruesavings.com/api/v1/widgets/session \\\n  --header 'Authorization: Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef' \\\n  --header 'Client-ID: 123e4567-e89b-12d3-a456-426614174000'"
+      - lang: Node
+        source: "const request = require('request');\n\nconst options = {\n  method: 'POST',\n  url: 'https://merchant-api.accruesavings.com/api/v1/widgets/session',\n  headers: {\n    'Client-ID': '123e4567-e89b-12d3-a456-426614174000',\n    Authorization: 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n  }\n};\n\nrequest(options, function (error, response, body) {\n  if (error) throw new Error(error);\n\n  console.log(body);\n});\n"
+      - lang: Python
+        source: "import http.client\n\nconn = http.client.HTTPSConnection(\"merchant-api.accruesavings.com\")\n\nheaders = {\n    'Client-ID': \"123e4567-e89b-12d3-a456-426614174000\",\n    'Authorization': \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\"\n    }\n\nconn.request(\"POST\", \"/api/v1/widgets/session\", headers=headers)\n\nres = conn.getresponse()\ndata = res.read()\n\nprint(data.decode(\"utf-8\"))"
+      - lang: Ruby
+        source: 'require ''uri''
+
+          require ''net/http''
+
+          require ''openssl''
+
+
+          url = URI("https://merchant-api.accruesavings.com/api/v1/widgets/session")
+
+
+          http = Net::HTTP.new(url.host, url.port)
+
+          http.use_ssl = true
+
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+
+          request = Net::HTTP::Post.new(url)
+
+          request["Client-ID"] = ''123e4567-e89b-12d3-a456-426614174000''
+
+          request["Authorization"] = ''Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef''
+
+
+          response = http.request(request)
+
+          puts response.read_body'
+      - lang: Java
+        source: "OkHttpClient client = new OkHttpClient();\n\nRequest request = new Request.Builder()\n  .url(\"https://merchant-api.accruesavings.com/api/v1/widgets/session\")\n  .post(null)\n  .addHeader(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n  .addHeader(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n  .build();\n\nResponse response = client.newCall(request).execute();"
+      - lang: Go
+        source: "package main\n\nimport (\n\t\"fmt\"\n\t\"net/http\"\n\t\"io/ioutil\"\n)\n\nfunc main() {\n\n\turl := \"https://merchant-api.accruesavings.com/api/v1/widgets/session\"\n\n\treq, _ := http.NewRequest(\"POST\", url, nil)\n\n\treq.Header.Add(\"Client-ID\", \"123e4567-e89b-12d3-a456-426614174000\")\n\treq.Header.Add(\"Authorization\", \"Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef\")\n\n\tres, _ := http.DefaultClient.Do(req)\n\n\tdefer res.Body.Close()\n\tbody, _ := ioutil.ReadAll(res.Body)\n\n\tfmt.Println(res)\n\tfmt.Println(string(body))\n\n}"
+      - lang: Csharp
+        source: 'var client = new RestClient("https://merchant-api.accruesavings.com/api/v1/widgets/session");
+
+          var request = new RestRequest(Method.POST);
+
+          request.AddHeader("Client-ID", "123e4567-e89b-12d3-a456-426614174000");
+
+          request.AddHeader("Authorization", "Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef");
+
+          IRestResponse response = client.Execute(request);'
+      - lang: Php
+        source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/widgets/session');\n$request->setMethod(HTTP_METH_POST);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
+components:
+  schemas:
+    WidgetSession:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - WidgetSession
+        attributes:
+          type: object
+          properties:
+            sessionToken:
+              type: string
+              description: The session token used to authenticate widget requests
+              example: wgt_session_1234567890abcdef
+            createdAt:
+              type: string
+              format: date-time
+              description: The timestamp when the session was created
+              example: '2025-01-15T10:30:00.000Z'
+          required:
+          - sessionToken
+          - createdAt
+      required:
+      - id
+      - type
+      - attributes
+      description: Widget Session
+      x-tags:
+      - Model
+    NoWalletFoundResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - NoWalletFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: NoWalletFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WidgetException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - WidgetException (code='NoWalletFound' message='No wallet found for defined filters.' metaData=undefined)
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/widgets/wallet/123e4567-e89b-12d3-a456-426614174000
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/widgets/wallet/123e4567-e89b-12d3-a456-426614174000
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    WalletWidgetErrorResponse:
+      anyOf:
+      - $ref: '#/components/schemas/NoWalletFoundResponse'
+      - $ref: '#/components/schemas/InvalidIdentifierForWidgetResponse'
+      - $ref: '#/components/schemas/MultipleWalletsFoundForWidgetResponse'
+    NoLinkedAccountFoundResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - NoLinkedAccountFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: NoLinkedAccountFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WidgetException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - No linked account found for payment intent.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/widgets/payment-intent/123e4567-e89b-12d3-a456-426614174000/linked-account
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/widgets/payment-intent/123e4567-e89b-12d3-a456-426614174000/linked-account
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    CreateWidgetSessionRequest:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+              - CreateWidgetSession
+            attributes:
+              type: object
+              properties:
+                widgetType:
+                  type: string
+                  enum:
+                  - PaymentMethods
+                  description: The type of widget for which to create a session
+                  example: PaymentMethods
+              required:
+              - widgetType
+          required:
+          - type
+          - attributes
+      required:
+      - data
+    MultipleWalletsFoundForWidgetResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - MultipleWalletsFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: MultipleWalletsFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WidgetException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - WidgetException (code='MultipleWalletsFound' message='Multiple wallets found for defined filters.' metaData=undefined)
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/widgets/wallet?filter[userReference]=123e4567-e89b-12d3-a456-426614174000
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/widgets/wallet?filter[userReference]=123e4567-e89b-12d3-a456-426614174000
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    GetLinkedAccountWidgetDataResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/LinkedAccountWidgetData'
+      required:
+      - data
+    WidgetSessionValidationErrorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - BadRequest
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: BadRequest
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ValidationError
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Validation failed for data.attributes.widgetType
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/widgets/session
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/widgets/session
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    WalletWidgetV2ErrorResponse:
+      anyOf:
+      - $ref: '#/components/schemas/InvalidIdentifierForWidgetResponse'
+      - $ref: '#/components/schemas/MultipleWalletsFoundForWidgetResponse'
+    LinkedAccountWidgetData:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - LinkedAccountWidgetData
+        attributes:
+          type: object
+          properties:
+            payload:
+              type: string
+              description: Linked Account Widget data encoded in base64.
+              example: YmFzZTY0IGVuY29kZWQgZGF0YQ==
+            dto:
+              type: object
+              properties:
+                institutionName:
+                  type: string
+                  example: Visa
+                accountMask:
+                  type: string
+                  example: '1234'
+              required:
+              - institutionName
+              - accountMask
+              description: Payload decoded into a structured format. The actual shape and content are dynamic and must be evaluated by the client for a particular use-case.
+            updatedAt:
+              type: string
+              format: date-time
+              readOnly: true
+            createdAt:
+              type: string
+              format: date-time
+              readOnly: true
+          required:
+          - payload
+          - dto
+          - updatedAt
+          - createdAt
+      required:
+      - id
+      - type
+      - attributes
+      description: Widgets
+      x-tags:
+      - Model
+    InvalidPaymentIntentIdentifierResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - InvalidIdentifier
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: InvalidIdentifier
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WidgetException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - No valid identifier passed for payment intent identification.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/widgets/payment-intent/123e4567-e89b-12d3-a456-426614174000/linked-account
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/widgets/payment-intent/123e4567-e89b-12d3-a456-426614174000/linked-account
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    GetWalletWidgetDataResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/WalletWidgetData'
+      required:
+      - data
+    LinkedAccountWidgetErrorResponse:
+      anyOf:
+      - $ref: '#/components/schemas/InvalidPaymentIntentIdentifierResponse'
+      - $ref: '#/components/schemas/NoLinkedAccountFoundResponse'
+    FindWalletWidgetDataV2Response:
+      type: object
+      properties:
+        data:
+          anyOf:
+          - $ref: '#/components/schemas/WalletWidgetData'
+          - type: 'null'
+          - type: 'null'
+      required:
+      - data
+    WalletWidgetData:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - WalletWidgetData
+        attributes:
+          type: object
+          properties:
+            payload:
+              type: string
+              description: Wallet Widget data encoded in base64.
+              example: YmFzZTY0IGVuY29kZWQgZGF0YQ==
+            dto:
+              type: object
+              properties:
+                dynamic:
+                  type: object
+                  properties:
+                    value:
+                      type: number
+                      example: 1
+                  required:
+                  - value
+              required:
+              - dynamic
+              description: Payload decoded into a structured format. The actual shape and content are dynamic and must be evaluated by the client for a particular use-case.
+        relationships:
+          type: object
+          properties:
+            wallet:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                    type:
+                      type: string
+                      enum:
+                      - Wallet
+                  required:
+                  - id
+                  - type
+              required:
+              - data
+          required:
+          - wallet
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              example: https://merchant-api.accruesavings.com/api/v1/widgets/wallet/123e4567-e89b-12d3-a456-426614174000
+          required:
+          - self
+      required:
+      - id
+      - type
+      - attributes
+      - relationships
+      - links
+      description: Widgets
+      x-tags:
+      - Model
+    UnexpectedWidgetErrorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 500
+        code:
+          type: string
+          enum:
+          - UnexpectedError
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: UnexpectedError
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WidgetException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - An unexpected error occurred.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/widgets/payment-intent/123e4567-e89b-12d3-a456-426614174000/linked-account
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/widgets/payment-intent/123e4567-e89b-12d3-a456-426614174000/linked-account
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    InvalidIdentifierForWidgetResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - InvalidIdentifier
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: InvalidIdentifier
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WidgetException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - WidgetException (code='InvalidIdentifier' message='No valid identifier passed for wallet identification.' metaData=undefined)
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/widgets/wallet?filter[userReference]=123e4567-e89b-12d3-a456-426614174000
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/widgets/wallet?filter[userReference]=123e4567-e89b-12d3-a456-426614174000
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    GetWalletWidgetDataV2Response:
+      type: object
+      properties:
+        data:
+          anyOf:
+          - $ref: '#/components/schemas/WalletWidgetData'
+          - type: 'null'
+          - type: 'null'
+      required:
+      - data
+    CreateWidgetSessionResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/WidgetSession'
+      required:
+      - data
+x-tagGroups:
+- name: Overview
+  tags:
+  - Introduction
+  - API Design
+- name: Users
+  tags:
+  - Users
+  - LinkedAccounts
+  - Identity Verification
+- name: Wallets
+  tags:
+  - Wallets
+- name: Gifts
+  tags:
+  - Gifts
+- name: Payments
+  tags:
+  - PaymentIntents
+  - Payments
+  - ExternalTransactions
+  - Simulations
+- name: Banking & KYC
+  tags:
+  - Banking
+  - Counterparties
+  - CounterpartyTransfers
+- name: Sweepstakes
+  tags:
+  - Sweepstakes
+- name: Rewards
+  tags:
+  - Rewards
+- name: Widgets
+  tags:
+  - Widgets
+- name: Webhooks
+  tags:
+  - Webhooks
+  - WebhookEvents
+  - Webhook Topics
