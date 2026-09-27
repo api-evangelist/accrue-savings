@@ -418,7 +418,7 @@ paths:
         source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/counterparty-transfers/:counterpartyTransferId');\n$request->setMethod(HTTP_METH_GET);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
 components:
   schemas:
-    CounterpartyTransferQueryValidationErrorResponse:
+    CounterpartyTransferValidationResponse:
       type: object
       properties:
         id:
@@ -433,18 +433,21 @@ components:
         code:
           type: string
           enum:
-          - BadRequest
+          - ValidationFailed
           description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: BadRequest
+          example: ValidationFailed
         title:
           type: string
           description: Generic title for the error.
-          example: ValidationError
+          example: CounterpartyTransferValidationException
         detail:
           type: string
           description: A human-readable explanation providing more insights about the error.
           examples:
-          - 'Validation failed for page[limit]: expected number'
+          - Insufficient balance
+          - Same source and destination
+          - Invalid amount (must be > 0)
+          - Idempotency-key conflict (key reused with a different payload)
         meta:
           type: object
           properties:
@@ -460,7 +463,7 @@ components:
               example: '2025-06-23T12:00:00.000Z'
             path:
               type: string
-              example: /api/v1/counterparty-transfers/
+              example: /api/v1/counterparty-transfers
           required:
           - environment
           - timestamp
@@ -468,7 +471,79 @@ components:
           example:
             environment: sandbox
             timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/counterparty-transfers/
+            path: /api/v1/counterparty-transfers
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    GetCounterpartyTransferResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/CounterpartyTransfer'
+      required:
+      - data
+    CreateCounterpartyTransferResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/CounterpartyTransfer'
+      required:
+      - data
+    CounterpartyNotFoundOnCreateResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 404
+        code:
+          type: string
+          enum:
+          - CounterpartyNotFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: CounterpartyNotFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: CounterpartyTransferNotFoundException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - One or both counterparties referenced in the request do not exist.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/counterparty-transfers
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/counterparty-transfers
       required:
       - id
       - status
@@ -559,139 +634,32 @@ components:
       description: A counterparty transfer represents a movement of funds between two counterparties.
       x-tags:
       - Model
-    GetCounterpartyTransferResponse:
+    ListCounterpartyTransfersResponse:
       type: object
       properties:
         data:
-          $ref: '#/components/schemas/CounterpartyTransfer'
-      required:
-      - data
-    CounterpartyTransferValidationResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 400
-        code:
-          type: string
-          enum:
-          - ValidationFailed
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: ValidationFailed
-        title:
-          type: string
-          description: Generic title for the error.
-          example: CounterpartyTransferValidationException
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - Insufficient balance
-          - Same source and destination
-          - Invalid amount (must be > 0)
-          - Idempotency-key conflict (key reused with a different payload)
+          type: array
+          items:
+            $ref: '#/components/schemas/CounterpartyTransfer'
         meta:
           type: object
           properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/counterparty-transfers
+            total:
+              type: number
+              example: 1
+            limit:
+              type: number
+              example: 10
+            offset:
+              type: number
+              example: 0
           required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/counterparty-transfers
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    CounterpartyTransferNotFoundResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 404
-        code:
-          type: string
-          enum:
-          - TransferNotFound
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: TransferNotFound
-        title:
-          type: string
-          description: Generic title for the error.
-          example: CounterpartyTransferNotFoundException
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - Counterparty transfer with ID '123e4567-e89b-12d3-a456-426614174000' not found in the authenticated partner scope.
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/counterparty-transfers/123e4567-e89b-12d3-a456-426614174000
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/counterparty-transfers/123e4567-e89b-12d3-a456-426614174000
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    CreateCounterpartyTransferResponse:
-      type: object
-      properties:
-        data:
-          $ref: '#/components/schemas/CounterpartyTransfer'
+          - total
+          - limit
+          - offset
       required:
       - data
+      - meta
     CrossTenantCounterpartyTransferResponse:
       type: object
       properties:
@@ -750,33 +718,7 @@ components:
       - title
       - detail
       - meta
-    ListCounterpartyTransfersResponse:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/CounterpartyTransfer'
-        meta:
-          type: object
-          properties:
-            total:
-              type: number
-              example: 1
-            limit:
-              type: number
-              example: 10
-            offset:
-              type: number
-              example: 0
-          required:
-          - total
-          - limit
-          - offset
-      required:
-      - data
-      - meta
-    CounterpartyNotFoundOnCreateResponse:
+    CounterpartyTransferQueryValidationErrorResponse:
       type: object
       properties:
         id:
@@ -787,22 +729,22 @@ components:
         status:
           type: integer
           description: The HTTP status code applicable to this error.
-          example: 404
+          example: 400
         code:
           type: string
           enum:
-          - CounterpartyNotFound
+          - BadRequest
           description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: CounterpartyNotFound
+          example: BadRequest
         title:
           type: string
           description: Generic title for the error.
-          example: CounterpartyTransferNotFoundException
+          example: ValidationError
         detail:
           type: string
           description: A human-readable explanation providing more insights about the error.
           examples:
-          - One or both counterparties referenced in the request do not exist.
+          - 'Validation failed for page[limit]: expected number'
         meta:
           type: object
           properties:
@@ -818,7 +760,7 @@ components:
               example: '2025-06-23T12:00:00.000Z'
             path:
               type: string
-              example: /api/v1/counterparty-transfers
+              example: /api/v1/counterparty-transfers/
           required:
           - environment
           - timestamp
@@ -826,7 +768,65 @@ components:
           example:
             environment: sandbox
             timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/counterparty-transfers
+            path: /api/v1/counterparty-transfers/
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    CounterpartyTransferNotFoundResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 404
+        code:
+          type: string
+          enum:
+          - TransferNotFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: TransferNotFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: CounterpartyTransferNotFoundException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Counterparty transfer with ID '123e4567-e89b-12d3-a456-426614174000' not found in the authenticated partner scope.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/counterparty-transfers/123e4567-e89b-12d3-a456-426614174000
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/counterparty-transfers/123e4567-e89b-12d3-a456-426614174000
       required:
       - id
       - status

@@ -162,13 +162,6 @@ components:
       description: A gift remaining-balance lookup.
       x-tags:
       - Model
-    GetGiftByLookUpIdResponse:
-      type: object
-      properties:
-        data:
-          $ref: '#/components/schemas/Gift'
-      required:
-      - data
     GiftNotFoundResponse:
       type: object
       properties:
@@ -287,6 +280,13 @@ components:
       - title
       - detail
       - meta
+    GetGiftByLookUpIdResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Gift'
+      required:
+      - data
 x-tagGroups:
 - name: Overview
   tags:

@@ -582,31 +582,133 @@ paths:
         source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/rewards/123e4567-e89b-12d3-a456-426614174000');\n$request->setMethod(HTTP_METH_DELETE);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
 components:
   schemas:
-    ListIssuedRewardsResponse:
+    IssueRewardResponse:
       type: object
       properties:
         data:
-          type: array
-          items:
-            $ref: '#/components/schemas/RewardResponse'
+          $ref: '#/components/schemas/RewardResponse'
+      required:
+      - data
+    IssueRewardConflictResponse:
+      anyOf:
+      - $ref: '#/components/schemas/WalletNotIssuableResponse'
+      - $ref: '#/components/schemas/PreIssuedConflictResponse'
+      - $ref: '#/components/schemas/IdempotencyConflictResponse'
+    IssueRewardUnexpectedErrorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 500
+        code:
+          type: string
+          enum:
+          - UnexpectedError
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: UnexpectedError
+        title:
+          type: string
+          description: Generic title for the error.
+          example: RewardIssuanceError
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Failed to issue reward.
         meta:
           type: object
           properties:
-            total:
-              type: number
-              example: 1
-            limit:
-              type: number
-              example: 10
-            offset:
-              type: number
-              example: 0
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/rewards
           required:
-          - total
-          - limit
-          - offset
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/rewards
       required:
-      - data
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    IssueRewardWalletNotFoundResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - WalletNotFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: WalletNotFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: RewardException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Wallet not found for recipient.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/rewards
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/rewards
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
       - meta
     RewardNotFoundResponse:
       type: object
@@ -666,18 +768,7 @@ components:
       - title
       - detail
       - meta
-    GetIssuedRewardByIdResponse:
-      type: object
-      properties:
-        data:
-          allOf:
-          - $ref: '#/components/schemas/RewardResponse'
-          - type:
-            - object
-            - 'null'
-      required:
-      - data
-    PreIssuedConflictResponse:
+    MultipleActiveWalletsResponse:
       type: object
       properties:
         id:
@@ -688,259 +779,22 @@ components:
         status:
           type: integer
           description: The HTTP status code applicable to this error.
-          example: 409
+          example: 400
         code:
           type: string
           enum:
-          - PreIssuedConflict
+          - MultipleActiveWallets
           description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: PreIssuedConflict
+          example: MultipleActiveWallets
         title:
           type: string
           description: Generic title for the error.
-          example: RewardConflictException
+          example: RewardException
         detail:
           type: string
           description: A human-readable explanation providing more insights about the error.
           examples:
-          - A pre-issued reward already exists for this recipient.
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/rewards
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/rewards
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    IssueRewardUnexpectedErrorResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 500
-        code:
-          type: string
-          enum:
-          - UnexpectedError
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: UnexpectedError
-        title:
-          type: string
-          description: Generic title for the error.
-          example: RewardIssuanceError
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - Failed to issue reward.
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/rewards
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/rewards
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    RewardManagementUnexpectedErrorResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 500
-        code:
-          type: string
-          enum:
-          - UnexpectedError
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: UnexpectedError
-        title:
-          type: string
-          description: Generic title for the error.
-          example: RewardManagementError
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - Failed to update or cancel reward.
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/rewards/123e4567-e89b-12d3-a456-426614174000
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/rewards/123e4567-e89b-12d3-a456-426614174000
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    IdempotencyConflictResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 409
-        code:
-          type: string
-          enum:
-          - IdempotencyConflict
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: IdempotencyConflict
-        title:
-          type: string
-          description: Generic title for the error.
-          example: RewardConflictException
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - Idempotency key reused with a different payload.
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/rewards
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/rewards
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    IssueRewardErrorResponse:
-      anyOf:
-      - $ref: '#/components/schemas/InvalidRewardRequestResponse'
-      - $ref: '#/components/schemas/IssueRewardWalletNotFoundResponse'
-      - $ref: '#/components/schemas/MultipleActiveWalletsResponse'
-    RewardLookupUnexpectedErrorResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 500
-        code:
-          type: string
-          enum:
-          - UnexpectedError
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: UnexpectedError
-        title:
-          type: string
-          description: Generic title for the error.
-          example: RewardLookupError
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - Failed to look up reward.
+          - Multiple active wallets match this phone number.
         meta:
           type: object
           properties:
@@ -1027,194 +881,6 @@ components:
       description: Request to issue a reward to a phone number.
       x-tags:
       - Model
-    UpdateRewardResponse:
-      type: object
-      properties:
-        data:
-          $ref: '#/components/schemas/RewardResponse'
-      required:
-      - data
-    MultipleActiveWalletsResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 400
-        code:
-          type: string
-          enum:
-          - MultipleActiveWallets
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: MultipleActiveWallets
-        title:
-          type: string
-          description: Generic title for the error.
-          example: RewardException
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - Multiple active wallets match this phone number.
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/rewards
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/rewards
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    WalletNotIssuableResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 409
-        code:
-          type: string
-          enum:
-          - WalletNotIssuable
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: WalletNotIssuable
-        title:
-          type: string
-          description: Generic title for the error.
-          example: RewardConflictException
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - The recipient wallet cannot receive issued rewards in its current state.
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/rewards
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/rewards
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    IssueRewardResponse:
-      type: object
-      properties:
-        data:
-          $ref: '#/components/schemas/RewardResponse'
-      required:
-      - data
-    IssueRewardWalletNotFoundResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 400
-        code:
-          type: string
-          enum:
-          - WalletNotFound
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: WalletNotFound
-        title:
-          type: string
-          description: Generic title for the error.
-          example: RewardException
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - Wallet not found for recipient.
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/rewards
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/rewards
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
     InvalidRewardRequestResponse:
       type: object
       properties:
@@ -1275,104 +941,17 @@ components:
       - title
       - detail
       - meta
-    InvalidRewardStateResponse:
+    GetIssuedRewardByIdResponse:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 409
-        code:
-          type: string
-          enum:
-          - InvalidState
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: InvalidState
-        title:
-          type: string
-          description: Generic title for the error.
-          example: RewardConflictException
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - Reward cannot be modified in its current state.
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/rewards/123e4567-e89b-12d3-a456-426614174000
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/rewards/123e4567-e89b-12d3-a456-426614174000
+        data:
+          allOf:
+          - $ref: '#/components/schemas/RewardResponse'
+          - type:
+            - object
+            - 'null'
       required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    UpdateRewardRequest:
-      type: object
-      properties:
-        type:
-          type: string
-          enum:
-          - UpdateReward
-        attributes:
-          type: object
-          properties:
-            amount:
-              type: integer
-              exclusiveMinimum: 0
-              maximum: 2147483647
-              description: Updated reward amount in cents.
-              format: int32
-              example: 750
-            message:
-              type: string
-              description: Updated message shown to the recipient.
-              example: Updated thank-you note
-            reasonCode:
-              type: string
-              description: Updated reason code.
-              example: CX-COMPENSATION-002
-            costCenter:
-              type: string
-              description: Updated cost center.
-              example: CX-ESCALATIONS
-            notificationEmail:
-              type: string
-              format: email
-              description: Updated notification email.
-              example: supervisor@partner.example
-      required:
-      - type
-      - attributes
-      description: Request to update a reward when `canUpdate` is `true` (pre-issued rewards in `Created` status). At least one attribute must be provided.
-      x-tags:
-      - Model
+      - data
     RewardResponse:
       type: object
       properties:
@@ -1477,11 +1056,432 @@ components:
       description: Unified reward resource for both immediate wallet credits and pre-issued rewards awaiting claim.
       x-tags:
       - Model
-    IssueRewardConflictResponse:
+    IssueRewardErrorResponse:
       anyOf:
-      - $ref: '#/components/schemas/WalletNotIssuableResponse'
-      - $ref: '#/components/schemas/PreIssuedConflictResponse'
-      - $ref: '#/components/schemas/IdempotencyConflictResponse'
+      - $ref: '#/components/schemas/InvalidRewardRequestResponse'
+      - $ref: '#/components/schemas/IssueRewardWalletNotFoundResponse'
+      - $ref: '#/components/schemas/MultipleActiveWalletsResponse'
+    UpdateRewardResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/RewardResponse'
+      required:
+      - data
+    RewardLookupUnexpectedErrorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 500
+        code:
+          type: string
+          enum:
+          - UnexpectedError
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: UnexpectedError
+        title:
+          type: string
+          description: Generic title for the error.
+          example: RewardLookupError
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Failed to look up reward.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/rewards
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/rewards
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    IdempotencyConflictResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 409
+        code:
+          type: string
+          enum:
+          - IdempotencyConflict
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: IdempotencyConflict
+        title:
+          type: string
+          description: Generic title for the error.
+          example: RewardConflictException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Idempotency key reused with a different payload.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/rewards
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/rewards
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    WalletNotIssuableResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 409
+        code:
+          type: string
+          enum:
+          - WalletNotIssuable
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: WalletNotIssuable
+        title:
+          type: string
+          description: Generic title for the error.
+          example: RewardConflictException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - The recipient wallet cannot receive issued rewards in its current state.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/rewards
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/rewards
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    RewardManagementUnexpectedErrorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 500
+        code:
+          type: string
+          enum:
+          - UnexpectedError
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: UnexpectedError
+        title:
+          type: string
+          description: Generic title for the error.
+          example: RewardManagementError
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Failed to update or cancel reward.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/rewards/123e4567-e89b-12d3-a456-426614174000
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/rewards/123e4567-e89b-12d3-a456-426614174000
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    ListIssuedRewardsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/RewardResponse'
+        meta:
+          type: object
+          properties:
+            total:
+              type: number
+              example: 1
+            limit:
+              type: number
+              example: 10
+            offset:
+              type: number
+              example: 0
+          required:
+          - total
+          - limit
+          - offset
+      required:
+      - data
+      - meta
+    UpdateRewardRequest:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - UpdateReward
+        attributes:
+          type: object
+          properties:
+            amount:
+              type: integer
+              exclusiveMinimum: 0
+              maximum: 2147483647
+              description: Updated reward amount in cents.
+              format: int32
+              example: 750
+            message:
+              type: string
+              description: Updated message shown to the recipient.
+              example: Updated thank-you note
+            reasonCode:
+              type: string
+              description: Updated reason code.
+              example: CX-COMPENSATION-002
+            costCenter:
+              type: string
+              description: Updated cost center.
+              example: CX-ESCALATIONS
+            notificationEmail:
+              type: string
+              format: email
+              description: Updated notification email.
+              example: supervisor@partner.example
+      required:
+      - type
+      - attributes
+      description: Request to update a reward when `canUpdate` is `true` (pre-issued rewards in `Created` status). At least one attribute must be provided.
+      x-tags:
+      - Model
+    PreIssuedConflictResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 409
+        code:
+          type: string
+          enum:
+          - PreIssuedConflict
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: PreIssuedConflict
+        title:
+          type: string
+          description: Generic title for the error.
+          example: RewardConflictException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - A pre-issued reward already exists for this recipient.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/rewards
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/rewards
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    InvalidRewardStateResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 409
+        code:
+          type: string
+          enum:
+          - InvalidState
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: InvalidState
+        title:
+          type: string
+          description: Generic title for the error.
+          example: RewardConflictException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Reward cannot be modified in its current state.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/rewards/123e4567-e89b-12d3-a456-426614174000
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/rewards/123e4567-e89b-12d3-a456-426614174000
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
 x-tagGroups:
 - name: Overview
   tags:

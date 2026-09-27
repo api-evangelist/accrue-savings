@@ -548,64 +548,6 @@ paths:
         source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/users/:userId/kyc/document-verification/complete');\n$request->setMethod(HTTP_METH_POST);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
 components:
   schemas:
-    InvalidRequestResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 400
-        code:
-          type: string
-          enum:
-          - InvalidRequest
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: InvalidRequest
-        title:
-          type: string
-          description: Generic title for the error.
-          example: BankingException
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - Invalid KYC application data.
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/users/123e4567-e89b-12d3-a456-426614174000/kyc/application
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/users/123e4567-e89b-12d3-a456-426614174000/kyc/application
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
     KycStatusNotFoundResponse:
       type: object
       properties:
@@ -664,52 +606,6 @@ components:
       - title
       - detail
       - meta
-    Kyc:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: Unique identifier for the object.
-          readOnly: true
-        type:
-          type: string
-          enum:
-          - Kyc
-        attributes:
-          type: object
-          properties:
-            status:
-              type: string
-              enum:
-              - Approved
-              - AwaitingDocuments
-              - Denied
-              - ManualReview
-              - NotStarted
-              - Pending
-              - Unknown
-              description: The current status of the user's KYC verification
-              example: Approved
-            updatedAt:
-              type: string
-              format: date-time
-              readOnly: true
-            createdAt:
-              type: string
-              format: date-time
-              readOnly: true
-          required:
-          - status
-          - updatedAt
-          - createdAt
-      required:
-      - id
-      - type
-      - attributes
-      description: KYC verification status for a user
-      x-tags:
-      - Model
     KycApplicationFailedResponse:
       type: object
       properties:
@@ -768,203 +664,6 @@ components:
       - title
       - detail
       - meta
-    CompleteDocumentVerificationResponse:
-      type:
-      - object
-      - 'null'
-      properties:
-        data:
-          $ref: '#/components/schemas/Kyc'
-      required:
-      - data
-    GetDocumentVerificationLinkErrorResponse:
-      anyOf:
-      - $ref: '#/components/schemas/UserNotFoundForBankingResponse'
-      - $ref: '#/components/schemas/DocumentVerificationFailedResponse'
-      - $ref: '#/components/schemas/InvalidUuidSyntaxForBankingResponse'
-    InvalidUuidSyntaxForBankingResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 400
-        code:
-          type: string
-          enum:
-          - BadRequest
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: BadRequest
-        title:
-          type: string
-          description: Generic title for the error.
-          example: ValidationError
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - 'invalid input syntax for type uuid: "{uuid}"'
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/users/123e4567-e89b-12d3-a456-426614174000/kyc
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/users/123e4567-e89b-12d3-a456-426614174000/kyc
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    GetDocumentVerificationLinkResponse:
-      type: object
-      properties:
-        data:
-          $ref: '#/components/schemas/DocumentVerificationLink'
-      required:
-      - data
-    GetKycStatusResponse:
-      type:
-      - object
-      - 'null'
-      properties:
-        data:
-          $ref: '#/components/schemas/Kyc'
-      required:
-      - data
-    CreateKycApplicationResponse:
-      type: object
-      properties:
-        data:
-          $ref: '#/components/schemas/Kyc'
-      required:
-      - data
-    DocumentVerificationLink:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: Unique identifier for the object.
-          readOnly: true
-        type:
-          type: string
-          enum:
-          - DocumentVerificationLink
-        attributes:
-          type: object
-          properties:
-            url:
-              type: string
-              format: uri
-              description: The secure URL to document verification portal where users can upload identity documents
-              example: https://verify.sardine.ai/session/abc123xyz
-            updatedAt:
-              type: string
-              format: date-time
-              readOnly: true
-            createdAt:
-              type: string
-              format: date-time
-              readOnly: true
-          required:
-          - url
-          - updatedAt
-          - createdAt
-      required:
-      - id
-      - type
-      - attributes
-      description: A secure link for users to complete document verification
-      x-tags:
-      - Model
-    UserNotFoundForBankingResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 400
-        code:
-          type: string
-          enum:
-          - UserNotFound
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: UserNotFound
-        title:
-          type: string
-          description: Generic title for the error.
-          example: BankingException
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - User not found or invalid.
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/users/123e4567-e89b-12d3-a456-426614174000/kyc
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/users/123e4567-e89b-12d3-a456-426614174000/kyc
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    CompleteDocumentVerificationErrorResponse:
-      anyOf:
-      - $ref: '#/components/schemas/UserNotFoundForBankingResponse'
-      - $ref: '#/components/schemas/DocumentVerificationFailedResponse'
-      - $ref: '#/components/schemas/InvalidUuidSyntaxForBankingResponse'
     DocumentVerificationFailedResponse:
       type: object
       properties:
@@ -1023,6 +722,101 @@ components:
       - title
       - detail
       - meta
+    CreateKycApplicationErrorResponse:
+      anyOf:
+      - $ref: '#/components/schemas/UserNotFoundForBankingResponse'
+      - $ref: '#/components/schemas/InvalidRequestResponse'
+      - $ref: '#/components/schemas/KycApplicationFailedResponse'
+      - $ref: '#/components/schemas/InvalidUuidSyntaxForBankingResponse'
+    CreateKycApplicationResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Kyc'
+      required:
+      - data
+    CompleteDocumentVerificationErrorResponse:
+      anyOf:
+      - $ref: '#/components/schemas/UserNotFoundForBankingResponse'
+      - $ref: '#/components/schemas/DocumentVerificationFailedResponse'
+      - $ref: '#/components/schemas/InvalidUuidSyntaxForBankingResponse'
+    GetDocumentVerificationLinkErrorResponse:
+      anyOf:
+      - $ref: '#/components/schemas/UserNotFoundForBankingResponse'
+      - $ref: '#/components/schemas/DocumentVerificationFailedResponse'
+      - $ref: '#/components/schemas/InvalidUuidSyntaxForBankingResponse'
+    UserNotFoundForBankingResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - UserNotFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: UserNotFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: BankingException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - User not found or invalid.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/users/123e4567-e89b-12d3-a456-426614174000/kyc
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/users/123e4567-e89b-12d3-a456-426614174000/kyc
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    CompleteDocumentVerificationResponse:
+      type:
+      - object
+      - 'null'
+      properties:
+        data:
+          $ref: '#/components/schemas/Kyc'
+      required:
+      - data
+    GetKycStatusErrorResponse:
+      anyOf:
+      - $ref: '#/components/schemas/UserNotFoundForBankingResponse'
+      - $ref: '#/components/schemas/KycStatusNotFoundResponse'
+      - $ref: '#/components/schemas/InvalidUuidSyntaxForBankingResponse'
     UnexpectedErrorForBankingResponse:
       type: object
       properties:
@@ -1081,17 +875,223 @@ components:
       - title
       - detail
       - meta
-    GetKycStatusErrorResponse:
-      anyOf:
-      - $ref: '#/components/schemas/UserNotFoundForBankingResponse'
-      - $ref: '#/components/schemas/KycStatusNotFoundResponse'
-      - $ref: '#/components/schemas/InvalidUuidSyntaxForBankingResponse'
-    CreateKycApplicationErrorResponse:
-      anyOf:
-      - $ref: '#/components/schemas/UserNotFoundForBankingResponse'
-      - $ref: '#/components/schemas/InvalidRequestResponse'
-      - $ref: '#/components/schemas/KycApplicationFailedResponse'
-      - $ref: '#/components/schemas/InvalidUuidSyntaxForBankingResponse'
+    InvalidUuidSyntaxForBankingResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - BadRequest
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: BadRequest
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ValidationError
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - 'invalid input syntax for type uuid: "{uuid}"'
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/users/123e4567-e89b-12d3-a456-426614174000/kyc
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/users/123e4567-e89b-12d3-a456-426614174000/kyc
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    DocumentVerificationLink:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - DocumentVerificationLink
+        attributes:
+          type: object
+          properties:
+            url:
+              type: string
+              format: uri
+              description: The secure URL to document verification portal where users can upload identity documents
+              example: https://verify.sardine.ai/session/abc123xyz
+            updatedAt:
+              type: string
+              format: date-time
+              readOnly: true
+            createdAt:
+              type: string
+              format: date-time
+              readOnly: true
+          required:
+          - url
+          - updatedAt
+          - createdAt
+      required:
+      - id
+      - type
+      - attributes
+      description: A secure link for users to complete document verification
+      x-tags:
+      - Model
+    GetKycStatusResponse:
+      type:
+      - object
+      - 'null'
+      properties:
+        data:
+          $ref: '#/components/schemas/Kyc'
+      required:
+      - data
+    InvalidRequestResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - InvalidRequest
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: InvalidRequest
+        title:
+          type: string
+          description: Generic title for the error.
+          example: BankingException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Invalid KYC application data.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/users/123e4567-e89b-12d3-a456-426614174000/kyc/application
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/users/123e4567-e89b-12d3-a456-426614174000/kyc/application
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    Kyc:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - Kyc
+        attributes:
+          type: object
+          properties:
+            status:
+              type: string
+              enum:
+              - Approved
+              - AwaitingDocuments
+              - Denied
+              - ManualReview
+              - NotStarted
+              - Pending
+              - Unknown
+              description: The current status of the user's KYC verification
+              example: Approved
+            updatedAt:
+              type: string
+              format: date-time
+              readOnly: true
+            createdAt:
+              type: string
+              format: date-time
+              readOnly: true
+          required:
+          - status
+          - updatedAt
+          - createdAt
+      required:
+      - id
+      - type
+      - attributes
+      description: KYC verification status for a user
+      x-tags:
+      - Model
+    GetDocumentVerificationLinkResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/DocumentVerificationLink'
+      required:
+      - data
 x-tagGroups:
 - name: Overview
   tags:

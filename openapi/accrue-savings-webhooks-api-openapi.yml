@@ -525,6 +525,24 @@ paths:
         source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/webhooks/%7BwebhookId%7D');\n$request->setMethod(HTTP_METH_DELETE);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
 components:
   schemas:
+    GetWebhookResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Webhook'
+      required:
+      - data
+    WebhookResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Webhook'
+      required:
+      - data
+    WebhookErrorResponse:
+      anyOf:
+      - $ref: '#/components/schemas/InvalidWebhookTopicsResponse'
+      - $ref: '#/components/schemas/WebhookValidationErrorResponse'
     WebhookNotFoundResponse:
       type: object
       properties:
@@ -636,97 +654,6 @@ components:
       - title
       - detail
       - meta
-    CreateWebhook:
-      type: object
-      properties:
-        type:
-          type: string
-          enum:
-          - Webhook
-        attributes:
-          type: object
-          properties:
-            enabled:
-              type: boolean
-            name:
-              type: string
-            url:
-              type: string
-              description: HTTPS endpoint that receives POST requests for subscribed events. If omitted or empty, events are still stored for this webhook (for example, via the webhook events API) but no HTTP delivery is attempted.
-            topics:
-              type: array
-              items:
-                type: string
-              description: 'Array of webhook topics to subscribe to. Use `''*''` to subscribe to all topics. Note: When using `''*''`, all new topics added in the future will automatically be sent to this webhook. You are responsible for handling any new or unknown topic types. The `''*''` wildcard cannot be combined with other topics.'
-              example:
-              - PaymentIntentCreated
-              - PaymentCreated
-          required:
-          - enabled
-          - name
-          - topics
-      required:
-      - type
-      - attributes
-      description: Create webhook request
-      x-tags:
-      - Model
-    UpdateWebhook:
-      type: object
-      properties:
-        type:
-          type: string
-          enum:
-          - Webhook
-        attributes:
-          type: object
-          properties:
-            enabled:
-              type: boolean
-            name:
-              type: string
-            url:
-              type: string
-              description: HTTPS delivery endpoint. Set to empty or omit to stop HTTP delivery while continuing to record events for this webhook.
-            topics:
-              type: array
-              items:
-                type: string
-              description: 'Array of webhook topics to subscribe to. Use `''*''` to subscribe to all topics. Note: When using `''*''`, all new topics added in the future will automatically be sent to this webhook. You are responsible for handling any new or unknown topic types. The `''*''` wildcard cannot be combined with other topics.'
-              example:
-              - PaymentIntentCreated
-              - PaymentCreated
-      required:
-      - type
-      - attributes
-      description: Update webhook request
-      x-tags:
-      - Model
-    WebhookErrorResponse:
-      anyOf:
-      - $ref: '#/components/schemas/InvalidWebhookTopicsResponse'
-      - $ref: '#/components/schemas/WebhookValidationErrorResponse'
-    WebhooksResponse:
-      type: object
-      properties:
-        data:
-          $ref: '#/components/schemas/Webhook'
-      required:
-      - data
-    WebhookResponse:
-      type: object
-      properties:
-        data:
-          $ref: '#/components/schemas/Webhook'
-      required:
-      - data
-    GetWebhookResponse:
-      type: object
-      properties:
-        data:
-          $ref: '#/components/schemas/Webhook'
-      required:
-      - data
     Webhook:
       type: object
       properties:
@@ -782,6 +709,44 @@ components:
       - attributes
       description: ''
       x-tags: Model
+    WebhooksResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Webhook'
+      required:
+      - data
+    UpdateWebhook:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - Webhook
+        attributes:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            name:
+              type: string
+            url:
+              type: string
+              description: HTTPS delivery endpoint. Set to empty or omit to stop HTTP delivery while continuing to record events for this webhook.
+            topics:
+              type: array
+              items:
+                type: string
+              description: 'Array of webhook topics to subscribe to. Use `''*''` to subscribe to all topics. Note: When using `''*''`, all new topics added in the future will automatically be sent to this webhook. You are responsible for handling any new or unknown topic types. The `''*''` wildcard cannot be combined with other topics.'
+              example:
+              - PaymentIntentCreated
+              - PaymentCreated
+      required:
+      - type
+      - attributes
+      description: Update webhook request
+      x-tags:
+      - Model
     InvalidWebhookTopicsResponse:
       type: object
       properties:
@@ -840,6 +805,41 @@ components:
       - title
       - detail
       - meta
+    CreateWebhook:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - Webhook
+        attributes:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            name:
+              type: string
+            url:
+              type: string
+              description: HTTPS endpoint that receives POST requests for subscribed events. If omitted or empty, events are still stored for this webhook (for example, via the webhook events API) but no HTTP delivery is attempted.
+            topics:
+              type: array
+              items:
+                type: string
+              description: 'Array of webhook topics to subscribe to. Use `''*''` to subscribe to all topics. Note: When using `''*''`, all new topics added in the future will automatically be sent to this webhook. You are responsible for handling any new or unknown topic types. The `''*''` wildcard cannot be combined with other topics.'
+              example:
+              - PaymentIntentCreated
+              - PaymentCreated
+          required:
+          - enabled
+          - name
+          - topics
+      required:
+      - type
+      - attributes
+      description: Create webhook request
+      x-tags:
+      - Model
 x-tagGroups:
 - name: Overview
   tags:
