@@ -565,40 +565,18 @@ paths:
         source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/users/:userId/disclosures/kyc');\n$request->setMethod(HTTP_METH_POST);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
 components:
   schemas:
-    ListUsersResponse:
+    CreateUserResponse:
       type: object
       properties:
         data:
-          type: array
-          items:
-            $ref: '#/components/schemas/User'
-        meta:
-          type: object
-          properties:
-            total:
-              type: number
-              example: 1
-            limit:
-              type: number
-              example: 10
-            offset:
-              type: number
-              example: 0
-          required:
-          - total
-          - limit
-          - offset
+          $ref: '#/components/schemas/User'
       required:
       - data
-      - meta
-    GetUserResponse:
-      type: object
-      properties:
-        data:
-          $ref: '#/components/schemas/ReducedUser'
-      required:
-      - data
-    InvalidUuidSyntaxResponse:
+    UpdateUserAttachedProfileErrorResponse:
+      anyOf:
+      - $ref: '#/components/schemas/InvalidIdentifierForAttachedProfileResponse'
+      - $ref: '#/components/schemas/InvalidUuidSyntaxResponse'
+    UserQueryValidationErrorResponse:
       type: object
       properties:
         id:
@@ -624,7 +602,7 @@ components:
           type: string
           description: A human-readable explanation providing more insights about the error.
           examples:
-          - 'invalid input syntax for type uuid: "{uuid}"'
+          - 'Validation failed for page[limit]: expected number'
         meta:
           type: object
           properties:
@@ -640,7 +618,7 @@ components:
               example: '2025-06-23T12:00:00.000Z'
             path:
               type: string
-              example: /api/v1/users/123e4567-e89b-12d3-a456-426614174000
+              example: /api/v1/users
           required:
           - environment
           - timestamp
@@ -648,65 +626,7 @@ components:
           example:
             environment: sandbox
             timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/users/123e4567-e89b-12d3-a456-426614174000
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    UserNotFoundForDisclosureResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 404
-        code:
-          type: string
-          enum:
-          - UserNotFound
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: UserNotFound
-        title:
-          type: string
-          description: Generic title for the error.
-          example: UserNotFoundException
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - User with ID '{userId}' not found.
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/users/123e4567-e89b-12d3-a456-426614174000/disclosures/kyc
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/users/123e4567-e89b-12d3-a456-426614174000/disclosures/kyc
+            path: /api/v1/users
       required:
       - id
       - status
@@ -749,529 +669,6 @@ components:
       description: Create user request
       x-tags:
       - Model
-    CreateUserErrorResponse:
-      anyOf:
-      - $ref: '#/components/schemas/InvalidIdentifierResponse'
-      - $ref: '#/components/schemas/PhoneNumberBannedResponse'
-      - $ref: '#/components/schemas/MerchantIsDisabledResponse'
-    GetUserErrorResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 400
-        code:
-          type: string
-          enum:
-          - BadRequest
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: BadRequest
-        title:
-          type: string
-          description: Generic title for the error.
-          example: ValidationError
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - 'invalid input syntax for type uuid: "{uuid}"'
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/users/123e4567-e89b-12d3-a456-426614174000
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/users/123e4567-e89b-12d3-a456-426614174000
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    CreateUserInternalServerErrorResponse:
-      anyOf:
-      - $ref: '#/components/schemas/IdentityProviderFailureResponse'
-      - $ref: '#/components/schemas/UnexpectedErrorResponse'
-    AttachedProfile:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: Unique identifier for the object.
-          readOnly: true
-        type:
-          type: string
-          enum:
-          - AttachedProfile
-        attributes:
-          type: object
-          properties:
-            referenceId:
-              type: string
-              description: Deprecated. Use stableReferenceId instead. Legacy merchant-scoped user identifier. Immutable once set.
-              deprecated: true
-              example: Any string identifier provided by you.
-            stableReferenceId:
-              type: string
-              description: Stable merchant-scoped user identifier. Required for all new integrations; immutable once set. Cannot be changed after initial assignment. Optional in the API only while legacy merchants transition from referenceId.
-              example: stable-abc-123
-            email:
-              type: string
-              example: User email address kept in your system.
-            phoneNumber:
-              type: string
-              example: User phone number kept in your system.
-      required:
-      - id
-      - type
-      - attributes
-      description: AttachedProfile patch object
-      x-tags:
-      - Model
-    InvalidIdentifierResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 400
-        code:
-          type: string
-          enum:
-          - InvalidIdentifier
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: InvalidIdentifier
-        title:
-          type: string
-          description: Generic title for the error.
-          example: UserValidationException
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - Invalid merchant identifier provided.
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/users
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/users
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    PhoneNumberBannedResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 400
-        code:
-          type: string
-          enum:
-          - PhoneNumberBanned
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: PhoneNumberBanned
-        title:
-          type: string
-          description: Generic title for the error.
-          example: UserValidationException
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - The provided phone number has been banned.
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/users
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/users
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    AcceptKycDisclosureDocumentsErrorResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 400
-        code:
-          type: string
-          enum:
-          - BadRequest
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: BadRequest
-        title:
-          type: string
-          description: Generic title for the error.
-          example: ValidationError
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - 'invalid input syntax for type uuid: "{uuid}"'
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/users/123e4567-e89b-12d3-a456-426614174000
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/users/123e4567-e89b-12d3-a456-426614174000
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    MerchantIsDisabledResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 400
-        code:
-          type: string
-          enum:
-          - MerchantIsDisabled
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: MerchantIsDisabled
-        title:
-          type: string
-          description: Generic title for the error.
-          example: UserException
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - The merchant account is disabled and cannot create users.
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/users
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/users
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    IdentityProviderFailureResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 500
-        code:
-          type: string
-          enum:
-          - IdentityProviderFailure
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: IdentityProviderFailure
-        title:
-          type: string
-          description: Generic title for the error.
-          example: IdentityProviderUserCreationFailed
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - Failed to create user in identity provider.
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/users
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/users
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    ReducedUser:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: Unique identifier for the object.
-          readOnly: true
-        type:
-          type: string
-          enum:
-          - User
-        attributes:
-          type: object
-          properties:
-            disabled:
-              type: boolean
-              description: Flag to indicate if the user account is disabled.
-            profile:
-              type: object
-              properties:
-                firstName:
-                  type: string
-                lastName:
-                  type: string
-                email:
-                  type: string
-                  format: email
-                phoneNumber:
-                  type: string
-            updatedAt:
-              type: string
-              format: date-time
-              readOnly: true
-            createdAt:
-              type: string
-              format: date-time
-              readOnly: true
-          required:
-          - disabled
-          - updatedAt
-          - createdAt
-      required:
-      - id
-      - type
-      - attributes
-      description: A user
-      x-tags:
-      - Model
-    User:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: Unique identifier for the object.
-          readOnly: true
-        type:
-          type: string
-          enum:
-          - User
-        attributes:
-          type: object
-          properties:
-            disabled:
-              type: boolean
-              description: Flag to indicate if the user account is disabled.
-            publicId:
-              type: string
-              description: The public identifier for the user.
-            profile:
-              type: object
-              properties:
-                firstName:
-                  type: string
-                lastName:
-                  type: string
-                email:
-                  type: string
-                  format: email
-                phoneNumber:
-                  type: string
-            attachedProfile:
-              type: object
-              properties:
-                referenceId:
-                  type: string
-                  description: Deprecated. Use stableReferenceId instead. Legacy merchant-scoped user identifier. Immutable once set.
-                  deprecated: true
-                  example: Any string identifier provided by you.
-                stableReferenceId:
-                  type: string
-                  description: Stable merchant-scoped user identifier. Required for all new integrations; immutable once set. The field remains absent in some requests only to support existing merchants migrating from referenceId. When set, becomes the effectiveReferenceId.
-                  example: stable-abc-123
-                effectiveReferenceId:
-                  type: string
-                  description: Computed field (read-only). Equals stableReferenceId when set, otherwise falls back to referenceId. Use as the canonical user identifier.
-                  example: stable-abc-123
-                email:
-                  type: string
-                  example: User email address kept in your system.
-                phoneNumber:
-                  type: string
-                  example: User phone number kept in your system.
-            updatedAt:
-              type: string
-              format: date-time
-              readOnly: true
-            createdAt:
-              type: string
-              format: date-time
-              readOnly: true
-          required:
-          - updatedAt
-          - createdAt
-      required:
-      - id
-      - type
-      - attributes
-      description: A user
-      x-tags:
-      - Model
-    CreateUserResponse:
-      type: object
-      properties:
-        data:
-          $ref: '#/components/schemas/User'
-      required:
-      - data
     UserAlreadyExistsResponse:
       type: object
       properties:
@@ -1330,127 +727,11 @@ components:
       - title
       - detail
       - meta
-    UnexpectedErrorResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 500
-        code:
-          type: string
-          enum:
-          - UnexpectedError
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: UnexpectedError
-        title:
-          type: string
-          description: Generic title for the error.
-          example: UserException
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - An unexpected error occurred.
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/users
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/users
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    UpdateUserAttachedProfileErrorResponse:
+    CreateUserInternalServerErrorResponse:
       anyOf:
-      - $ref: '#/components/schemas/InvalidIdentifierForAttachedProfileResponse'
-      - $ref: '#/components/schemas/InvalidUuidSyntaxResponse'
-    UserNotFoundResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 404
-        code:
-          type: string
-          enum:
-          - UserNotFound
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: UserNotFound
-        title:
-          type: string
-          description: Generic title for the error.
-          example: UserNotFoundException
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - User with ID '{userId}' not found.
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/users/123e4567-e89b-12d3-a456-426614174000
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/users/123e4567-e89b-12d3-a456-426614174000
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    UserQueryValidationErrorResponse:
+      - $ref: '#/components/schemas/IdentityProviderFailureResponse'
+      - $ref: '#/components/schemas/UnexpectedErrorResponse'
+    MerchantIsDisabledResponse:
       type: object
       properties:
         id:
@@ -1465,18 +746,18 @@ components:
         code:
           type: string
           enum:
-          - BadRequest
+          - MerchantIsDisabled
           description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: BadRequest
+          example: MerchantIsDisabled
         title:
           type: string
           description: Generic title for the error.
-          example: ValidationError
+          example: UserException
         detail:
           type: string
           description: A human-readable explanation providing more insights about the error.
           examples:
-          - 'Validation failed for page[limit]: expected number'
+          - The merchant account is disabled and cannot create users.
         meta:
           type: object
           properties:
@@ -1566,6 +847,725 @@ components:
       - title
       - detail
       - meta
+    InvalidUuidSyntaxResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - BadRequest
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: BadRequest
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ValidationError
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - 'invalid input syntax for type uuid: "{uuid}"'
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/users/123e4567-e89b-12d3-a456-426614174000
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/users/123e4567-e89b-12d3-a456-426614174000
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    ReducedUser:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - User
+        attributes:
+          type: object
+          properties:
+            disabled:
+              type: boolean
+              description: Flag to indicate if the user account is disabled.
+            profile:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                phoneNumber:
+                  type: string
+            updatedAt:
+              type: string
+              format: date-time
+              readOnly: true
+            createdAt:
+              type: string
+              format: date-time
+              readOnly: true
+          required:
+          - disabled
+          - updatedAt
+          - createdAt
+      required:
+      - id
+      - type
+      - attributes
+      description: A user
+      x-tags:
+      - Model
+    UserNotFoundForDisclosureResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 404
+        code:
+          type: string
+          enum:
+          - UserNotFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: UserNotFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: UserNotFoundException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - User with ID '{userId}' not found.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/users/123e4567-e89b-12d3-a456-426614174000/disclosures/kyc
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/users/123e4567-e89b-12d3-a456-426614174000/disclosures/kyc
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - User
+        attributes:
+          type: object
+          properties:
+            disabled:
+              type: boolean
+              description: Flag to indicate if the user account is disabled.
+            publicId:
+              type: string
+              description: The public identifier for the user.
+            profile:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                phoneNumber:
+                  type: string
+            attachedProfile:
+              type: object
+              properties:
+                referenceId:
+                  type: string
+                  description: Deprecated. Use stableReferenceId instead. Legacy merchant-scoped user identifier. Immutable once set.
+                  deprecated: true
+                  example: Any string identifier provided by you.
+                stableReferenceId:
+                  type: string
+                  description: Stable merchant-scoped user identifier. Required for all new integrations; immutable once set. The field remains absent in some requests only to support existing merchants migrating from referenceId. When set, becomes the effectiveReferenceId.
+                  example: stable-abc-123
+                effectiveReferenceId:
+                  type: string
+                  description: Computed field (read-only). Equals stableReferenceId when set, otherwise falls back to referenceId. Use as the canonical user identifier.
+                  example: stable-abc-123
+                email:
+                  type: string
+                  example: User email address kept in your system.
+                phoneNumber:
+                  type: string
+                  example: User phone number kept in your system.
+            updatedAt:
+              type: string
+              format: date-time
+              readOnly: true
+            createdAt:
+              type: string
+              format: date-time
+              readOnly: true
+          required:
+          - updatedAt
+          - createdAt
+      required:
+      - id
+      - type
+      - attributes
+      description: A user
+      x-tags:
+      - Model
+    ListUsersResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        meta:
+          type: object
+          properties:
+            total:
+              type: number
+              example: 1
+            limit:
+              type: number
+              example: 10
+            offset:
+              type: number
+              example: 0
+          required:
+          - total
+          - limit
+          - offset
+      required:
+      - data
+      - meta
+    AttachedProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - AttachedProfile
+        attributes:
+          type: object
+          properties:
+            referenceId:
+              type: string
+              description: Deprecated. Use stableReferenceId instead. Legacy merchant-scoped user identifier. Immutable once set.
+              deprecated: true
+              example: Any string identifier provided by you.
+            stableReferenceId:
+              type: string
+              description: Stable merchant-scoped user identifier. Required for all new integrations; immutable once set. Cannot be changed after initial assignment. Optional in the API only while legacy merchants transition from referenceId.
+              example: stable-abc-123
+            email:
+              type: string
+              example: User email address kept in your system.
+            phoneNumber:
+              type: string
+              example: User phone number kept in your system.
+      required:
+      - id
+      - type
+      - attributes
+      description: AttachedProfile patch object
+      x-tags:
+      - Model
+    UserNotFoundResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 404
+        code:
+          type: string
+          enum:
+          - UserNotFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: UserNotFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: UserNotFoundException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - User with ID '{userId}' not found.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/users/123e4567-e89b-12d3-a456-426614174000
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/users/123e4567-e89b-12d3-a456-426614174000
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    UnexpectedErrorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 500
+        code:
+          type: string
+          enum:
+          - UnexpectedError
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: UnexpectedError
+        title:
+          type: string
+          description: Generic title for the error.
+          example: UserException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - An unexpected error occurred.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/users
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/users
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    InvalidIdentifierResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - InvalidIdentifier
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: InvalidIdentifier
+        title:
+          type: string
+          description: Generic title for the error.
+          example: UserValidationException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Invalid merchant identifier provided.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/users
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/users
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    AcceptKycDisclosureDocumentsErrorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - BadRequest
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: BadRequest
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ValidationError
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - 'invalid input syntax for type uuid: "{uuid}"'
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/users/123e4567-e89b-12d3-a456-426614174000
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/users/123e4567-e89b-12d3-a456-426614174000
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    PhoneNumberBannedResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - PhoneNumberBanned
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: PhoneNumberBanned
+        title:
+          type: string
+          description: Generic title for the error.
+          example: UserValidationException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - The provided phone number has been banned.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/users
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/users
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    GetUserErrorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - BadRequest
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: BadRequest
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ValidationError
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - 'invalid input syntax for type uuid: "{uuid}"'
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/users/123e4567-e89b-12d3-a456-426614174000
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/users/123e4567-e89b-12d3-a456-426614174000
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    IdentityProviderFailureResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 500
+        code:
+          type: string
+          enum:
+          - IdentityProviderFailure
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: IdentityProviderFailure
+        title:
+          type: string
+          description: Generic title for the error.
+          example: IdentityProviderUserCreationFailed
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Failed to create user in identity provider.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/users
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/users
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    CreateUserErrorResponse:
+      anyOf:
+      - $ref: '#/components/schemas/InvalidIdentifierResponse'
+      - $ref: '#/components/schemas/PhoneNumberBannedResponse'
+      - $ref: '#/components/schemas/MerchantIsDisabledResponse'
+    GetUserResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/ReducedUser'
+      required:
+      - data
 x-tagGroups:
 - name: Overview
   tags:

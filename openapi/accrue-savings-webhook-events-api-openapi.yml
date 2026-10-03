@@ -231,30 +231,7 @@ paths:
         source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/webhook-events/123e4567-e89b-12d3-a456-426614174000');\n$request->setMethod(HTTP_METH_GET);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
 components:
   schemas:
-    TransactionEventAttributes:
-      type: object
-      properties:
-        transactionId:
-          type: string
-          format: uuid
-          description: The transaction ID associated with this event
-          example: 123e4567-e89b-12d3-a456-426614174000
-        walletId:
-          type: string
-          format: uuid
-          description: The wallet ID associated with this transaction
-          example: 123e4567-e89b-12d3-a456-426614174000
-        rewardIds:
-          type: array
-          items:
-            type: string
-            format: uuid
-          description: Optional array of reward IDs associated with this transaction
-          example: []
-      required:
-      - transactionId
-      - walletId
-    WebhookTransactionFailed:
+    WebhookCounterpartyPayout:
       type: object
       properties:
         id:
@@ -263,10 +240,12 @@ components:
         type:
           type: string
           enum:
-          - TransactionFailed
+          - CounterpartyPayoutCreated
+          - CounterpartyPayoutSent
+          - CounterpartyPayoutCompleted
         attributes:
           allOf:
-          - $ref: '#/components/schemas/TransactionEventAttributes'
+          - $ref: '#/components/schemas/CounterpartyPayoutEventAttributes'
           - type: object
             properties:
               reference:
@@ -290,75 +269,92 @@ components:
                 type:
                 - string
                 - 'null'
+              walletId:
+                type:
+                - string
+                - 'null'
+                format: uuid
               billingAddress:
                 type:
                 - object
                 - 'null'
                 additionalProperties: {}
-              fee:
-                type: object
-                properties:
-                  type:
-                    type:
-                    - string
-                    - 'null'
-                    description: The fee type applied to this transaction (for example, a specific FeeType name). This value can be null when no fee type applies or the fee type cannot be determined.
-                    example: JitFundingFee
-                  amount:
-                    type: integer
-                    description: The fee amount applied to this transaction, represented in the smallest currency unit (e.g., cents for USD). This value can be 0 when no fee was charged.
-                    example: 125
-                required:
-                - type
-                - amount
-                description: Fee breakdown applied to this transaction.
-              failureReason:
-                type: string
-                enum:
-                - Canceled
-                - HardDecline
-                - SoftDecline
-                - Expired
-                - InsufficientFunds
-                - Reversed
-                - Unknown
-                description: 'Transaction failure reason (TransactionFailureReason).
-
-
-                  - **Canceled**: The transaction was canceled.
-
-                  - **HardDecline**: The request was declined (hard decline).
-
-                  - **SoftDecline**: The payment request was declined; subsequent attempts may succeed.
-
-                  - **Expired**: The transaction or authorization expired.
-
-                  - **InsufficientFunds**: Insufficient funds to complete the transaction.
-
-                  - **Reversed**: The transaction was reversed.
-
-                  - **Unknown**: The failure reason is unknown.'
-                example: SoftDecline
-            required:
-            - fee
       required:
       - id
       - type
       - attributes
-      description: TransactionFailed event data as stored in webhook payload
+      description: Counterparty payout lifecycle event data (CounterpartyPayoutCreated, CounterpartyPayoutSent, CounterpartyPayoutCompleted) as stored in webhook payload
       x-tags:
       - Model
-    GetWebhookEventResponse:
+    WebhookCapture:
       type: object
       properties:
-        data:
-          $ref: '#/components/schemas/WebhookEvent'
-        included:
-          type: array
-          items:
-            $ref: '#/components/schemas/WebhookIncluded'
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum:
+          - Capture
+        attributes:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            method:
+              type: string
+              enum:
+              - Direct
+              - BankRails
+              - VirtualDebitCard
+            amount:
+              type: integer
+            reference:
+              type:
+              - string
+              - 'null'
+            externalPayments: {}
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+          required:
+          - id
+          - method
+          - amount
+          - createdAt
+          - updatedAt
       required:
-      - data
+      - id
+      - type
+      - attributes
+      description: Capture entity as stored in webhook payload (includes externalPayments)
+      x-tags:
+      - Model
+    ApplicationApprovedEventAttributes:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+          description: The user ID associated with this event
+          example: 123e4567-e89b-12d3-a456-426614174000
+        priorStatus:
+          type: string
+          enum:
+          - Approved
+          - AwaitingDocuments
+          - Denied
+          - ManualReview
+          - NotStarted
+          - Pending
+          - Unknown
+          description: Optional previous KYC status before approval
+      required:
+      - userId
     WebhookTransactionCleared:
       type: object
       properties:
@@ -426,417 +422,54 @@ components:
       description: TransactionCleared event data as stored in webhook payload
       x-tags:
       - Model
-    WebhookEventQueryValidationErrorResponse:
+    GetWebhookEventResponse:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 400
-        code:
-          type: string
-          enum:
-          - BadRequest
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: BadRequest
-        title:
-          type: string
-          description: Generic title for the error.
-          example: ValidationError
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - 'Validation failed for page[limit]: expected number'
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/webhook-events
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/webhook-events
+        data:
+          $ref: '#/components/schemas/WebhookEvent'
+        included:
+          type: array
+          items:
+            $ref: '#/components/schemas/WebhookIncluded'
       required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    WebhookCounterpartyPayoutReturned:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        type:
-          type: string
-          enum:
-          - CounterpartyPayoutReturned
-        attributes:
-          allOf:
-          - $ref: '#/components/schemas/CounterpartyPayoutEventAttributes'
-          - type: object
-            properties:
-              returnCode:
-                type:
-                - string
-                - 'null'
-                description: Bank return code when the payout was returned by the receiving bank (for example `R01`). Null for the other terminal failures, which carry no bank return.
-                example: R01
-              returnReason:
-                type:
-                - string
-                - 'null'
-                description: Human-readable reason for the return, when the bank supplied one
-                example: insufficient funds
-              reference:
-                type:
-                - string
-                - 'null'
-              email:
-                type:
-                - string
-                - 'null'
-                format: email
-              fullName:
-                type:
-                - string
-                - 'null'
-              phoneNumber:
-                type:
-                - string
-                - 'null'
-              error:
-                type:
-                - string
-                - 'null'
-              walletId:
-                type:
-                - string
-                - 'null'
-                format: uuid
-              billingAddress:
-                type:
-                - object
-                - 'null'
-                additionalProperties: {}
-            required:
-            - returnCode
-            - returnReason
-      required:
-      - id
-      - type
-      - attributes
-      description: CounterpartyPayoutReturned event data as stored in webhook payload
+      - data
+    WebhookIncluded:
+      description: Polymorphic schema for webhook included resources. Uses discriminator on 'type' field for runtime deserialization.
       x-tags:
       - Model
-    CounterpartyIncomingPaymentEventAttributes:
-      type: object
-      properties:
-        counterpartyId:
-          type: string
-          format: uuid
-          description: The counterparty whose account received the payment
-          example: 123e4567-e89b-12d3-a456-426614174000
-        merchantId:
-          type: string
-          format: uuid
-          description: The merchant that owns the counterparty
-          example: 123e4567-e89b-12d3-a456-426614174000
-        amount:
-          type: integer
-          description: The payment amount, represented in the smallest currency unit (e.g., cents for USD).
-          example: 2500
-        currency:
-          type: string
-          description: ISO 4217 currency code of the payment
-          example: USD
-        direction:
-          type: string
-          enum:
-          - credit
-          - debit
-          description: 'Direction of the movement on the counterparty account.
-
-
-            - **credit**: funds were received into the counterparty account.
-
-            - **debit**: funds were withdrawn from the counterparty account.'
-          example: credit
-        method:
-          type: string
-          description: The bank rail the payment arrived over, for example `ach`, `wire`, or `rtp`. Treat this as an open set — new values may be added without notice.
-          example: ach
-        asOfDate:
-          type: string
-          description: The date the payment settled at the bank, as `YYYY-MM-DD`
-          example: '2026-08-27'
-        externalIncomingPaymentId:
-          type: string
-          description: Identifier for this incoming payment at the banking provider. Stable for the life of the payment and safe to use for reconciliation against your bank records.
-          example: ipd_a1b2c3d4e5
-      required:
-      - counterpartyId
-      - merchantId
-      - amount
-      - currency
-      - direction
-      - method
-      - asOfDate
-      - externalIncomingPaymentId
-    WebhookKycApproved:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        type:
-          type: string
-          enum:
-          - KycApproved
-        attributes:
-          allOf:
-          - $ref: '#/components/schemas/ApplicationApprovedEventAttributes'
-          - type: object
-            properties:
-              reference:
-                type:
-                - string
-                - 'null'
-              email:
-                type:
-                - string
-                - 'null'
-                format: email
-              fullName:
-                type:
-                - string
-                - 'null'
-              phoneNumber:
-                type:
-                - string
-                - 'null'
-              error:
-                type:
-                - string
-                - 'null'
-              walletId:
-                type:
-                - string
-                - 'null'
-                format: uuid
-              billingAddress:
-                type:
-                - object
-                - 'null'
-                additionalProperties: {}
-      required:
-      - id
-      - type
-      - attributes
-      description: KycApproved event data as stored in webhook payload
-      x-tags:
-      - Model
-    ApplicationCreatedEventAttributes:
-      type: object
-      properties:
-        application:
-          $ref: '#/components/schemas/BankApplicationLite'
-        userId:
-          type: string
-          format: uuid
-          description: The user ID associated with this event
-          example: 123e4567-e89b-12d3-a456-426614174000
-        provider:
-          type: string
-          description: Bank provider (e.g., 'Unit', 'ModernTreasury')
-          example: Unit
-      required:
-      - application
-      - userId
-      - provider
-    WebhookCounterpartyPayout:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        type:
-          type: string
-          enum:
-          - CounterpartyPayoutCreated
-          - CounterpartyPayoutSent
-          - CounterpartyPayoutCompleted
-        attributes:
-          allOf:
-          - $ref: '#/components/schemas/CounterpartyPayoutEventAttributes'
-          - type: object
-            properties:
-              reference:
-                type:
-                - string
-                - 'null'
-              email:
-                type:
-                - string
-                - 'null'
-                format: email
-              fullName:
-                type:
-                - string
-                - 'null'
-              phoneNumber:
-                type:
-                - string
-                - 'null'
-              error:
-                type:
-                - string
-                - 'null'
-              walletId:
-                type:
-                - string
-                - 'null'
-                format: uuid
-              billingAddress:
-                type:
-                - object
-                - 'null'
-                additionalProperties: {}
-      required:
-      - id
-      - type
-      - attributes
-      description: Counterparty payout lifecycle event data (CounterpartyPayoutCreated, CounterpartyPayoutSent, CounterpartyPayoutCompleted) as stored in webhook payload
-      x-tags:
-      - Model
-    WebhookKycStatus:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        type:
-          type: string
-          enum:
-          - KycDeclined
-          - KycPending
-          - KycAwaitingDocuments
-          - KycManualReview
-        attributes:
-          allOf:
-          - $ref: '#/components/schemas/ApplicationBasicEventAttributes'
-          - type: object
-            properties:
-              reference:
-                type:
-                - string
-                - 'null'
-              email:
-                type:
-                - string
-                - 'null'
-                format: email
-              fullName:
-                type:
-                - string
-                - 'null'
-              phoneNumber:
-                type:
-                - string
-                - 'null'
-              error:
-                type:
-                - string
-                - 'null'
-              walletId:
-                type:
-                - string
-                - 'null'
-                format: uuid
-              billingAddress:
-                type:
-                - object
-                - 'null'
-                additionalProperties: {}
-      required:
-      - id
-      - type
-      - attributes
-      description: KYC status event data (KycDeclined, KycPending, KycAwaitingDocuments, KycManualReview) as stored in webhook payload
-      x-tags:
-      - Model
-    BankApplicationLite:
-      type: object
-      properties:
-        type:
-          type: string
-          enum:
-          - Lite
-          description: The type of KYC application
-        firstName:
-          type: string
-          description: First name
-        lastName:
-          type: string
-          description: Last name
-        email:
-          type: string
-          format: email
-          description: Email address
-        dateOfBirth:
-          type: string
-          description: Date of birth
-        phone:
-          type: string
-          description: Phone number
-        street:
-          type: string
-          description: Street address
-        street2:
-          type: string
-          description: Street address line 2
-        city:
-          type: string
-          description: City
-        state:
-          type: string
-          description: State
-        postalCode:
-          type: string
-          description: Postal code
-      required:
-      - type
-      - firstName
-      - lastName
-      - email
-      - dateOfBirth
-      - phone
-      description: Bank application data
-      x-tags:
-      - Model
+      discriminator:
+        propertyName: type
+        mapping:
+          PaymentIntent: '#/components/schemas/WebhookPaymentIntent'
+          Payment: '#/components/schemas/WebhookPayment'
+          Refund: '#/components/schemas/WebhookRefund'
+          Capture: '#/components/schemas/WebhookCapture'
+          KycCreated: '#/components/schemas/WebhookKycCreated'
+          KycApproved: '#/components/schemas/WebhookKycApproved'
+          KycDeclined: '#/components/schemas/WebhookKycStatus'
+          KycPending: '#/components/schemas/WebhookKycStatus'
+          KycAwaitingDocuments: '#/components/schemas/WebhookKycStatus'
+          KycManualReview: '#/components/schemas/WebhookKycStatus'
+          TransactionCleared: '#/components/schemas/WebhookTransactionCleared'
+          TransactionFailed: '#/components/schemas/WebhookTransactionFailed'
+          CounterpartyIncomingPayment: '#/components/schemas/WebhookCounterpartyIncomingPayment'
+          CounterpartyPayoutCreated: '#/components/schemas/WebhookCounterpartyPayout'
+          CounterpartyPayoutSent: '#/components/schemas/WebhookCounterpartyPayout'
+          CounterpartyPayoutCompleted: '#/components/schemas/WebhookCounterpartyPayout'
+          CounterpartyPayoutReturned: '#/components/schemas/WebhookCounterpartyPayoutReturned'
+      oneOf:
+      - $ref: '#/components/schemas/WebhookPaymentIntent'
+      - $ref: '#/components/schemas/WebhookPayment'
+      - $ref: '#/components/schemas/WebhookRefund'
+      - $ref: '#/components/schemas/WebhookCapture'
+      - $ref: '#/components/schemas/WebhookKycCreated'
+      - $ref: '#/components/schemas/WebhookKycApproved'
+      - $ref: '#/components/schemas/WebhookKycStatus'
+      - $ref: '#/components/schemas/WebhookTransactionCleared'
+      - $ref: '#/components/schemas/WebhookTransactionFailed'
+      - $ref: '#/components/schemas/WebhookCounterpartyIncomingPayment'
+      - $ref: '#/components/schemas/WebhookCounterpartyPayout'
+      - $ref: '#/components/schemas/WebhookCounterpartyPayoutReturned'
     WebhookCounterpartyIncomingPayment:
       type: object
       properties:
@@ -958,27 +591,19 @@ components:
       - effectiveDate
       - createdAt
       - updatedAt
-    ApplicationApprovedEventAttributes:
+    ListWebhookEventsResponse:
       type: object
       properties:
-        userId:
-          type: string
-          format: uuid
-          description: The user ID associated with this event
-          example: 123e4567-e89b-12d3-a456-426614174000
-        priorStatus:
-          type: string
-          enum:
-          - Approved
-          - AwaitingDocuments
-          - Denied
-          - ManualReview
-          - NotStarted
-          - Pending
-          - Unknown
-          description: Optional previous KYC status before approval
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/WebhookEvent'
+        included:
+          type: array
+          items:
+            $ref: '#/components/schemas/WebhookIncluded'
       required:
-      - userId
+      - data
     ApplicationBasicEventAttributes:
       type: object
       properties:
@@ -992,6 +617,435 @@ components:
           description: Optional reason for KYC decline (only present for KycDeclined events)
       required:
       - userId
+    WebhookKycStatus:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum:
+          - KycDeclined
+          - KycPending
+          - KycAwaitingDocuments
+          - KycManualReview
+        attributes:
+          allOf:
+          - $ref: '#/components/schemas/ApplicationBasicEventAttributes'
+          - type: object
+            properties:
+              reference:
+                type:
+                - string
+                - 'null'
+              email:
+                type:
+                - string
+                - 'null'
+                format: email
+              fullName:
+                type:
+                - string
+                - 'null'
+              phoneNumber:
+                type:
+                - string
+                - 'null'
+              error:
+                type:
+                - string
+                - 'null'
+              walletId:
+                type:
+                - string
+                - 'null'
+                format: uuid
+              billingAddress:
+                type:
+                - object
+                - 'null'
+                additionalProperties: {}
+      required:
+      - id
+      - type
+      - attributes
+      description: KYC status event data (KycDeclined, KycPending, KycAwaitingDocuments, KycManualReview) as stored in webhook payload
+      x-tags:
+      - Model
+    WebhookTransactionFailed:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum:
+          - TransactionFailed
+        attributes:
+          allOf:
+          - $ref: '#/components/schemas/TransactionEventAttributes'
+          - type: object
+            properties:
+              reference:
+                type:
+                - string
+                - 'null'
+              email:
+                type:
+                - string
+                - 'null'
+                format: email
+              fullName:
+                type:
+                - string
+                - 'null'
+              phoneNumber:
+                type:
+                - string
+                - 'null'
+              error:
+                type:
+                - string
+                - 'null'
+              billingAddress:
+                type:
+                - object
+                - 'null'
+                additionalProperties: {}
+              fee:
+                type: object
+                properties:
+                  type:
+                    type:
+                    - string
+                    - 'null'
+                    description: The fee type applied to this transaction (for example, a specific FeeType name). This value can be null when no fee type applies or the fee type cannot be determined.
+                    example: JitFundingFee
+                  amount:
+                    type: integer
+                    description: The fee amount applied to this transaction, represented in the smallest currency unit (e.g., cents for USD). This value can be 0 when no fee was charged.
+                    example: 125
+                required:
+                - type
+                - amount
+                description: Fee breakdown applied to this transaction.
+              failureReason:
+                type: string
+                enum:
+                - Canceled
+                - HardDecline
+                - SoftDecline
+                - Expired
+                - InsufficientFunds
+                - Reversed
+                - Unknown
+                description: 'Transaction failure reason (TransactionFailureReason).
+
+
+                  - **Canceled**: The transaction was canceled.
+
+                  - **HardDecline**: The request was declined (hard decline).
+
+                  - **SoftDecline**: The payment request was declined; subsequent attempts may succeed.
+
+                  - **Expired**: The transaction or authorization expired.
+
+                  - **InsufficientFunds**: Insufficient funds to complete the transaction.
+
+                  - **Reversed**: The transaction was reversed.
+
+                  - **Unknown**: The failure reason is unknown.'
+                example: SoftDecline
+            required:
+            - fee
+      required:
+      - id
+      - type
+      - attributes
+      description: TransactionFailed event data as stored in webhook payload
+      x-tags:
+      - Model
+    WebhookKycApproved:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum:
+          - KycApproved
+        attributes:
+          allOf:
+          - $ref: '#/components/schemas/ApplicationApprovedEventAttributes'
+          - type: object
+            properties:
+              reference:
+                type:
+                - string
+                - 'null'
+              email:
+                type:
+                - string
+                - 'null'
+                format: email
+              fullName:
+                type:
+                - string
+                - 'null'
+              phoneNumber:
+                type:
+                - string
+                - 'null'
+              error:
+                type:
+                - string
+                - 'null'
+              walletId:
+                type:
+                - string
+                - 'null'
+                format: uuid
+              billingAddress:
+                type:
+                - object
+                - 'null'
+                additionalProperties: {}
+      required:
+      - id
+      - type
+      - attributes
+      description: KycApproved event data as stored in webhook payload
+      x-tags:
+      - Model
+    BankApplicationLite:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - Lite
+          description: The type of KYC application
+        firstName:
+          type: string
+          description: First name
+        lastName:
+          type: string
+          description: Last name
+        email:
+          type: string
+          format: email
+          description: Email address
+        dateOfBirth:
+          type: string
+          description: Date of birth
+        phone:
+          type: string
+          description: Phone number
+        street:
+          type: string
+          description: Street address
+        street2:
+          type: string
+          description: Street address line 2
+        city:
+          type: string
+          description: City
+        state:
+          type: string
+          description: State
+        postalCode:
+          type: string
+          description: Postal code
+      required:
+      - type
+      - firstName
+      - lastName
+      - email
+      - dateOfBirth
+      - phone
+      description: Bank application data
+      x-tags:
+      - Model
+    WebhookEvent:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - WebhookEvent
+        attributes:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: The webhook event ID
+              example: 123e4567-e89b-12d3-a456-426614174000
+            topic:
+              type: string
+              description: The webhook topic/event type
+            clientId:
+              type: string
+              format: uuid
+              description: The client ID associated with this webhook event
+            userId:
+              type: string
+              format: uuid
+              description: The user ID associated with this webhook event (if applicable)
+              example: 123e4567-e89b-12d3-a456-426614174000
+            walletId:
+              type: string
+              format: uuid
+              description: The wallet ID associated with this webhook event (if applicable)
+              example: 123e4567-e89b-12d3-a456-426614174000
+            updatedAt:
+              type: string
+              format: date-time
+              readOnly: true
+            createdAt:
+              type: string
+              format: date-time
+              readOnly: true
+          required:
+          - id
+          - topic
+          - clientId
+          - updatedAt
+          - createdAt
+        relationships:
+          type: object
+          properties:
+            event:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                    type:
+                      type: string
+                  required:
+                  - id
+                  - type
+                  description: The related event resource (PaymentIntent, Payment, Refund, Capture, or ApplicationEvent)
+              required:
+              - data
+      required:
+      - id
+      - type
+      - attributes
+      - relationships
+      description: ''
+      x-tags: Model
+    TransactionEventAttributes:
+      type: object
+      properties:
+        transactionId:
+          type: string
+          format: uuid
+          description: The transaction ID associated with this event
+          example: 123e4567-e89b-12d3-a456-426614174000
+        walletId:
+          type: string
+          format: uuid
+          description: The wallet ID associated with this transaction
+          example: 123e4567-e89b-12d3-a456-426614174000
+        rewardIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Optional array of reward IDs associated with this transaction
+          example: []
+      required:
+      - transactionId
+      - walletId
+    WebhookEventQueryValidationErrorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - BadRequest
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: BadRequest
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ValidationError
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - 'Validation failed for page[limit]: expected number'
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/webhook-events
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/webhook-events
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    ApplicationCreatedEventAttributes:
+      type: object
+      properties:
+        application:
+          $ref: '#/components/schemas/BankApplicationLite'
+        userId:
+          type: string
+          format: uuid
+          description: The user ID associated with this event
+          example: 123e4567-e89b-12d3-a456-426614174000
+        provider:
+          type: string
+          description: Bank provider (e.g., 'Unit', 'ModernTreasury')
+          example: Unit
+      required:
+      - application
+      - userId
+      - provider
     WebhookKycCreated:
       type: object
       properties:
@@ -1045,99 +1099,60 @@ components:
       description: KycCreated event data as stored in webhook payload
       x-tags:
       - Model
-    WebhookPayment:
+    CounterpartyIncomingPaymentEventAttributes:
       type: object
       properties:
-        id:
+        counterpartyId:
           type: string
           format: uuid
-        type:
+          description: The counterparty whose account received the payment
+          example: 123e4567-e89b-12d3-a456-426614174000
+        merchantId:
+          type: string
+          format: uuid
+          description: The merchant that owns the counterparty
+          example: 123e4567-e89b-12d3-a456-426614174000
+        amount:
+          type: integer
+          description: The payment amount, represented in the smallest currency unit (e.g., cents for USD).
+          example: 2500
+        currency:
+          type: string
+          description: ISO 4217 currency code of the payment
+          example: USD
+        direction:
           type: string
           enum:
-          - Payment
-        attributes:
-          type: object
-          properties:
-            id:
-              type: string
-              format: uuid
-            status:
-              type: string
-              enum:
-              - Canceled
-              - Created
-              - Failed
-              - Processing
-              - Returned
-              - Sent
-            amount:
-              type: integer
-            reference:
-              type:
-              - string
-              - 'null'
-            expiresAt:
-              type:
-              - string
-              - 'null'
-              format: date-time
-            createdAt:
-              type: string
-              format: date-time
-            updatedAt:
-              type: string
-              format: date-time
-            paymentIntentId:
-              type: string
-              format: uuid
-            channelId:
-              type:
-              - string
-              - 'null'
-            channel:
-              type:
-              - string
-              - 'null'
-            error:
-              type:
-              - string
-              - 'null'
-            secondaryAuthorizationType:
-              type:
-              - string
-              - 'null'
-              enum:
-              - Card
-            secondaryAuthorizationId:
-              type:
-              - string
-              - 'null'
-            secondaryAuthorizationAmount:
-              type:
-              - integer
-              - 'null'
-            walletId:
-              type:
-              - string
-              - 'null'
-              format: uuid
-            userId:
-              type: string
-              format: uuid
-          required:
-          - id
-          - status
-          - amount
-          - expiresAt
-          - createdAt
-          - updatedAt
+          - credit
+          - debit
+          description: 'Direction of the movement on the counterparty account.
+
+
+            - **credit**: funds were received into the counterparty account.
+
+            - **debit**: funds were withdrawn from the counterparty account.'
+          example: credit
+        method:
+          type: string
+          description: The bank rail the payment arrived over, for example `ach`, `wire`, or `rtp`. Treat this as an open set — new values may be added without notice.
+          example: ach
+        asOfDate:
+          type: string
+          description: The date the payment settled at the bank, as `YYYY-MM-DD`
+          example: '2026-08-27'
+        externalIncomingPaymentId:
+          type: string
+          description: Identifier for this incoming payment at the banking provider. Stable for the life of the payment and safe to use for reconciliation against your bank records.
+          example: ipd_a1b2c3d4e5
       required:
-      - id
-      - type
-      - attributes
-      description: Payment entity as stored in webhook payload (includes walletId/userId from PaymentIntent). All Prisma Payment fields may be present.
-      x-tags:
-      - Model
+      - counterpartyId
+      - merchantId
+      - amount
+      - currency
+      - direction
+      - method
+      - asOfDate
+      - externalIncomingPaymentId
     WebhookRefund:
       type: object
       properties:
@@ -1239,97 +1254,167 @@ components:
       description: Refund entity as stored in webhook payload. Includes charges/deductions via shared mapRefundCharges utility.
       x-tags:
       - Model
-    ListWebhookEventsResponse:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/WebhookEvent'
-        included:
-          type: array
-          items:
-            $ref: '#/components/schemas/WebhookIncluded'
-      required:
-      - data
-    WebhookEvent:
+    WebhookPayment:
       type: object
       properties:
         id:
           type: string
           format: uuid
-          description: Unique identifier for the object.
-          readOnly: true
         type:
           type: string
           enum:
-          - WebhookEvent
+          - Payment
         attributes:
           type: object
           properties:
             id:
               type: string
               format: uuid
-              description: The webhook event ID
-              example: 123e4567-e89b-12d3-a456-426614174000
-            topic:
+            status:
               type: string
-              description: The webhook topic/event type
-            clientId:
-              type: string
-              format: uuid
-              description: The client ID associated with this webhook event
-            userId:
-              type: string
-              format: uuid
-              description: The user ID associated with this webhook event (if applicable)
-              example: 123e4567-e89b-12d3-a456-426614174000
-            walletId:
-              type: string
-              format: uuid
-              description: The wallet ID associated with this webhook event (if applicable)
-              example: 123e4567-e89b-12d3-a456-426614174000
-            updatedAt:
-              type: string
+              enum:
+              - Canceled
+              - Created
+              - Failed
+              - Processing
+              - Returned
+              - Sent
+            amount:
+              type: integer
+            reference:
+              type:
+              - string
+              - 'null'
+            expiresAt:
+              type:
+              - string
+              - 'null'
               format: date-time
-              readOnly: true
             createdAt:
               type: string
               format: date-time
-              readOnly: true
+            updatedAt:
+              type: string
+              format: date-time
+            paymentIntentId:
+              type: string
+              format: uuid
+            channelId:
+              type:
+              - string
+              - 'null'
+            channel:
+              type:
+              - string
+              - 'null'
+            error:
+              type:
+              - string
+              - 'null'
+            secondaryAuthorizationType:
+              type:
+              - string
+              - 'null'
+              enum:
+              - Card
+            secondaryAuthorizationId:
+              type:
+              - string
+              - 'null'
+            secondaryAuthorizationAmount:
+              type:
+              - integer
+              - 'null'
+            walletId:
+              type:
+              - string
+              - 'null'
+              format: uuid
+            userId:
+              type: string
+              format: uuid
           required:
           - id
-          - topic
-          - clientId
-          - updatedAt
+          - status
+          - amount
+          - expiresAt
           - createdAt
-        relationships:
-          type: object
-          properties:
-            event:
-              type: object
-              properties:
-                data:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                      format: uuid
-                    type:
-                      type: string
-                  required:
-                  - id
-                  - type
-                  description: The related event resource (PaymentIntent, Payment, Refund, Capture, or ApplicationEvent)
-              required:
-              - data
+          - updatedAt
       required:
       - id
       - type
       - attributes
-      - relationships
-      description: ''
-      x-tags: Model
+      description: Payment entity as stored in webhook payload (includes walletId/userId from PaymentIntent). All Prisma Payment fields may be present.
+      x-tags:
+      - Model
+    WebhookCounterpartyPayoutReturned:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum:
+          - CounterpartyPayoutReturned
+        attributes:
+          allOf:
+          - $ref: '#/components/schemas/CounterpartyPayoutEventAttributes'
+          - type: object
+            properties:
+              returnCode:
+                type:
+                - string
+                - 'null'
+                description: Bank return code when the payout was returned by the receiving bank (for example `R01`). Null for the other terminal failures, which carry no bank return.
+                example: R01
+              returnReason:
+                type:
+                - string
+                - 'null'
+                description: Human-readable reason for the return, when the bank supplied one
+                example: insufficient funds
+              reference:
+                type:
+                - string
+                - 'null'
+              email:
+                type:
+                - string
+                - 'null'
+                format: email
+              fullName:
+                type:
+                - string
+                - 'null'
+              phoneNumber:
+                type:
+                - string
+                - 'null'
+              error:
+                type:
+                - string
+                - 'null'
+              walletId:
+                type:
+                - string
+                - 'null'
+                format: uuid
+              billingAddress:
+                type:
+                - object
+                - 'null'
+                additionalProperties: {}
+            required:
+            - returnCode
+            - returnReason
+      required:
+      - id
+      - type
+      - attributes
+      description: CounterpartyPayoutReturned event data as stored in webhook payload
+      x-tags:
+      - Model
     WebhookPaymentIntent:
       type: object
       properties:
@@ -1423,91 +1508,6 @@ components:
       - type
       - attributes
       description: PaymentIntent entity as stored in webhook payload
-      x-tags:
-      - Model
-    WebhookIncluded:
-      description: Polymorphic schema for webhook included resources. Uses discriminator on 'type' field for runtime deserialization.
-      x-tags:
-      - Model
-      discriminator:
-        propertyName: type
-        mapping:
-          PaymentIntent: '#/components/schemas/WebhookPaymentIntent'
-          Payment: '#/components/schemas/WebhookPayment'
-          Refund: '#/components/schemas/WebhookRefund'
-          Capture: '#/components/schemas/WebhookCapture'
-          KycCreated: '#/components/schemas/WebhookKycCreated'
-          KycApproved: '#/components/schemas/WebhookKycApproved'
-          KycDeclined: '#/components/schemas/WebhookKycStatus'
-          KycPending: '#/components/schemas/WebhookKycStatus'
-          KycAwaitingDocuments: '#/components/schemas/WebhookKycStatus'
-          KycManualReview: '#/components/schemas/WebhookKycStatus'
-          TransactionCleared: '#/components/schemas/WebhookTransactionCleared'
-          TransactionFailed: '#/components/schemas/WebhookTransactionFailed'
-          CounterpartyIncomingPayment: '#/components/schemas/WebhookCounterpartyIncomingPayment'
-          CounterpartyPayoutCreated: '#/components/schemas/WebhookCounterpartyPayout'
-          CounterpartyPayoutSent: '#/components/schemas/WebhookCounterpartyPayout'
-          CounterpartyPayoutCompleted: '#/components/schemas/WebhookCounterpartyPayout'
-          CounterpartyPayoutReturned: '#/components/schemas/WebhookCounterpartyPayoutReturned'
-      oneOf:
-      - $ref: '#/components/schemas/WebhookPaymentIntent'
-      - $ref: '#/components/schemas/WebhookPayment'
-      - $ref: '#/components/schemas/WebhookRefund'
-      - $ref: '#/components/schemas/WebhookCapture'
-      - $ref: '#/components/schemas/WebhookKycCreated'
-      - $ref: '#/components/schemas/WebhookKycApproved'
-      - $ref: '#/components/schemas/WebhookKycStatus'
-      - $ref: '#/components/schemas/WebhookTransactionCleared'
-      - $ref: '#/components/schemas/WebhookTransactionFailed'
-      - $ref: '#/components/schemas/WebhookCounterpartyIncomingPayment'
-      - $ref: '#/components/schemas/WebhookCounterpartyPayout'
-      - $ref: '#/components/schemas/WebhookCounterpartyPayoutReturned'
-    WebhookCapture:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        type:
-          type: string
-          enum:
-          - Capture
-        attributes:
-          type: object
-          properties:
-            id:
-              type: string
-              format: uuid
-            method:
-              type: string
-              enum:
-              - Direct
-              - BankRails
-              - VirtualDebitCard
-            amount:
-              type: integer
-            reference:
-              type:
-              - string
-              - 'null'
-            externalPayments: {}
-            createdAt:
-              type: string
-              format: date-time
-            updatedAt:
-              type: string
-              format: date-time
-          required:
-          - id
-          - method
-          - amount
-          - createdAt
-          - updatedAt
-      required:
-      - id
-      - type
-      - attributes
-      description: Capture entity as stored in webhook payload (includes externalPayments)
       x-tags:
       - Model
 x-tagGroups:
