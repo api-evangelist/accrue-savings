@@ -1204,68 +1204,6 @@ paths:
         source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/wallets/:walletId/transactions/:transactionId');\n$request->setMethod(HTTP_METH_GET);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
 components:
   schemas:
-    GetTransactionNotFoundResponse:
-      anyOf:
-      - $ref: '#/components/schemas/WalletNotFoundResponse'
-      - $ref: '#/components/schemas/TransactionNotFoundResponse'
-    ExceedsMaxOneTimeDepositAmountResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 400
-        code:
-          type: string
-          enum:
-          - ExceedsMaxOneTimeDepositAmount
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: ExceedsMaxOneTimeDepositAmount
-        title:
-          type: string
-          description: Generic title for the error.
-          example: WalletValidationException
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - Deposit amount exceeds the merchant maximum.
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000/transactions
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000/transactions
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
     TransactionNotFoundResponse:
       type: object
       properties:
@@ -1324,11 +1262,7 @@ components:
       - title
       - detail
       - meta
-    GetWalletBalanceErrorResponse:
-      anyOf:
-      - $ref: '#/components/schemas/MultipleWalletsFoundResponse'
-      - $ref: '#/components/schemas/InvalidUuidSyntaxForWalletResponse'
-    GetWalletErrorResponse:
+    DepositFailedAtCardProcessorResponse:
       type: object
       properties:
         id:
@@ -1343,147 +1277,9 @@ components:
         code:
           type: string
           enum:
-          - BadRequest
+          - DepositFailedAtCardProcessor
           description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: BadRequest
-        title:
-          type: string
-          description: Generic title for the error.
-          example: ValidationError
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - 'invalid input syntax for type uuid: "{uuid}"'
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    GetWalletResponse:
-      type: object
-      properties:
-        data:
-          $ref: '#/components/schemas/Wallet'
-        included:
-          type: array
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-                format: uuid
-                description: Unique identifier for the object.
-                readOnly: true
-              type:
-                type: string
-                enum:
-                - User
-              attributes:
-                type: object
-                properties:
-                  disabled:
-                    type: boolean
-                    description: Flag to indicate if the user account is disabled.
-                  publicId:
-                    type: string
-                    description: The public identifier for the user.
-                  profile:
-                    type: object
-                    properties:
-                      firstName:
-                        type: string
-                      lastName:
-                        type: string
-                      email:
-                        type: string
-                        format: email
-                      phoneNumber:
-                        type: string
-                  attachedProfile:
-                    type: object
-                    properties:
-                      referenceId:
-                        type: string
-                        description: Deprecated. Use stableReferenceId instead. Legacy merchant-scoped user identifier. Immutable once set.
-                        deprecated: true
-                        example: Any string identifier provided by you.
-                      stableReferenceId:
-                        type: string
-                        description: Stable merchant-scoped user identifier. Required for all new integrations; immutable once set. The field remains absent in some requests only to support existing merchants migrating from referenceId. When set, becomes the effectiveReferenceId.
-                        example: stable-abc-123
-                      effectiveReferenceId:
-                        type: string
-                        description: Computed field (read-only). Equals stableReferenceId when set, otherwise falls back to referenceId. Use as the canonical user identifier.
-                        example: stable-abc-123
-                      email:
-                        type: string
-                        example: User email address kept in your system.
-                      phoneNumber:
-                        type: string
-                        example: User phone number kept in your system.
-                  updatedAt:
-                    type: string
-                    format: date-time
-                    readOnly: true
-                  createdAt:
-                    type: string
-                    format: date-time
-                    readOnly: true
-                required:
-                - updatedAt
-                - createdAt
-            required:
-            - id
-            - type
-            - attributes
-      required:
-      - data
-      - included
-    WalletAlreadyExistsResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 400
-        code:
-          type: string
-          enum:
-          - WalletAlreadyExists
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: WalletAlreadyExists
+          example: DepositFailedAtCardProcessor
         title:
           type: string
           description: Generic title for the error.
@@ -1492,7 +1288,7 @@ components:
           type: string
           description: A human-readable explanation providing more insights about the error.
           examples:
-          - A wallet for this user and merchant already exists.
+          - Deposit failed at card processor. Please try again or contact support.
         meta:
           type: object
           properties:
@@ -1501,813 +1297,25 @@ components:
               enum:
               - production
               - sandbox
-              example: sandbox
             timestamp:
               type: string
               format: date-time
-              example: '2025-06-23T12:00:00.000Z'
             path:
               type: string
-              example: /api/v1/wallets
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/wallets
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    WalletNotFoundResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 404
-        code:
-          type: string
-          enum:
-          - WalletNotFound
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: WalletNotFound
-        title:
-          type: string
-          description: Generic title for the error.
-          example: WalletNotFoundException
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - Wallet with ID '{walletId}' not found.
-        meta:
-          type: object
-          properties:
-            environment:
+            originalCode:
               type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    CreateOneTimeDepositNotFoundResponse:
-      anyOf:
-      - $ref: '#/components/schemas/WalletNotFoundResponse'
-      - $ref: '#/components/schemas/TransactionNotFoundResponse'
-    GetWalletByBarcodeResponse:
-      type: object
-      properties:
-        data:
-          $ref: '#/components/schemas/Wallet'
-        included:
-          type: array
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-                format: uuid
-                description: Unique identifier for the object.
-                readOnly: true
-              type:
-                type: string
-                enum:
-                - User
-              attributes:
-                type: object
-                properties:
-                  disabled:
-                    type: boolean
-                    description: Flag to indicate if the user account is disabled.
-                  publicId:
-                    type: string
-                    description: The public identifier for the user.
-                  profile:
-                    type: object
-                    properties:
-                      firstName:
-                        type: string
-                      lastName:
-                        type: string
-                      email:
-                        type: string
-                        format: email
-                      phoneNumber:
-                        type: string
-                  attachedProfile:
-                    type: object
-                    properties:
-                      referenceId:
-                        type: string
-                        description: Deprecated. Use stableReferenceId instead. Legacy merchant-scoped user identifier. Immutable once set.
-                        deprecated: true
-                        example: Any string identifier provided by you.
-                      stableReferenceId:
-                        type: string
-                        description: Stable merchant-scoped user identifier. Required for all new integrations; immutable once set. The field remains absent in some requests only to support existing merchants migrating from referenceId. When set, becomes the effectiveReferenceId.
-                        example: stable-abc-123
-                      effectiveReferenceId:
-                        type: string
-                        description: Computed field (read-only). Equals stableReferenceId when set, otherwise falls back to referenceId. Use as the canonical user identifier.
-                        example: stable-abc-123
-                      email:
-                        type: string
-                        example: User email address kept in your system.
-                      phoneNumber:
-                        type: string
-                        example: User phone number kept in your system.
-                  updatedAt:
-                    type: string
-                    format: date-time
-                    readOnly: true
-                  createdAt:
-                    type: string
-                    format: date-time
-                    readOnly: true
-                required:
-                - updatedAt
-                - createdAt
-            required:
-            - id
-            - type
-            - attributes
-      required:
-      - data
-      - included
-    NoWalletFoundForBalanceResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 404
-        code:
-          type: string
-          enum:
-          - WalletNotFound
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: WalletNotFound
-        title:
-          type: string
-          description: Generic title for the error.
-          example: WalletNotFoundException
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - No wallet found for the provided parameters.
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000/balance
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000/balance
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    UnexpectedErrorForWalletResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 500
-        code:
-          type: string
-          enum:
-          - UnexpectedError
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: UnexpectedError
-        title:
-          type: string
-          description: Generic title for the error.
-          example: WalletException
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - An unexpected error occurred.
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/wallets
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/wallets
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    ClosedLoopWithdrawNotFoundResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 404
-        code:
-          type: string
-          enum:
-          - WalletNotFound
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: WalletNotFound
-        title:
-          type: string
-          description: Generic title for the error.
-          example: WalletNotFoundException
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - Wallet with ID '{walletId}' not found.
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    Wallet:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: Unique identifier for the object.
-          readOnly: true
-        type:
-          type: string
-          enum:
-          - Wallet
-        attributes:
-          type: object
-          properties:
-            status:
-              type: string
-              enum:
-              - Active
-              - ClosingWithClosedLoop
-              - ManualReview
-              - Closed
-              default: Active
-              description: The current status of the wallet.
-            closedAt:
-              type:
-              - string
-              - 'null'
-              format: date-time
-              description: The date and time when the wallet was closed.
-            updatedAt:
-              type: string
-              format: date-time
-              readOnly: true
-            createdAt:
-              type: string
-              format: date-time
-              readOnly: true
-          required:
-          - updatedAt
-          - createdAt
-        relationships:
-          type: object
-          properties:
-            user:
-              type: object
-              properties:
-                data:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                      format: uuid
-                    type:
-                      type: string
-                      enum:
-                      - User
-                  required:
-                  - id
-                  - type
-              required:
-              - data
-      required:
-      - id
-      - type
-      - attributes
-      - relationships
-      description: A wallet
-      x-tags:
-      - Model
-    ClosedLoopWithdrawResponse:
-      type: object
-      properties:
-        data:
-          type: object
-          properties:
-            id:
-              type: string
-              format: uuid
-              description: The wallet ID. Same as the `walletId` path parameter.
-              example: 123e4567-e89b-12d3-a456-426614174000
-            type:
-              type: string
-              enum:
-              - Withdraw
-            attributes:
-              type: object
-              properties:
-                split:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      linkedAccountId:
-                        type: string
-                        format: uuid
-                        description: The linked account ID that received (or will receive) this portion of the withdrawal.
-                        example: 123e4567-e89b-12d3-a456-426614174000
-                      institutionName:
-                        type: string
-                        description: Name of the financial institution for the linked account.
-                        example: Example Bank
-                      accountMask:
-                        type: string
-                        description: Masked account number (e.g., last four digits) for display.
-                        example: '1234'
-                      amount:
-                        type: integer
-                        description: Amount in cents allocated to this linked account.
-                        example: 2500
-                    required:
-                    - linkedAccountId
-                    - institutionName
-                    - accountMask
-                    - amount
-                  description: Breakdown of the withdrawal across linked accounts. Each item indicates how much is allocated to each account.
-              required:
-              - split
-          required:
-          - id
-          - type
-          - attributes
-      required:
-      - data
-    CreateOneTimeDepositResponse:
-      type: object
-      properties:
-        data:
-          type: object
-          properties:
-            id:
-              type: string
-              format: uuid
-              description: The transaction ID. This is the same value as `attributes.transactionId`.
-              example: 123e4567-e89b-12d3-a456-426614174000
-            type:
-              type: string
-              enum:
-              - OneTimeDeposit
-            attributes:
-              type: object
-              properties:
-                id:
-                  type: string
-                  format: uuid
-                  description: Transaction ID.
-                  example: 123e4567-e89b-12d3-a456-426614174000
-                transactionId:
-                  type: string
-                  format: uuid
-                  description: The ID of the created transaction. Same value as `id`.
-                  example: 123e4567-e89b-12d3-a456-426614174000
-                status:
-                  type: string
-                  enum:
-                  - Pending
-                  - Cleared
-                  - Failed
-                  description: The status of the created transaction. New deposits are typically created in `Pending` status until they are cleared or fail.
-                  example: Pending
-                amount:
-                  type: integer
-                  description: The total amount charged to the user, represented in the smallest currency unit (e.g., cents for USD).
-                  format: int32
-                  example: 1300
-                disbursement:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      counterpartyId:
-                        type: string
-                        format: uuid
-                        description: The ID of the counterparty who will receive the net disbursement.
-                        example: 497f6eca-6276-4993-bfeb-53cbbbba6f08
-                      amount:
-                        type: integer
-                        description: The total disbursement amount from the deposit, represented in the smallest currency unit (e.g., cents for USD).
-                        format: int32
-                        example: 300
-                      fee:
-                        type: integer
-                        description: Accrue's fee deducted from the disbursement amount. Always returns 0.
-                        format: int32
-                        example: 0
-                        deprecated: true
-                      remit:
-                        type: boolean
-                        description: Deprecated. Always returns `true`. All disbursements are remitted directly. Will be removed in a future version.
-                        example: true
-                        deprecated: true
-                    required:
-                    - counterpartyId
-                    - amount
-                    - fee
-                    - remit
-                  description: Breakdown of fee disbursements included in the deposit, if any were provided.
-                  example:
-                  - counterpartyId: 497f6eca-6276-4993-bfeb-53cbbbba6f08
-                    amount: 300
-                    fee: 0
-                    remit: true
-                charges:
-                  type: object
-                  properties:
-                    fee:
-                      type: object
-                      properties:
-                        amount:
-                          type: integer
-                          minimum: 0
-                          description: Fee amount in cents
-                          format: int32
-                          example: 150
-                        type:
-                          type: string
-                          description: Fee type identifier (e.g., 'ACHFee', 'CardFee')
-                          example: ACHFee
-                      required:
-                      - amount
-                      - type
-                      description: Processing fee details
-                  description: Charges applied to this deposit.
-                deductions:
-                  type: object
-                  properties:
-                    fee:
-                      type: integer
-                      minimum: 0
-                      description: Accrue processing fee in cents
-                      format: int32
-                      example: 150
-                  required:
-                  - fee
-                  description: Legacy charges breakdown. Use `charges` instead.
-                  deprecated: true
-              required:
-              - id
-              - transactionId
-              - status
-              - amount
-          required:
-          - id
-          - type
-          - attributes
-      required:
-      - data
-    Transaction:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: Unique identifier for the object.
-          readOnly: true
-        type:
-          type: string
-          enum:
-          - Transaction
-        attributes:
-          type: object
-          properties:
-            id:
-              type: string
-              format: uuid
-              description: Transaction ID
-              example: 123e4567-e89b-12d3-a456-426614174000
-            walletId:
-              type: string
-              format: uuid
-              description: The wallet ID associated with this transaction
-              example: 123e4567-e89b-12d3-a456-426614174000
-            type:
-              type: string
-              description: The type of transaction
-              example: NonRecurring
-            status:
-              type: string
-              enum:
-              - Pending
-              - Cleared
-              - Failed
-              description: The current status of the transaction
-              example: Cleared
-            amount:
-              type: integer
-              description: The transaction amount, represented in the smallest currency unit (e.g., cents for USD). To obtain the value in dollars, divide by 100.
-              format: int32
-              example: 9999
-            createdAt:
-              type: string
-              format: date-time
-              description: The date and time when the transaction was created
-              example: '2024-01-15T10:30:00Z'
-            clearedAt:
-              type: string
-              format: date-time
-              description: The date and time when the transaction was cleared (undefined if not yet cleared)
-              readOnly: true
-            charges:
-              type: object
-              properties:
-                fee:
-                  type: object
-                  properties:
-                    amount:
-                      type: integer
-                      minimum: 0
-                      description: Fee amount in cents
-                      format: int32
-                      example: 150
-                    type:
-                      type: string
-                      description: Fee type identifier (e.g., 'ACHFee', 'CardFee').
-                      example: ACHFee
-                  required:
-                  - amount
-                  - type
-                  description: Processing fee details
-              description: Charges applied to this transaction.
-          required:
-          - id
-          - walletId
-          - type
-          - status
-          - amount
-          - createdAt
-      required:
-      - id
-      - type
-      - attributes
-      description: A transaction
-      x-tags:
-      - Model
-    ListWalletsResponse:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-                format: uuid
-                description: Unique identifier for the object.
-                readOnly: true
-              type:
-                type: string
-                enum:
-                - Wallet
-              attributes:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    enum:
-                    - Active
-                    - ClosingWithClosedLoop
-                    - ManualReview
-                    - Closed
-                    default: Active
-                    description: The current status of the wallet.
-                  closedAt:
-                    type:
-                    - string
-                    - 'null'
-                    format: date-time
-                    description: The date and time when the wallet was closed.
-                  updatedAt:
-                    type: string
-                    format: date-time
-                    readOnly: true
-                  createdAt:
-                    type: string
-                    format: date-time
-                    readOnly: true
-                required:
-                - updatedAt
-                - createdAt
-              relationships:
-                type: object
-                properties:
-                  user:
-                    type: object
-                    properties:
-                      data:
-                        type: object
-                        properties:
-                          id:
-                            type: string
-                            format: uuid
-                          type:
-                            type: string
-                            enum:
-                            - User
-                        required:
-                        - id
-                        - type
-                    required:
-                    - data
-            required:
-            - id
-            - type
-            - attributes
-            - relationships
-        meta:
-          type: object
-          properties:
-            total:
-              type: number
-              example: 1
-            limit:
-              type: number
-              example: 10
-            offset:
-              type: number
-              example: 0
-          required:
-          - total
-          - limit
-          - offset
-      required:
-      - data
-      - meta
-    KycNotCompletedResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 400
-        code:
-          type: string
-          enum:
-          - NotAllowed
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: NotAllowed
-        title:
-          type: string
-          description: Generic title for the error.
-          example: WalletValidationException
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - KYC is not completed for this wallet.
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000/transactions
+              description: 'The original card processor response code. This field is only present for card deposit failures. For bank transfer (ACH) deposit failures, different error codes are returned (e.g., InsufficientFunds, ExceedACHLimit, LinkedAccountDisconnected) and this field is not included. Response codes are categorized by their prefix:
+
+                - **10xxx**: Approved - The payment request was successful.
+
+                - **20xxx**: Soft declines - The payment request was declined, though subsequent attempts may succeed.
+
+                - **30xxx**: Hard declines - The request was declined. Most hard declines require the issuer or cardholder to fix any outstanding issues before you can retry.
+
+                - **4xxxx**: Risk responses - The request raised a risk response. The response_code and status depend on the action specified in your Fraud Detection risk strategies.
+
+                - **50xxx**: Card payout declines - The card payout request was declined.'
+              example: '20005'
           required:
           - environment
           - timestamp
@@ -2316,6 +1324,7 @@ components:
             environment: sandbox
             timestamp: '2025-06-23T12:00:00.000Z'
             path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000/transactions
+            originalCode: '20005'
       required:
       - id
       - status
@@ -2323,7 +1332,7 @@ components:
       - title
       - detail
       - meta
-    WalletBarcodeExpiredOrInvalidResponse:
+    WalletForBarcodeNotFoundResponse:
       type: object
       properties:
         id:
@@ -2334,13 +1343,13 @@ components:
         status:
           type: integer
           description: The HTTP status code applicable to this error.
-          example: 400
+          example: 404
         code:
           type: string
           enum:
-          - WalletIdentifierExpired
+          - WalletForBarcodeNotFound
           description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: WalletIdentifierExpired
+          example: WalletForBarcodeNotFound
         title:
           type: string
           description: Generic title for the error.
@@ -2349,9 +1358,7 @@ components:
           type: string
           description: A human-readable explanation providing more insights about the error.
           examples:
-          - Barcode has expired.
-          - Barcode has exceeded maximum uses.
-          - Barcode does not belong to this merchant.
+          - Wallet for barcode not found
         meta:
           type: object
           properties:
@@ -2441,341 +1448,6 @@ components:
       - title
       - detail
       - meta
-    PhoneNumberBannedForWalletResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 400
-        code:
-          type: string
-          enum:
-          - NotAllowed
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: NotAllowed
-        title:
-          type: string
-          description: Generic title for the error.
-          example: WalletValidationException
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - The given phone number is not allowed to create a wallet.
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/wallets
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/wallets
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    CreateOneTimeDepositErrorResponse:
-      anyOf:
-      - $ref: '#/components/schemas/InvalidIdentifierForWalletResponse'
-      - $ref: '#/components/schemas/KycNotCompletedResponse'
-      - $ref: '#/components/schemas/DepositFailedAtCardProcessorResponse'
-      - $ref: '#/components/schemas/ExceedsMaxOneTimeDepositAmountResponse'
-      - $ref: '#/components/schemas/InvalidUuidSyntaxForWalletResponse'
-    DepositFailedAtCardProcessorResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 400
-        code:
-          type: string
-          enum:
-          - DepositFailedAtCardProcessor
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: DepositFailedAtCardProcessor
-        title:
-          type: string
-          description: Generic title for the error.
-          example: WalletValidationException
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - Deposit failed at card processor. Please try again or contact support.
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-            timestamp:
-              type: string
-              format: date-time
-            path:
-              type: string
-            originalCode:
-              type: string
-              description: 'The original card processor response code. This field is only present for card deposit failures. For bank transfer (ACH) deposit failures, different error codes are returned (e.g., InsufficientFunds, ExceedACHLimit, LinkedAccountDisconnected) and this field is not included. Response codes are categorized by their prefix:
-
-                - **10xxx**: Approved - The payment request was successful.
-
-                - **20xxx**: Soft declines - The payment request was declined, though subsequent attempts may succeed.
-
-                - **30xxx**: Hard declines - The request was declined. Most hard declines require the issuer or cardholder to fix any outstanding issues before you can retry.
-
-                - **4xxxx**: Risk responses - The request raised a risk response. The response_code and status depend on the action specified in your Fraud Detection risk strategies.
-
-                - **50xxx**: Card payout declines - The card payout request was declined.'
-              example: '20005'
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000/transactions
-            originalCode: '20005'
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    ListTransactionsErrorResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 400
-        code:
-          type: string
-          enum:
-          - BadRequest
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: BadRequest
-        title:
-          type: string
-          description: Generic title for the error.
-          example: ValidationError
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - 'invalid input syntax for type uuid: "{uuid}"'
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    GetTransactionErrorResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 400
-        code:
-          type: string
-          enum:
-          - BadRequest
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: BadRequest
-        title:
-          type: string
-          description: Generic title for the error.
-          example: ValidationError
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - 'invalid input syntax for type uuid: "{uuid}"'
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    ListTransactionsResponse:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/Transaction'
-        meta:
-          type: object
-          properties:
-            total:
-              type: number
-              example: 1
-            limit:
-              type: number
-              example: 10
-            offset:
-              type: number
-              example: 0
-          required:
-          - total
-          - limit
-          - offset
-      required:
-      - data
-      - meta
-    CreateWalletResponse:
-      type: object
-      properties:
-        data:
-          type: object
-          properties:
-            id:
-              type: string
-              format: uuid
-              description: Unique identifier for the object.
-              readOnly: true
-            type:
-              type: string
-              enum:
-              - Wallet
-            attributes:
-              type: object
-              properties:
-                status:
-                  type: string
-                  enum:
-                  - Active
-                  - ClosingWithClosedLoop
-                  - ManualReview
-                  - Closed
-                  default: Active
-                  description: The current status of the wallet.
-                closedAt:
-                  type:
-                  - string
-                  - 'null'
-                  format: date-time
-                  description: The date and time when the wallet was closed.
-                updatedAt:
-                  type: string
-                  format: date-time
-                  readOnly: true
-                createdAt:
-                  type: string
-                  format: date-time
-                  readOnly: true
-              required:
-              - updatedAt
-              - createdAt
-          required:
-          - id
-          - type
-          - attributes
-      required:
-      - data
-    CreateWalletErrorResponse:
-      anyOf:
-      - $ref: '#/components/schemas/WalletUserNotFoundResponse'
-      - $ref: '#/components/schemas/WalletAlreadyExistsResponse'
-      - $ref: '#/components/schemas/PhoneNumberBannedForWalletResponse'
-      - $ref: '#/components/schemas/MerchantIsDisabledForWalletResponse'
-      - $ref: '#/components/schemas/InvalidIdentifierForWalletResponse'
-      - $ref: '#/components/schemas/InvalidUuidSyntaxForWalletResponse'
     MerchantIsDisabledForWalletResponse:
       type: object
       properties:
@@ -2834,75 +1506,10 @@ components:
       - title
       - detail
       - meta
-    GetTransactionResponse:
-      type: object
-      properties:
-        data:
-          $ref: '#/components/schemas/Transaction'
-      required:
-      - data
-    ClosedLoopWithdrawErrorResponse:
+    GetWalletBalanceErrorResponse:
       anyOf:
-      - $ref: '#/components/schemas/InvalidIdentifierForWalletResponse'
+      - $ref: '#/components/schemas/MultipleWalletsFoundResponse'
       - $ref: '#/components/schemas/InvalidUuidSyntaxForWalletResponse'
-    MultipleWalletsFoundResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 400
-        code:
-          type: string
-          enum:
-          - MultipleWalletsFound
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: MultipleWalletsFound
-        title:
-          type: string
-          description: Generic title for the error.
-          example: WalletValidationException
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - Multiple wallets found for the provided user reference. Please use a more specific identifier.
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000/balance
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000/balance
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
     InvalidUuidSyntaxForWalletResponse:
       type: object
       properties:
@@ -2961,7 +1568,7 @@ components:
       - title
       - detail
       - meta
-    ListTransactionsNotFoundResponse:
+    WalletNotFoundResponse:
       type: object
       properties:
         id:
@@ -3019,65 +1626,33 @@ components:
       - title
       - detail
       - meta
-    WalletQueryValidationErrorResponse:
+    ListTransactionsResponse:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 400
-        code:
-          type: string
-          enum:
-          - BadRequest
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: BadRequest
-        title:
-          type: string
-          description: Generic title for the error.
-          example: ValidationError
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - 'Validation failed for page[limit]: expected number'
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transaction'
         meta:
           type: object
           properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/wallets
+            total:
+              type: number
+              example: 1
+            limit:
+              type: number
+              example: 10
+            offset:
+              type: number
+              example: 0
           required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/wallets
+          - total
+          - limit
+          - offset
       required:
-      - id
-      - status
-      - code
-      - title
-      - detail
+      - data
       - meta
-    InvalidIdentifierForWalletResponse:
+    ExceedsMaxOneTimeDepositAmountResponse:
       type: object
       properties:
         id:
@@ -3092,9 +1667,9 @@ components:
         code:
           type: string
           enum:
-          - InvalidIdentifier
+          - ExceedsMaxOneTimeDepositAmount
           description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: InvalidIdentifier
+          example: ExceedsMaxOneTimeDepositAmount
         title:
           type: string
           description: Generic title for the error.
@@ -3103,7 +1678,7 @@ components:
           type: string
           description: A human-readable explanation providing more insights about the error.
           examples:
-          - Invalid merchant or reward profile identifier provided.
+          - Deposit amount exceeds the merchant maximum.
         meta:
           type: object
           properties:
@@ -3119,7 +1694,7 @@ components:
               example: '2025-06-23T12:00:00.000Z'
             path:
               type: string
-              example: /api/v1/wallets
+              example: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000/transactions
           required:
           - environment
           - timestamp
@@ -3127,7 +1702,7 @@ components:
           example:
             environment: sandbox
             timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/wallets
+            path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000/transactions
       required:
       - id
       - status
@@ -3135,6 +1710,76 @@ components:
       - title
       - detail
       - meta
+    Wallet:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - Wallet
+        attributes:
+          type: object
+          properties:
+            status:
+              type: string
+              enum:
+              - Active
+              - ClosingWithClosedLoop
+              - ManualReview
+              - Closed
+              default: Active
+              description: The current status of the wallet.
+            closedAt:
+              type:
+              - string
+              - 'null'
+              format: date-time
+              description: The date and time when the wallet was closed.
+            updatedAt:
+              type: string
+              format: date-time
+              readOnly: true
+            createdAt:
+              type: string
+              format: date-time
+              readOnly: true
+          required:
+          - updatedAt
+          - createdAt
+        relationships:
+          type: object
+          properties:
+            user:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                    type:
+                      type: string
+                      enum:
+                      - User
+                  required:
+                  - id
+                  - type
+              required:
+              - data
+      required:
+      - id
+      - type
+      - attributes
+      - relationships
+      description: A wallet
+      x-tags:
+      - Model
     GetWalletBalanceResponse:
       type: object
       properties:
@@ -3304,7 +1949,160 @@ components:
           - Model
       required:
       - data
-    WalletForBarcodeNotFoundResponse:
+    CreateWalletErrorResponse:
+      anyOf:
+      - $ref: '#/components/schemas/WalletUserNotFoundResponse'
+      - $ref: '#/components/schemas/WalletAlreadyExistsResponse'
+      - $ref: '#/components/schemas/PhoneNumberBannedForWalletResponse'
+      - $ref: '#/components/schemas/MerchantIsDisabledForWalletResponse'
+      - $ref: '#/components/schemas/InvalidIdentifierForWalletResponse'
+      - $ref: '#/components/schemas/InvalidUuidSyntaxForWalletResponse'
+    CreateOneTimeDepositErrorResponse:
+      anyOf:
+      - $ref: '#/components/schemas/InvalidIdentifierForWalletResponse'
+      - $ref: '#/components/schemas/KycNotCompletedResponse'
+      - $ref: '#/components/schemas/DepositFailedAtCardProcessorResponse'
+      - $ref: '#/components/schemas/ExceedsMaxOneTimeDepositAmountResponse'
+      - $ref: '#/components/schemas/InvalidUuidSyntaxForWalletResponse'
+    GetWalletByBarcodeResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Wallet'
+        included:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                description: Unique identifier for the object.
+                readOnly: true
+              type:
+                type: string
+                enum:
+                - User
+              attributes:
+                type: object
+                properties:
+                  disabled:
+                    type: boolean
+                    description: Flag to indicate if the user account is disabled.
+                  publicId:
+                    type: string
+                    description: The public identifier for the user.
+                  profile:
+                    type: object
+                    properties:
+                      firstName:
+                        type: string
+                      lastName:
+                        type: string
+                      email:
+                        type: string
+                        format: email
+                      phoneNumber:
+                        type: string
+                  attachedProfile:
+                    type: object
+                    properties:
+                      referenceId:
+                        type: string
+                        description: Deprecated. Use stableReferenceId instead. Legacy merchant-scoped user identifier. Immutable once set.
+                        deprecated: true
+                        example: Any string identifier provided by you.
+                      stableReferenceId:
+                        type: string
+                        description: Stable merchant-scoped user identifier. Required for all new integrations; immutable once set. The field remains absent in some requests only to support existing merchants migrating from referenceId. When set, becomes the effectiveReferenceId.
+                        example: stable-abc-123
+                      effectiveReferenceId:
+                        type: string
+                        description: Computed field (read-only). Equals stableReferenceId when set, otherwise falls back to referenceId. Use as the canonical user identifier.
+                        example: stable-abc-123
+                      email:
+                        type: string
+                        example: User email address kept in your system.
+                      phoneNumber:
+                        type: string
+                        example: User phone number kept in your system.
+                  updatedAt:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                  createdAt:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                required:
+                - updatedAt
+                - createdAt
+            required:
+            - id
+            - type
+            - attributes
+      required:
+      - data
+      - included
+    PhoneNumberBannedForWalletResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - NotAllowed
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: NotAllowed
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WalletValidationException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - The given phone number is not allowed to create a wallet.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    NoWalletFoundForBalanceResponse:
       type: object
       properties:
         id:
@@ -3319,9 +2117,611 @@ components:
         code:
           type: string
           enum:
-          - WalletForBarcodeNotFound
+          - WalletNotFound
           description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: WalletForBarcodeNotFound
+          example: WalletNotFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WalletNotFoundException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - No wallet found for the provided parameters.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000/balance
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000/balance
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    GetTransactionErrorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - BadRequest
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: BadRequest
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ValidationError
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - 'invalid input syntax for type uuid: "{uuid}"'
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    UnexpectedErrorForWalletResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 500
+        code:
+          type: string
+          enum:
+          - UnexpectedError
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: UnexpectedError
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WalletException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - An unexpected error occurred.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    CreateWalletResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: Unique identifier for the object.
+              readOnly: true
+            type:
+              type: string
+              enum:
+              - Wallet
+            attributes:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum:
+                  - Active
+                  - ClosingWithClosedLoop
+                  - ManualReview
+                  - Closed
+                  default: Active
+                  description: The current status of the wallet.
+                closedAt:
+                  type:
+                  - string
+                  - 'null'
+                  format: date-time
+                  description: The date and time when the wallet was closed.
+                updatedAt:
+                  type: string
+                  format: date-time
+                  readOnly: true
+                createdAt:
+                  type: string
+                  format: date-time
+                  readOnly: true
+              required:
+              - updatedAt
+              - createdAt
+          required:
+          - id
+          - type
+          - attributes
+      required:
+      - data
+    WalletQueryValidationErrorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - BadRequest
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: BadRequest
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ValidationError
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - 'Validation failed for page[limit]: expected number'
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    GetWalletResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Wallet'
+        included:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                description: Unique identifier for the object.
+                readOnly: true
+              type:
+                type: string
+                enum:
+                - User
+              attributes:
+                type: object
+                properties:
+                  disabled:
+                    type: boolean
+                    description: Flag to indicate if the user account is disabled.
+                  publicId:
+                    type: string
+                    description: The public identifier for the user.
+                  profile:
+                    type: object
+                    properties:
+                      firstName:
+                        type: string
+                      lastName:
+                        type: string
+                      email:
+                        type: string
+                        format: email
+                      phoneNumber:
+                        type: string
+                  attachedProfile:
+                    type: object
+                    properties:
+                      referenceId:
+                        type: string
+                        description: Deprecated. Use stableReferenceId instead. Legacy merchant-scoped user identifier. Immutable once set.
+                        deprecated: true
+                        example: Any string identifier provided by you.
+                      stableReferenceId:
+                        type: string
+                        description: Stable merchant-scoped user identifier. Required for all new integrations; immutable once set. The field remains absent in some requests only to support existing merchants migrating from referenceId. When set, becomes the effectiveReferenceId.
+                        example: stable-abc-123
+                      effectiveReferenceId:
+                        type: string
+                        description: Computed field (read-only). Equals stableReferenceId when set, otherwise falls back to referenceId. Use as the canonical user identifier.
+                        example: stable-abc-123
+                      email:
+                        type: string
+                        example: User email address kept in your system.
+                      phoneNumber:
+                        type: string
+                        example: User phone number kept in your system.
+                  updatedAt:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                  createdAt:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                required:
+                - updatedAt
+                - createdAt
+            required:
+            - id
+            - type
+            - attributes
+      required:
+      - data
+      - included
+    WalletAlreadyExistsResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - WalletAlreadyExists
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: WalletAlreadyExists
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WalletValidationException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - A wallet for this user and merchant already exists.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    ClosedLoopWithdrawErrorResponse:
+      anyOf:
+      - $ref: '#/components/schemas/InvalidIdentifierForWalletResponse'
+      - $ref: '#/components/schemas/InvalidUuidSyntaxForWalletResponse'
+    ListWalletsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                description: Unique identifier for the object.
+                readOnly: true
+              type:
+                type: string
+                enum:
+                - Wallet
+              attributes:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum:
+                    - Active
+                    - ClosingWithClosedLoop
+                    - ManualReview
+                    - Closed
+                    default: Active
+                    description: The current status of the wallet.
+                  closedAt:
+                    type:
+                    - string
+                    - 'null'
+                    format: date-time
+                    description: The date and time when the wallet was closed.
+                  updatedAt:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                  createdAt:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                required:
+                - updatedAt
+                - createdAt
+              relationships:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                          type:
+                            type: string
+                            enum:
+                            - User
+                        required:
+                        - id
+                        - type
+                    required:
+                    - data
+            required:
+            - id
+            - type
+            - attributes
+            - relationships
+        meta:
+          type: object
+          properties:
+            total:
+              type: number
+              example: 1
+            limit:
+              type: number
+              example: 10
+            offset:
+              type: number
+              example: 0
+          required:
+          - total
+          - limit
+          - offset
+      required:
+      - data
+      - meta
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - Transaction
+        attributes:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: Transaction ID
+              example: 123e4567-e89b-12d3-a456-426614174000
+            walletId:
+              type: string
+              format: uuid
+              description: The wallet ID associated with this transaction
+              example: 123e4567-e89b-12d3-a456-426614174000
+            type:
+              type: string
+              description: The type of transaction
+              example: NonRecurring
+            status:
+              type: string
+              enum:
+              - Pending
+              - Cleared
+              - Failed
+              description: The current status of the transaction
+              example: Cleared
+            amount:
+              type: integer
+              description: The transaction amount, represented in the smallest currency unit (e.g., cents for USD). To obtain the value in dollars, divide by 100.
+              format: int32
+              example: 9999
+            createdAt:
+              type: string
+              format: date-time
+              description: The date and time when the transaction was created
+              example: '2024-01-15T10:30:00Z'
+            clearedAt:
+              type: string
+              format: date-time
+              description: The date and time when the transaction was cleared (undefined if not yet cleared)
+              readOnly: true
+            charges:
+              type: object
+              properties:
+                fee:
+                  type: object
+                  properties:
+                    amount:
+                      type: integer
+                      minimum: 0
+                      description: Fee amount in cents
+                      format: int32
+                      example: 150
+                    type:
+                      type: string
+                      description: Fee type identifier (e.g., 'ACHFee', 'CardFee').
+                      example: ACHFee
+                  required:
+                  - amount
+                  - type
+                  description: Processing fee details
+              description: Charges applied to this transaction.
+          required:
+          - id
+          - walletId
+          - type
+          - status
+          - amount
+          - createdAt
+      required:
+      - id
+      - type
+      - attributes
+      description: A transaction
+      x-tags:
+      - Model
+    WalletBarcodeExpiredOrInvalidResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - WalletIdentifierExpired
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: WalletIdentifierExpired
         title:
           type: string
           description: Generic title for the error.
@@ -3330,7 +2730,9 @@ components:
           type: string
           description: A human-readable explanation providing more insights about the error.
           examples:
-          - Wallet for barcode not found
+          - Barcode has expired.
+          - Barcode has exceeded maximum uses.
+          - Barcode does not belong to this merchant.
         meta:
           type: object
           properties:
@@ -3355,6 +2757,604 @@ components:
             environment: sandbox
             timestamp: '2025-06-23T12:00:00.000Z'
             path: /api/v1/wallets/barcode/SCAN-LOOKUP-ID
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    CreateOneTimeDepositNotFoundResponse:
+      anyOf:
+      - $ref: '#/components/schemas/WalletNotFoundResponse'
+      - $ref: '#/components/schemas/TransactionNotFoundResponse'
+    CreateOneTimeDepositResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: The transaction ID. This is the same value as `attributes.transactionId`.
+              example: 123e4567-e89b-12d3-a456-426614174000
+            type:
+              type: string
+              enum:
+              - OneTimeDeposit
+            attributes:
+              type: object
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                  description: Transaction ID.
+                  example: 123e4567-e89b-12d3-a456-426614174000
+                transactionId:
+                  type: string
+                  format: uuid
+                  description: The ID of the created transaction. Same value as `id`.
+                  example: 123e4567-e89b-12d3-a456-426614174000
+                status:
+                  type: string
+                  enum:
+                  - Pending
+                  - Cleared
+                  - Failed
+                  description: The status of the created transaction. New deposits are typically created in `Pending` status until they are cleared or fail.
+                  example: Pending
+                amount:
+                  type: integer
+                  description: The total amount charged to the user, represented in the smallest currency unit (e.g., cents for USD).
+                  format: int32
+                  example: 1300
+                disbursement:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      counterpartyId:
+                        type: string
+                        format: uuid
+                        description: The ID of the counterparty who will receive the net disbursement.
+                        example: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                      amount:
+                        type: integer
+                        description: The total disbursement amount from the deposit, represented in the smallest currency unit (e.g., cents for USD).
+                        format: int32
+                        example: 300
+                      fee:
+                        type: integer
+                        description: Accrue's fee deducted from the disbursement amount. Always returns 0.
+                        format: int32
+                        example: 0
+                        deprecated: true
+                      remit:
+                        type: boolean
+                        description: Deprecated. Always returns `true`. All disbursements are remitted directly. Will be removed in a future version.
+                        example: true
+                        deprecated: true
+                    required:
+                    - counterpartyId
+                    - amount
+                    - fee
+                    - remit
+                  description: Breakdown of fee disbursements included in the deposit, if any were provided.
+                  example:
+                  - counterpartyId: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+                    amount: 300
+                    fee: 0
+                    remit: true
+                charges:
+                  type: object
+                  properties:
+                    fee:
+                      type: object
+                      properties:
+                        amount:
+                          type: integer
+                          minimum: 0
+                          description: Fee amount in cents
+                          format: int32
+                          example: 150
+                        type:
+                          type: string
+                          description: Fee type identifier (e.g., 'ACHFee', 'CardFee')
+                          example: ACHFee
+                      required:
+                      - amount
+                      - type
+                      description: Processing fee details
+                  description: Charges applied to this deposit.
+                deductions:
+                  type: object
+                  properties:
+                    fee:
+                      type: integer
+                      minimum: 0
+                      description: Accrue processing fee in cents
+                      format: int32
+                      example: 150
+                  required:
+                  - fee
+                  description: Legacy charges breakdown. Use `charges` instead.
+                  deprecated: true
+              required:
+              - id
+              - transactionId
+              - status
+              - amount
+          required:
+          - id
+          - type
+          - attributes
+      required:
+      - data
+    GetTransactionNotFoundResponse:
+      anyOf:
+      - $ref: '#/components/schemas/WalletNotFoundResponse'
+      - $ref: '#/components/schemas/TransactionNotFoundResponse'
+    ClosedLoopWithdrawResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: The wallet ID. Same as the `walletId` path parameter.
+              example: 123e4567-e89b-12d3-a456-426614174000
+            type:
+              type: string
+              enum:
+              - Withdraw
+            attributes:
+              type: object
+              properties:
+                split:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      linkedAccountId:
+                        type: string
+                        format: uuid
+                        description: The linked account ID that received (or will receive) this portion of the withdrawal.
+                        example: 123e4567-e89b-12d3-a456-426614174000
+                      institutionName:
+                        type: string
+                        description: Name of the financial institution for the linked account.
+                        example: Example Bank
+                      accountMask:
+                        type: string
+                        description: Masked account number (e.g., last four digits) for display.
+                        example: '1234'
+                      amount:
+                        type: integer
+                        description: Amount in cents allocated to this linked account.
+                        example: 2500
+                    required:
+                    - linkedAccountId
+                    - institutionName
+                    - accountMask
+                    - amount
+                  description: Breakdown of the withdrawal across linked accounts. Each item indicates how much is allocated to each account.
+              required:
+              - split
+          required:
+          - id
+          - type
+          - attributes
+      required:
+      - data
+    ListTransactionsNotFoundResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 404
+        code:
+          type: string
+          enum:
+          - WalletNotFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: WalletNotFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WalletNotFoundException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Wallet with ID '{walletId}' not found.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    MultipleWalletsFoundResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - MultipleWalletsFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: MultipleWalletsFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WalletValidationException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Multiple wallets found for the provided user reference. Please use a more specific identifier.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000/balance
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000/balance
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    KycNotCompletedResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - NotAllowed
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: NotAllowed
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WalletValidationException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - KYC is not completed for this wallet.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000/transactions
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000/transactions
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    ListTransactionsErrorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - BadRequest
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: BadRequest
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ValidationError
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - 'invalid input syntax for type uuid: "{uuid}"'
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    ClosedLoopWithdrawNotFoundResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 404
+        code:
+          type: string
+          enum:
+          - WalletNotFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: WalletNotFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WalletNotFoundException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Wallet with ID '{walletId}' not found.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    InvalidIdentifierForWalletResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - InvalidIdentifier
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: InvalidIdentifier
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WalletValidationException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Invalid merchant or reward profile identifier provided.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    GetTransactionResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Transaction'
+      required:
+      - data
+    GetWalletErrorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - BadRequest
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: BadRequest
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ValidationError
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - 'invalid input syntax for type uuid: "{uuid}"'
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/wallets/123e4567-e89b-12d3-a456-426614174000
       required:
       - id
       - status

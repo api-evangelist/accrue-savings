@@ -525,20 +525,59 @@ paths:
         source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/webhooks/%7BwebhookId%7D');\n$request->setMethod(HTTP_METH_DELETE);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
 components:
   schemas:
-    GetWebhookResponse:
+    WebhookNotFoundResponse:
       type: object
       properties:
-        data:
-          $ref: '#/components/schemas/Webhook'
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 404
+        code:
+          type: string
+        title:
+          type: string
+          description: Generic title for the error.
+          example: NotFoundException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - 'NotFoundException: Not Found'
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/webhooks/123e4567-e89b-12d3-a456-426614174000
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/webhooks/123e4567-e89b-12d3-a456-426614174000
       required:
-      - data
-    WebhookResponse:
-      type: object
-      properties:
-        data:
-          $ref: '#/components/schemas/Webhook'
-      required:
-      - data
+      - id
+      - status
+      - title
+      - detail
+      - meta
     InvalidWebhookTopicsResponse:
       type: object
       properties:
@@ -655,129 +694,6 @@ components:
       - title
       - detail
       - meta
-    UpdateWebhook:
-      type: object
-      properties:
-        type:
-          type: string
-          enum:
-          - Webhook
-        attributes:
-          type: object
-          properties:
-            enabled:
-              type: boolean
-            name:
-              type: string
-            url:
-              type: string
-              description: HTTPS delivery endpoint. Set to empty or omit to stop HTTP delivery while continuing to record events for this webhook.
-            topics:
-              type: array
-              items:
-                type: string
-              description: 'Array of webhook topics to subscribe to. Use `''*''` to subscribe to all topics. Note: When using `''*''`, all new topics added in the future will automatically be sent to this webhook. You are responsible for handling any new or unknown topic types. The `''*''` wildcard cannot be combined with other topics.'
-              example:
-              - PaymentIntentCreated
-              - PaymentCreated
-      required:
-      - type
-      - attributes
-      description: Update webhook request
-      x-tags:
-      - Model
-    WebhookErrorResponse:
-      anyOf:
-      - $ref: '#/components/schemas/InvalidWebhookTopicsResponse'
-      - $ref: '#/components/schemas/WebhookValidationErrorResponse'
-    CreateWebhook:
-      type: object
-      properties:
-        type:
-          type: string
-          enum:
-          - Webhook
-        attributes:
-          type: object
-          properties:
-            enabled:
-              type: boolean
-            name:
-              type: string
-            url:
-              type: string
-              description: HTTPS endpoint that receives POST requests for subscribed events. If omitted or empty, events are still stored for this webhook (for example, via the webhook events API) but no HTTP delivery is attempted.
-            topics:
-              type: array
-              items:
-                type: string
-              description: 'Array of webhook topics to subscribe to. Use `''*''` to subscribe to all topics. Note: When using `''*''`, all new topics added in the future will automatically be sent to this webhook. You are responsible for handling any new or unknown topic types. The `''*''` wildcard cannot be combined with other topics.'
-              example:
-              - PaymentIntentCreated
-              - PaymentCreated
-          required:
-          - enabled
-          - name
-          - topics
-      required:
-      - type
-      - attributes
-      description: Create webhook request
-      x-tags:
-      - Model
-    WebhookNotFoundResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 404
-        code:
-          type: string
-        title:
-          type: string
-          description: Generic title for the error.
-          example: NotFoundException
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - 'NotFoundException: Not Found'
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/webhooks/123e4567-e89b-12d3-a456-426614174000
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/webhooks/123e4567-e89b-12d3-a456-426614174000
-      required:
-      - id
-      - status
-      - title
-      - detail
-      - meta
     Webhook:
       type: object
       properties:
@@ -833,6 +749,55 @@ components:
       - attributes
       description: ''
       x-tags: Model
+    GetWebhookResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Webhook'
+      required:
+      - data
+    WebhookErrorResponse:
+      anyOf:
+      - $ref: '#/components/schemas/InvalidWebhookTopicsResponse'
+      - $ref: '#/components/schemas/WebhookValidationErrorResponse'
+    UpdateWebhook:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - Webhook
+        attributes:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            name:
+              type: string
+            url:
+              type: string
+              description: HTTPS delivery endpoint. Set to empty or omit to stop HTTP delivery while continuing to record events for this webhook.
+            topics:
+              type: array
+              items:
+                type: string
+              description: 'Array of webhook topics to subscribe to. Use `''*''` to subscribe to all topics. Note: When using `''*''`, all new topics added in the future will automatically be sent to this webhook. You are responsible for handling any new or unknown topic types. The `''*''` wildcard cannot be combined with other topics.'
+              example:
+              - PaymentIntentCreated
+              - PaymentCreated
+      required:
+      - type
+      - attributes
+      description: Update webhook request
+      x-tags:
+      - Model
+    WebhookResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Webhook'
+      required:
+      - data
     WebhooksResponse:
       type: object
       properties:
@@ -840,6 +805,41 @@ components:
           $ref: '#/components/schemas/Webhook'
       required:
       - data
+    CreateWebhook:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - Webhook
+        attributes:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            name:
+              type: string
+            url:
+              type: string
+              description: HTTPS endpoint that receives POST requests for subscribed events. If omitted or empty, events are still stored for this webhook (for example, via the webhook events API) but no HTTP delivery is attempted.
+            topics:
+              type: array
+              items:
+                type: string
+              description: 'Array of webhook topics to subscribe to. Use `''*''` to subscribe to all topics. Note: When using `''*''`, all new topics added in the future will automatically be sent to this webhook. You are responsible for handling any new or unknown topic types. The `''*''` wildcard cannot be combined with other topics.'
+              example:
+              - PaymentIntentCreated
+              - PaymentCreated
+          required:
+          - enabled
+          - name
+          - topics
+      required:
+      - type
+      - attributes
+      description: Create webhook request
+      x-tags:
+      - Model
 x-tagGroups:
 - name: Overview
   tags:

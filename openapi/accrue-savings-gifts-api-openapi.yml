@@ -125,6 +125,50 @@ paths:
         source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/gifts/SCAN-LOOKUP-ID');\n$request->setMethod(HTTP_METH_GET);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
 components:
   schemas:
+    Gift:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - Gift
+        attributes:
+          type: object
+          properties:
+            available:
+              type: integer
+              minimum: 0
+              description: Remaining amount available to spend, in integer cents.
+              format: int32
+              example: 3000
+            originalAmount:
+              type: integer
+              minimum: 0
+              description: Original gift amount, in integer cents.
+              format: int32
+              example: 5000
+          required:
+          - available
+          - originalAmount
+      required:
+      - id
+      - type
+      - attributes
+      description: A gift remaining-balance lookup.
+      x-tags:
+      - Model
+    GetGiftByLookUpIdResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Gift'
+      required:
+      - data
     GiftNotFoundResponse:
       type: object
       properties:
@@ -183,43 +227,6 @@ components:
       - title
       - detail
       - meta
-    Gift:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: Unique identifier for the object.
-          readOnly: true
-        type:
-          type: string
-          enum:
-          - Gift
-        attributes:
-          type: object
-          properties:
-            available:
-              type: integer
-              minimum: 0
-              description: Remaining amount available to spend, in integer cents.
-              format: int32
-              example: 3000
-            originalAmount:
-              type: integer
-              minimum: 0
-              description: Original gift amount, in integer cents.
-              format: int32
-              example: 5000
-          required:
-          - available
-          - originalAmount
-      required:
-      - id
-      - type
-      - attributes
-      description: A gift remaining-balance lookup.
-      x-tags:
-      - Model
     GiftLookUpIdExpiredOrInvalidResponse:
       type: object
       properties:
@@ -280,13 +287,6 @@ components:
       - title
       - detail
       - meta
-    GetGiftByLookUpIdResponse:
-      type: object
-      properties:
-        data:
-          $ref: '#/components/schemas/Gift'
-      required:
-      - data
 x-tagGroups:
 - name: Overview
   tags:

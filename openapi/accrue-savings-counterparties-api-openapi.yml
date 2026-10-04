@@ -927,29 +927,20 @@ paths:
         source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/counterparties/:counterpartyId/payouts');\n$request->setMethod(HTTP_METH_GET);\n\n$request->setQueryData([\n  'page[limit]' => 'SOME_NUMBER_VALUE',\n  'page[offset]' => 'SOME_NUMBER_VALUE',\n  'filter[status]' => 'Sent',\n  'filter[minAmount]' => '1000',\n  'filter[maxAmount]' => '500000',\n  'filter[createdAfter]' => '2024-01-01T00:00:00.000Z',\n  'filter[createdBefore]' => '2024-12-31T23:59:59.999Z',\n  'filter[effectiveDateFrom]' => '2024-01-01',\n  'filter[effectiveDateTo]' => '2024-12-31'\n]);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
 components:
   schemas:
-    CounterpartyExternalBankAccount:
+    PayoutFromCounterpartyResponse:
       type: object
       properties:
-        accountNumber:
-          type: string
-          description: The payee's bank account number for settlement.
-          example: '1234567890'
-        routingNumber:
-          type: string
-          description: The payee's ABA routing number for settlement.
-          example: '021000021'
-        accountType:
-          type: string
-          enum:
-          - Checking
-          - Savings
-          description: The type of the payee's settlement bank account.
-          example: Checking
+        data:
+          $ref: '#/components/schemas/CounterpartyPayout'
       required:
-      - accountNumber
-      - routingNumber
-      - accountType
-      description: The payee's own bank account for settlement.
+      - data
+    CreateCounterpartyResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Counterparty'
+      required:
+      - data
     ListCounterpartiesResponse:
       type: object
       properties:
@@ -959,7 +950,7 @@ components:
             $ref: '#/components/schemas/Counterparty'
       required:
       - data
-    CounterpartyValidationErrorResponse:
+    CounterpartyAlreadyExistsResponse:
       type: object
       properties:
         id:
@@ -970,22 +961,22 @@ components:
         status:
           type: integer
           description: The HTTP status code applicable to this error.
-          example: 400
+          example: 409
         code:
           type: string
           enum:
-          - BadRequest
+          - CounterpartyAlreadyExists
           description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: BadRequest
+          example: CounterpartyAlreadyExists
         title:
           type: string
           description: Generic title for the error.
-          example: ValidationError
+          example: CounterpartyAlreadyExistsException
         detail:
           type: string
           description: A human-readable explanation providing more insights about the error.
           examples:
-          - Validation failed for data.attributes.routingNumber
+          - Counterparty already exists for this client
         meta:
           type: object
           properties:
@@ -1017,14 +1008,80 @@ components:
       - title
       - detail
       - meta
-    CreateCounterpartyResponse:
+    Counterparty:
       type: object
       properties:
-        data:
-          $ref: '#/components/schemas/Counterparty'
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - Counterparty
+        attributes:
+          type: object
+          properties:
+            updatedAt:
+              type: string
+              format: date-time
+              readOnly: true
+            createdAt:
+              type: string
+              format: date-time
+              readOnly: true
+            label:
+              type: string
+              description: Optional label for the counterparty.
+            accountNumber:
+              type: string
+              description: Deprecated. Use `externalBankAccount.accountNumber` instead. Still returned for compatibility.
+              example: '1234567890'
+              deprecated: true
+            routingNumber:
+              type: string
+              description: Deprecated. Use `externalBankAccount.routingNumber` instead. Still returned for compatibility.
+              example: '021000021'
+              deprecated: true
+            accountType:
+              type: string
+              enum:
+              - Checking
+              - Savings
+              description: Deprecated. Use `externalBankAccount.accountType` instead. Still returned for compatibility.
+              deprecated: true
+            externalBankAccount:
+              $ref: '#/components/schemas/CounterpartyExternalBankAccount'
+            internalBankAccount:
+              $ref: '#/components/schemas/CounterpartyInternalBankAccount'
+            balance:
+              type: object
+              properties:
+                pending:
+                  type: integer
+                  description: The balance associated with the counterparty not yet settled, in cents. Can exceed the int32 range — read it into a 64-bit integer.
+                  format: int64
+                  example: 1000
+                available:
+                  type: integer
+                  description: Settled balance associated with the counterparty, in cents. Can exceed the int32 range — read it into a 64-bit integer. A single payout is capped below this (see the payout `amount` field), so a balance above that cap is paid out across multiple payouts.
+                  format: int64
+                  example: 1000
+              required:
+              - pending
+              - available
+          required:
+          - updatedAt
+          - createdAt
       required:
-      - data
-    UnexpectedCounterpartyErrorResponse:
+      - id
+      - type
+      - attributes
+      description: A counterparty represents a payee. `externalBankAccount` is the payee's own bank account for settlement. Top-level `accountNumber` / `routingNumber` / `accountType` still echo those values but are deprecated. `internalBankAccount` is the Accrue account you can fund over bank rails when one has been provisioned.
+      x-tags:
+      - Model
+    UnauthorizedForCounterpartiesResponse:
       type: object
       properties:
         id:
@@ -1035,22 +1092,22 @@ components:
         status:
           type: integer
           description: The HTTP status code applicable to this error.
-          example: 500
+          example: 401
         code:
           type: string
           enum:
-          - UnexpectedError
+          - Unauthorized
           description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: UnexpectedError
+          example: Unauthorized
         title:
           type: string
           description: Generic title for the error.
-          example: CounterpartyException
+          example: ClientNotAuthenticatedException
         detail:
           type: string
           description: A human-readable explanation providing more insights about the error.
           examples:
-          - An unexpected error occurred.
+          - 'unauthorized: no authenticated client for this request'
         meta:
           type: object
           properties:
@@ -1066,7 +1123,7 @@ components:
               example: '2025-06-23T12:00:00.000Z'
             path:
               type: string
-              example: /api/v1/counterparties/123e4567-e89b-12d3-a456-426614174000
+              example: /api/v1/counterparties/
           required:
           - environment
           - timestamp
@@ -1074,7 +1131,7 @@ components:
           example:
             environment: sandbox
             timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/counterparties/123e4567-e89b-12d3-a456-426614174000
+            path: /api/v1/counterparties/
       required:
       - id
       - status
@@ -1082,6 +1139,13 @@ components:
       - title
       - detail
       - meta
+    UpdateCounterpartyResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Counterparty'
+      required:
+      - data
     InsufficientBalanceResponse:
       type: object
       properties:
@@ -1214,36 +1278,64 @@ components:
       description: A payout represents a transfer of funds from a counterparty's available balance to their bank account.
       x-tags:
       - Model
-    GetCounterpartyResponse:
+    CounterpartyValidationErrorResponse:
       type: object
       properties:
-        data:
-          $ref: '#/components/schemas/Counterparty'
-      required:
-      - data
-    CounterpartyInternalBankAccount:
-      type: object
-      properties:
-        accountNumber:
+        id:
           type: string
-          description: Account number of the Accrue bank account associated with this counterparty.
-          example: '9876543210'
-        routingNumber:
-          type: string
-          description: Routing number of the Accrue bank account associated with this counterparty.
-          example: '021000021'
-        accountType:
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
           type: string
           enum:
-          - Checking
-          - Savings
-          description: Account type of the Accrue bank account associated with this counterparty.
-          example: Checking
+          - BadRequest
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: BadRequest
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ValidationError
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Validation failed for data.attributes.routingNumber
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/counterparties
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/counterparties
       required:
-      - accountNumber
-      - routingNumber
-      - accountType
-      description: The Accrue bank account associated with this counterparty. Present only when a dedicated Accrue deposit account has been provisioned. Use these details to send funds to this counterparty over bank rails.
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
     CounterpartyNotFoundResponse:
       type: object
       properties:
@@ -1360,144 +1452,6 @@ components:
       - title
       - detail
       - meta
-    PayoutFromCounterpartyResponse:
-      type: object
-      properties:
-        data:
-          $ref: '#/components/schemas/CounterpartyPayout'
-      required:
-      - data
-    Counterparty:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: Unique identifier for the object.
-          readOnly: true
-        type:
-          type: string
-          enum:
-          - Counterparty
-        attributes:
-          type: object
-          properties:
-            updatedAt:
-              type: string
-              format: date-time
-              readOnly: true
-            createdAt:
-              type: string
-              format: date-time
-              readOnly: true
-            label:
-              type: string
-              description: Optional label for the counterparty.
-            accountNumber:
-              type: string
-              description: Deprecated. Use `externalBankAccount.accountNumber` instead. Still returned for compatibility.
-              example: '1234567890'
-              deprecated: true
-            routingNumber:
-              type: string
-              description: Deprecated. Use `externalBankAccount.routingNumber` instead. Still returned for compatibility.
-              example: '021000021'
-              deprecated: true
-            accountType:
-              type: string
-              enum:
-              - Checking
-              - Savings
-              description: Deprecated. Use `externalBankAccount.accountType` instead. Still returned for compatibility.
-              deprecated: true
-            externalBankAccount:
-              $ref: '#/components/schemas/CounterpartyExternalBankAccount'
-            internalBankAccount:
-              $ref: '#/components/schemas/CounterpartyInternalBankAccount'
-            balance:
-              type: object
-              properties:
-                pending:
-                  type: integer
-                  description: The balance associated with the counterparty not yet settled, in cents. Can exceed the int32 range — read it into a 64-bit integer.
-                  format: int64
-                  example: 1000
-                available:
-                  type: integer
-                  description: Settled balance associated with the counterparty, in cents. Can exceed the int32 range — read it into a 64-bit integer. A single payout is capped below this (see the payout `amount` field), so a balance above that cap is paid out across multiple payouts.
-                  format: int64
-                  example: 1000
-              required:
-              - pending
-              - available
-          required:
-          - updatedAt
-          - createdAt
-      required:
-      - id
-      - type
-      - attributes
-      description: A counterparty represents a payee. `externalBankAccount` is the payee's own bank account for settlement. Top-level `accountNumber` / `routingNumber` / `accountType` still echo those values but are deprecated. `internalBankAccount` is the Accrue account you can fund over bank rails when one has been provisioned.
-      x-tags:
-      - Model
-    UnauthorizedForCounterpartiesResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 401
-        code:
-          type: string
-          enum:
-          - Unauthorized
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: Unauthorized
-        title:
-          type: string
-          description: Generic title for the error.
-          example: ClientNotAuthenticatedException
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - 'unauthorized: no authenticated client for this request'
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/counterparties/
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/counterparties/
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
     ListCounterpartyPayoutsResponse:
       type: object
       properties:
@@ -1524,7 +1478,30 @@ components:
       required:
       - data
       - meta
-    CounterpartyAlreadyExistsResponse:
+    CounterpartyExternalBankAccount:
+      type: object
+      properties:
+        accountNumber:
+          type: string
+          description: The payee's bank account number for settlement.
+          example: '1234567890'
+        routingNumber:
+          type: string
+          description: The payee's ABA routing number for settlement.
+          example: '021000021'
+        accountType:
+          type: string
+          enum:
+          - Checking
+          - Savings
+          description: The type of the payee's settlement bank account.
+          example: Checking
+      required:
+      - accountNumber
+      - routingNumber
+      - accountType
+      description: The payee's own bank account for settlement.
+    UnexpectedCounterpartyErrorResponse:
       type: object
       properties:
         id:
@@ -1535,22 +1512,22 @@ components:
         status:
           type: integer
           description: The HTTP status code applicable to this error.
-          example: 409
+          example: 500
         code:
           type: string
           enum:
-          - CounterpartyAlreadyExists
+          - UnexpectedError
           description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: CounterpartyAlreadyExists
+          example: UnexpectedError
         title:
           type: string
           description: Generic title for the error.
-          example: CounterpartyAlreadyExistsException
+          example: CounterpartyException
         detail:
           type: string
           description: A human-readable explanation providing more insights about the error.
           examples:
-          - Counterparty already exists for this client
+          - An unexpected error occurred.
         meta:
           type: object
           properties:
@@ -1566,7 +1543,7 @@ components:
               example: '2025-06-23T12:00:00.000Z'
             path:
               type: string
-              example: /api/v1/counterparties
+              example: /api/v1/counterparties/123e4567-e89b-12d3-a456-426614174000
           required:
           - environment
           - timestamp
@@ -1574,7 +1551,7 @@ components:
           example:
             environment: sandbox
             timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/counterparties
+            path: /api/v1/counterparties/123e4567-e89b-12d3-a456-426614174000
       required:
       - id
       - status
@@ -1582,17 +1559,40 @@ components:
       - title
       - detail
       - meta
-    UpdateCounterpartyResponse:
+    CreateCounterpartyPayoutErrorResponse:
+      anyOf:
+      - $ref: '#/components/schemas/InsufficientBalanceResponse'
+      - $ref: '#/components/schemas/CounterpartyValidationErrorResponse'
+    GetCounterpartyResponse:
       type: object
       properties:
         data:
           $ref: '#/components/schemas/Counterparty'
       required:
       - data
-    CreateCounterpartyPayoutErrorResponse:
-      anyOf:
-      - $ref: '#/components/schemas/InsufficientBalanceResponse'
-      - $ref: '#/components/schemas/CounterpartyValidationErrorResponse'
+    CounterpartyInternalBankAccount:
+      type: object
+      properties:
+        accountNumber:
+          type: string
+          description: Account number of the Accrue bank account associated with this counterparty.
+          example: '9876543210'
+        routingNumber:
+          type: string
+          description: Routing number of the Accrue bank account associated with this counterparty.
+          example: '021000021'
+        accountType:
+          type: string
+          enum:
+          - Checking
+          - Savings
+          description: Account type of the Accrue bank account associated with this counterparty.
+          example: Checking
+      required:
+      - accountNumber
+      - routingNumber
+      - accountType
+      description: The Accrue bank account associated with this counterparty. Present only when a dedicated Accrue deposit account has been provisioned. Use these details to send funds to this counterparty over bank rails.
 x-tagGroups:
 - name: Overview
   tags:

@@ -1474,112 +1474,6 @@ paths:
         source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/simulation/counterparties/123e4567-e89b-12d3-a456-426614174000/deposits');\n$request->setMethod(HTTP_METH_POST);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
 components:
   schemas:
-    BarcodeExpiredOrInvalidResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 400
-        code:
-          type: string
-          enum:
-          - InvalidTransaction
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: InvalidTransaction
-        title:
-          type: string
-          description: Generic title for the error.
-          example: ErrorResponseDto
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - Barcode has expired.
-          - Barcode has exceeded maximum uses.
-          - Barcode does not belong to this merchant.
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/simulation/barcodes/SCAN-LOOKUP-ID
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/simulation/barcodes/SCAN-LOOKUP-ID
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    FailPendingTransactionRequest:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: Unique identifier for the object.
-          readOnly: true
-        type:
-          type: string
-          enum:
-          - FailPendingTransaction
-        attributes:
-          type: object
-          properties:
-            transactionId:
-              type: string
-              format: uuid
-              description: Optional transaction ID. If not provided, the first pending transaction will be failed.
-              example: 123e4567-e89b-12d3-a456-426614174000
-            reason:
-              type: string
-              enum:
-              - Canceled
-              - HardDecline
-              - SoftDecline
-              - Expired
-              - InsufficientFunds
-              - Reversed
-              - Unknown
-              description: Transaction failure reason applied when failing the pending transaction (ACH or card). If not provided, defaults to Unknown.
-              example: InsufficientFunds
-      required:
-      - id
-      - type
-      - attributes
-      description: Fail Pending Transaction request
-      x-tags:
-      - Model
-    GetWalletBarcodeResponse:
-      type: object
-      properties:
-        data:
-          $ref: '#/components/schemas/WalletBarcode'
-      required:
-      - data
     CardCapture:
       type: object
       properties:
@@ -1644,162 +1538,6 @@ components:
       description: CardCapture
       x-tags:
       - Model
-    GenerateWalletBarcodeResponse:
-      type: object
-      properties:
-        data:
-          $ref: '#/components/schemas/WalletBarcode'
-      required:
-      - data
-    SimulateCardAuthorizationCapture:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: Unique identifier for the object.
-          readOnly: true
-        type:
-          type: string
-          enum:
-          - SimulateCardAuthorizationCapture
-        attributes:
-          type: object
-          properties:
-            amount:
-              type: integer
-              description: Amount to authorize/capture in cents
-              format: int32
-          required:
-          - amount
-      required:
-      - id
-      - type
-      - attributes
-      description: SimulateCardAuthorizationCapture
-      x-tags:
-      - Model
-    GenerateBarcodeValidationResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 400
-        code:
-          type: string
-          enum:
-          - InvalidTransaction
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: InvalidTransaction
-        title:
-          type: string
-          description: Generic title for the error.
-          example: ErrorResponseDto
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - Cannot generate barcode for wallet. Ensure the wallet is active and KYC is approved.
-          - Failed to generate barcode for wallet.
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/barcodes
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/barcodes
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    SimulateCardErrorResponse:
-      anyOf:
-      - $ref: '#/components/schemas/SimulationCardAuthorizationValidationResponse'
-      - $ref: '#/components/schemas/SimulationCardNotSupportedResponse'
-    BarcodeNotFoundResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 404
-        code:
-          type: string
-          enum:
-          - BarcodeNotFound
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: BarcodeNotFound
-        title:
-          type: string
-          description: Generic title for the error.
-          example: ErrorResponseDto
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - Barcode not found
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/simulation/barcodes/SCAN-LOOKUP-ID
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/simulation/barcodes/SCAN-LOOKUP-ID
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
     CounterpartyNotFoundForSimulationResponse:
       type: object
       properties:
@@ -1858,16 +1596,48 @@ components:
       - title
       - detail
       - meta
-    ListWalletBarcodesResponse:
+    GenerateWalletBarcodeResponse:
       type: object
       properties:
         data:
-          type: array
-          items:
-            $ref: '#/components/schemas/WalletBarcode'
+          $ref: '#/components/schemas/WalletBarcode'
       required:
       - data
-    WalletNotFoundForSimulationResponse:
+    GenerateWalletBarcode:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - GenerateWalletBarcode
+        attributes:
+          type: object
+          properties:
+            expiresAt:
+              type: string
+              format: date-time
+              description: When the barcode should expire. Omit for default expiration.
+              example: '2025-12-31T23:59:59.000Z'
+            usageLimit:
+              type: integer
+              description: Maximum number of times the barcode can be used. Omit for unlimited.
+              format: int32
+            reuseActive:
+              type: boolean
+              description: If true, reuses an active barcode when one exists instead of creating a new one.
+      required:
+      - id
+      - type
+      - attributes
+      description: Generate Wallet Barcode request
+      x-tags:
+      - Model
+    InvalidTransactionResponse:
       type: object
       properties:
         id:
@@ -1878,13 +1648,13 @@ components:
         status:
           type: integer
           description: The HTTP status code applicable to this error.
-          example: 404
+          example: 400
         code:
           type: string
           enum:
-          - WalletNotFound
+          - InvalidTransaction
           description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: WalletNotFound
+          example: InvalidTransaction
         title:
           type: string
           description: Generic title for the error.
@@ -1893,7 +1663,7 @@ components:
           type: string
           description: A human-readable explanation providing more insights about the error.
           examples:
-          - Wallet not found
+          - Invalid transaction
         meta:
           type: object
           properties:
@@ -1909,7 +1679,7 @@ components:
               example: '2025-06-23T12:00:00.000Z'
             path:
               type: string
-              example: /api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/clear-pending/bank
+              example: /api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/fail-transaction
           required:
           - environment
           - timestamp
@@ -1917,7 +1687,67 @@ components:
           example:
             environment: sandbox
             timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/clear-pending/bank
+            path: /api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/fail-transaction
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    BarcodeExpiredOrInvalidResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - InvalidTransaction
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: InvalidTransaction
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ErrorResponseDto
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Barcode has expired.
+          - Barcode has exceeded maximum uses.
+          - Barcode does not belong to this merchant.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/simulation/barcodes/SCAN-LOOKUP-ID
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/simulation/barcodes/SCAN-LOOKUP-ID
       required:
       - id
       - status
@@ -1983,7 +1813,123 @@ components:
       - title
       - detail
       - meta
-    SimulationCardAuthorizationValidationResponse:
+    BarcodeNotFoundResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 404
+        code:
+          type: string
+          enum:
+          - BarcodeNotFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: BarcodeNotFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ErrorResponseDto
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Barcode not found
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/simulation/barcodes/SCAN-LOOKUP-ID
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/simulation/barcodes/SCAN-LOOKUP-ID
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    WalletNotFoundForSimulationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 404
+        code:
+          type: string
+          enum:
+          - WalletNotFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: WalletNotFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ErrorResponseDto
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Wallet not found
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/clear-pending/bank
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/clear-pending/bank
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    SimulationCardNotSupportedResponse:
       type: object
       properties:
         id:
@@ -1998,18 +1944,18 @@ components:
         code:
           type: string
           enum:
-          - InvalidAmount
+          - WalletNotFound
           description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: InvalidAmount
+          example: WalletNotFound
         title:
           type: string
           description: Generic title for the error.
-          example: SimulationValidationException
+          example: SimulationException
         detail:
           type: string
           description: A human-readable explanation providing more insights about the error.
           examples:
-          - Amount must be greater than 0.
+          - 'Payment does not support VDC authorization: {paymentId}'
         meta:
           type: object
           properties:
@@ -2102,15 +2048,6 @@ components:
       description: AuthorizationRequest
       x-tags:
       - Model
-    ListAuthorizationRequestsResponse:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/AuthorizationRequest'
-      required:
-      - data
     DemoBackupPaymentMethod:
       type: object
       properties:
@@ -2170,138 +2107,206 @@ components:
       description: Demo Backup Payment Method
       x-tags:
       - Model
-    SimulateCardAuthorization:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: Unique identifier for the object.
-          readOnly: true
-        type:
-          type: string
-          enum:
-          - SimulateCardAuthorization
-        attributes:
-          type: object
-          properties:
-            amount:
-              type: integer
-              description: Amount to authorize in cents
-              format: int32
-          required:
-          - amount
-      required:
-      - id
-      - type
-      - attributes
-      description: SimulateCardAuthorization
-      x-tags:
-      - Model
-    GenerateWalletBarcode:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: Unique identifier for the object.
-          readOnly: true
-        type:
-          type: string
-          enum:
-          - GenerateWalletBarcode
-        attributes:
-          type: object
-          properties:
-            expiresAt:
-              type: string
-              format: date-time
-              description: When the barcode should expire. Omit for default expiration.
-              example: '2025-12-31T23:59:59.000Z'
-            usageLimit:
-              type: integer
-              description: Maximum number of times the barcode can be used. Omit for unlimited.
-              format: int32
-            reuseActive:
-              type: boolean
-              description: If true, reuses an active barcode when one exists instead of creating a new one.
-      required:
-      - id
-      - type
-      - attributes
-      description: Generate Wallet Barcode request
-      x-tags:
-      - Model
-    SimulateCardCapture:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: Unique identifier for the object.
-          readOnly: true
-        type:
-          type: string
-          enum:
-          - SimulateCardCapture
-        attributes:
-          type: object
-          properties:
-            authorizationRequestId:
-              type: string
-              format: uuid
-              description: Authorization Request ID
-            amount:
-              type: integer
-              description: Amount to capture in cents
-              format: int32
-          required:
-          - authorizationRequestId
-          - amount
-      required:
-      - id
-      - type
-      - attributes
-      description: SimulateCardCapture
-      x-tags:
-      - Model
-    SimulateCounterpartyDeposit:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: Unique identifier for the object.
-          readOnly: true
-        type:
-          type: string
-          enum:
-          - SimulateCounterpartyDeposit
-        attributes:
-          type: object
-          properties:
-            amount:
-              type: integer
-              minimum: 1
-              description: Amount to deposit in cents
-              format: int32
-              example: 10000
-          required:
-          - amount
-      required:
-      - id
-      - type
-      - attributes
-      description: SimulateCounterpartyDeposit
-      x-tags:
-      - Model
-    CreateDemoBackupPaymentMethodResponse:
+    GetWalletBarcodeResponse:
       type: object
       properties:
         data:
-          $ref: '#/components/schemas/DemoBackupPaymentMethod'
+          $ref: '#/components/schemas/WalletBarcode'
       required:
       - data
+    FailPendingTransactionRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - FailPendingTransaction
+        attributes:
+          type: object
+          properties:
+            transactionId:
+              type: string
+              format: uuid
+              description: Optional transaction ID. If not provided, the first pending transaction will be failed.
+              example: 123e4567-e89b-12d3-a456-426614174000
+            reason:
+              type: string
+              enum:
+              - Canceled
+              - HardDecline
+              - SoftDecline
+              - Expired
+              - InsufficientFunds
+              - Reversed
+              - Unknown
+              description: Transaction failure reason applied when failing the pending transaction (ACH or card). If not provided, defaults to Unknown.
+              example: InsufficientFunds
+      required:
+      - id
+      - type
+      - attributes
+      description: Fail Pending Transaction request
+      x-tags:
+      - Model
+    ListWalletBarcodesResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/WalletBarcode'
+      required:
+      - data
+    SimulationCardAuthorizationValidationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - InvalidAmount
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: InvalidAmount
+        title:
+          type: string
+          description: Generic title for the error.
+          example: SimulationValidationException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Amount must be greater than 0.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    SimulateCardAuthorizationCapture:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - SimulateCardAuthorizationCapture
+        attributes:
+          type: object
+          properties:
+            amount:
+              type: integer
+              description: Amount to authorize/capture in cents
+              format: int32
+          required:
+          - amount
+      required:
+      - id
+      - type
+      - attributes
+      description: SimulateCardAuthorizationCapture
+      x-tags:
+      - Model
+    GenerateBarcodeValidationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - InvalidTransaction
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: InvalidTransaction
+        title:
+          type: string
+          description: Generic title for the error.
+          example: ErrorResponseDto
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - Cannot generate barcode for wallet. Ensure the wallet is active and KYC is approved.
+          - Failed to generate barcode for wallet.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/barcodes
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/barcodes
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
     CounterpartyDepositSimulationValidationResponse:
       type: object
       properties:
@@ -2361,64 +2366,22 @@ components:
       - title
       - detail
       - meta
-    SimulationCardNotSupportedResponse:
+    CardCapturesRequestsResponse:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 400
-        code:
-          type: string
-          enum:
-          - WalletNotFound
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: WalletNotFound
-        title:
-          type: string
-          description: Generic title for the error.
-          example: SimulationException
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - 'Payment does not support VDC authorization: {paymentId}'
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/simulation/123e4567-e89b-12d3-a456-426614174000/card/auth
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CardCapture'
       required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
+      - data
+    CreateDemoBackupPaymentMethodResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/DemoBackupPaymentMethod'
+      required:
+      - data
     SimulationPaymentNotFoundResponse:
       type: object
       properties:
@@ -2477,15 +2440,97 @@ components:
       - title
       - detail
       - meta
-    CardCapturesRequestsResponse:
+    SimulateCardAuthorization:
       type: object
       properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/CardCapture'
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - SimulateCardAuthorization
+        attributes:
+          type: object
+          properties:
+            amount:
+              type: integer
+              description: Amount to authorize in cents
+              format: int32
+          required:
+          - amount
       required:
-      - data
+      - id
+      - type
+      - attributes
+      description: SimulateCardAuthorization
+      x-tags:
+      - Model
+    SimulateCounterpartyDeposit:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - SimulateCounterpartyDeposit
+        attributes:
+          type: object
+          properties:
+            amount:
+              type: integer
+              minimum: 1
+              description: Amount to deposit in cents
+              format: int32
+              example: 10000
+          required:
+          - amount
+      required:
+      - id
+      - type
+      - attributes
+      description: SimulateCounterpartyDeposit
+      x-tags:
+      - Model
+    SimulateCardCapture:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - SimulateCardCapture
+        attributes:
+          type: object
+          properties:
+            authorizationRequestId:
+              type: string
+              format: uuid
+              description: Authorization Request ID
+            amount:
+              type: integer
+              description: Amount to capture in cents
+              format: int32
+          required:
+          - authorizationRequestId
+          - amount
+      required:
+      - id
+      - type
+      - attributes
+      description: SimulateCardCapture
+      x-tags:
+      - Model
     WalletBarcode:
       type: object
       properties:
@@ -2548,64 +2593,19 @@ components:
       description: WalletBarcode
       x-tags:
       - Model
-    InvalidTransactionResponse:
+    ListAuthorizationRequestsResponse:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 400
-        code:
-          type: string
-          enum:
-          - InvalidTransaction
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: InvalidTransaction
-        title:
-          type: string
-          description: Generic title for the error.
-          example: ErrorResponseDto
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - Invalid transaction
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/fail-transaction
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/simulation/wallets/123e4567-e89b-12d3-a456-426614174000/fail-transaction
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuthorizationRequest'
       required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
+      - data
+    SimulateCardErrorResponse:
+      anyOf:
+      - $ref: '#/components/schemas/SimulationCardAuthorizationValidationResponse'
+      - $ref: '#/components/schemas/SimulationCardNotSupportedResponse'
 x-tagGroups:
 - name: Overview
   tags:
