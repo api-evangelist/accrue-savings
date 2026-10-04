@@ -458,6 +458,9 @@ apis:
   - type: Webhooks
     url: asyncapi/accrue-savings-merchant-api-webhooks.yml
 common:
+- type: CapabilityMap
+  url: capabilities/accrue-savings-capability-edges.yml
+  name: Accrue Savings Business Capability Map
 - type: Overlay
   url: overlays/accrue-savings-merchant-api-overlay.yaml
 - type: DomainSecurity
