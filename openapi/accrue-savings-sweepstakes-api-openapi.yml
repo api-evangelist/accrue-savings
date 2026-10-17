@@ -124,10 +124,6 @@ paths:
         source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/sweepstakes/%7BsweepstakesId%7D/results');\n$request->setMethod(HTTP_METH_POST);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
 components:
   schemas:
-    AddSweepstakesResultsErrorResponse:
-      anyOf:
-      - $ref: '#/components/schemas/SweepstakesRequestInvalidResponse'
-      - $ref: '#/components/schemas/SweepstakesNotFoundResponse'
     SweepstakesRequestInvalidResponse:
       type: object
       properties:
@@ -244,6 +240,47 @@ components:
       - title
       - detail
       - meta
+    SweepstakesResults:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - SweepstakesResults
+        attributes:
+          type: object
+          properties:
+            customer:
+              type: object
+              properties:
+                idType:
+                  type: string
+                  enum:
+                  - ID
+                  - PhoneNumber
+                  default: PhoneNumber
+                  description: Type of ID used to identify the customer.
+                  example: PhoneNumber
+                id:
+                  type: string
+                  description: User phone number recorded during checkout.
+                  example: '+12125550001'
+              required:
+              - id
+          required:
+          - customer
+      required:
+      - id
+      - type
+      - attributes
+      description: SweepstakesResults
+      x-tags:
+      - Model
     UnexpectedSweepstakesErrorResponse:
       type: object
       properties:
@@ -302,47 +339,10 @@ components:
       - title
       - detail
       - meta
-    SweepstakesResults:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: Unique identifier for the object.
-          readOnly: true
-        type:
-          type: string
-          enum:
-          - SweepstakesResults
-        attributes:
-          type: object
-          properties:
-            customer:
-              type: object
-              properties:
-                idType:
-                  type: string
-                  enum:
-                  - ID
-                  - PhoneNumber
-                  default: PhoneNumber
-                  description: Type of ID used to identify the customer.
-                  example: PhoneNumber
-                id:
-                  type: string
-                  description: User phone number recorded during checkout.
-                  example: '+12125550001'
-              required:
-              - id
-          required:
-          - customer
-      required:
-      - id
-      - type
-      - attributes
-      description: SweepstakesResults
-      x-tags:
-      - Model
+    AddSweepstakesResultsErrorResponse:
+      anyOf:
+      - $ref: '#/components/schemas/SweepstakesRequestInvalidResponse'
+      - $ref: '#/components/schemas/SweepstakesNotFoundResponse'
 x-tagGroups:
 - name: Overview
   tags:

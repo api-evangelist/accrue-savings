@@ -693,71 +693,6 @@ paths:
         source: "<?php\n\n$request = new HttpRequest();\n$request->setUrl('https://merchant-api.accruesavings.com/api/v1/widgets/session');\n$request->setMethod(HTTP_METH_POST);\n\n$request->setHeaders([\n  'Client-ID' => '123e4567-e89b-12d3-a456-426614174000',\n  'Authorization' => 'Bearer 633b336e4f57f095a405f6685e208cc7dd16de3e82494662f2acfeec3af1cdef'\n]);\n\ntry {\n  $response = $request->send();\n\n  echo $response->getBody();\n} catch (HttpException $ex) {\n  echo $ex;\n}"
 components:
   schemas:
-    GetWalletWidgetDataResponse:
-      type: object
-      properties:
-        data:
-          $ref: '#/components/schemas/WalletWidgetData'
-      required:
-      - data
-    NoLinkedAccountFoundResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 400
-        code:
-          type: string
-          enum:
-          - NoLinkedAccountFound
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: NoLinkedAccountFound
-        title:
-          type: string
-          description: Generic title for the error.
-          example: WidgetException
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - No linked account found for payment intent.
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/widgets/payment-intent/123e4567-e89b-12d3-a456-426614174000/linked-account
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/widgets/payment-intent/123e4567-e89b-12d3-a456-426614174000/linked-account
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
     LinkedAccountWidgetData:
       type: object
       properties:
@@ -810,45 +745,7 @@ components:
       description: Widgets
       x-tags:
       - Model
-    LinkedAccountWidgetErrorResponse:
-      anyOf:
-      - $ref: '#/components/schemas/InvalidPaymentIntentIdentifierResponse'
-      - $ref: '#/components/schemas/NoLinkedAccountFoundResponse'
-    WidgetSession:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: Unique identifier for the object.
-          readOnly: true
-        type:
-          type: string
-          enum:
-          - WidgetSession
-        attributes:
-          type: object
-          properties:
-            sessionToken:
-              type: string
-              description: The session token used to authenticate widget requests
-              example: wgt_session_1234567890abcdef
-            createdAt:
-              type: string
-              format: date-time
-              description: The timestamp when the session was created
-              example: '2025-01-15T10:30:00.000Z'
-          required:
-          - sessionToken
-          - createdAt
-      required:
-      - id
-      - type
-      - attributes
-      description: Widget Session
-      x-tags:
-      - Model
-    UnexpectedWidgetErrorResponse:
+    InvalidIdentifierForWidgetResponse:
       type: object
       properties:
         id:
@@ -859,13 +756,13 @@ components:
         status:
           type: integer
           description: The HTTP status code applicable to this error.
-          example: 500
+          example: 400
         code:
           type: string
           enum:
-          - UnexpectedError
+          - InvalidIdentifier
           description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: UnexpectedError
+          example: InvalidIdentifier
         title:
           type: string
           description: Generic title for the error.
@@ -874,7 +771,7 @@ components:
           type: string
           description: A human-readable explanation providing more insights about the error.
           examples:
-          - An unexpected error occurred.
+          - WidgetException (code='InvalidIdentifier' message='No valid identifier passed for wallet identification.' metaData=undefined)
         meta:
           type: object
           properties:
@@ -890,7 +787,7 @@ components:
               example: '2025-06-23T12:00:00.000Z'
             path:
               type: string
-              example: /api/v1/widgets/payment-intent/123e4567-e89b-12d3-a456-426614174000/linked-account
+              example: /api/v1/widgets/wallet?filter[userReference]=123e4567-e89b-12d3-a456-426614174000
           required:
           - environment
           - timestamp
@@ -898,7 +795,7 @@ components:
           example:
             environment: sandbox
             timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/widgets/payment-intent/123e4567-e89b-12d3-a456-426614174000/linked-account
+            path: /api/v1/widgets/wallet?filter[userReference]=123e4567-e89b-12d3-a456-426614174000
       required:
       - id
       - status
@@ -906,32 +803,17 @@ components:
       - title
       - detail
       - meta
-    CreateWidgetSessionRequest:
+    CreateWidgetSessionResponse:
       type: object
       properties:
         data:
-          type: object
-          properties:
-            type:
-              type: string
-              enum:
-              - CreateWidgetSession
-            attributes:
-              type: object
-              properties:
-                widgetType:
-                  type: string
-                  enum:
-                  - PaymentMethods
-                  description: The type of widget for which to create a session
-                  example: PaymentMethods
-              required:
-              - widgetType
-          required:
-          - type
-          - attributes
+          $ref: '#/components/schemas/WidgetSession'
       required:
       - data
+    WalletWidgetV2ErrorResponse:
+      anyOf:
+      - $ref: '#/components/schemas/InvalidIdentifierForWidgetResponse'
+      - $ref: '#/components/schemas/MultipleWalletsFoundForWidgetResponse'
     MultipleWalletsFoundForWidgetResponse:
       type: object
       properties:
@@ -990,32 +872,11 @@ components:
       - title
       - detail
       - meta
-    WalletWidgetV2ErrorResponse:
-      anyOf:
-      - $ref: '#/components/schemas/InvalidIdentifierForWidgetResponse'
-      - $ref: '#/components/schemas/MultipleWalletsFoundForWidgetResponse'
     WalletWidgetErrorResponse:
       anyOf:
       - $ref: '#/components/schemas/NoWalletFoundResponse'
       - $ref: '#/components/schemas/InvalidIdentifierForWidgetResponse'
       - $ref: '#/components/schemas/MultipleWalletsFoundForWidgetResponse'
-    GetWalletWidgetDataV2Response:
-      type: object
-      properties:
-        data:
-          anyOf:
-          - $ref: '#/components/schemas/WalletWidgetData'
-          - type: 'null'
-          - type: 'null'
-      required:
-      - data
-    GetLinkedAccountWidgetDataResponse:
-      type: object
-      properties:
-        data:
-          $ref: '#/components/schemas/LinkedAccountWidgetData'
-      required:
-      - data
     WalletWidgetData:
       type: object
       properties:
@@ -1089,129 +950,16 @@ components:
       description: Widgets
       x-tags:
       - Model
-    InvalidIdentifierForWidgetResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 400
-        code:
-          type: string
-          enum:
-          - InvalidIdentifier
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: InvalidIdentifier
-        title:
-          type: string
-          description: Generic title for the error.
-          example: WidgetException
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - WidgetException (code='InvalidIdentifier' message='No valid identifier passed for wallet identification.' metaData=undefined)
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/widgets/wallet?filter[userReference]=123e4567-e89b-12d3-a456-426614174000
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/widgets/wallet?filter[userReference]=123e4567-e89b-12d3-a456-426614174000
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
-    CreateWidgetSessionResponse:
+    GetWalletWidgetDataV2Response:
       type: object
       properties:
         data:
-          $ref: '#/components/schemas/WidgetSession'
+          anyOf:
+          - $ref: '#/components/schemas/WalletWidgetData'
+          - type: 'null'
+          - type: 'null'
       required:
       - data
-    NoWalletFoundResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: A unique UUID for this particular occurrence of the problem.
-          example: 123e4567-e89b-12d3-a456-426614174000
-        status:
-          type: integer
-          description: The HTTP status code applicable to this error.
-          example: 400
-        code:
-          type: string
-          enum:
-          - NoWalletFound
-          description: A unique, camel-cased Accrue-specific code detailing the error.
-          example: NoWalletFound
-        title:
-          type: string
-          description: Generic title for the error.
-          example: WidgetException
-        detail:
-          type: string
-          description: A human-readable explanation providing more insights about the error.
-          examples:
-          - WidgetException (code='NoWalletFound' message='No wallet found for defined filters.' metaData=undefined)
-        meta:
-          type: object
-          properties:
-            environment:
-              type: string
-              enum:
-              - production
-              - sandbox
-              example: sandbox
-            timestamp:
-              type: string
-              format: date-time
-              example: '2025-06-23T12:00:00.000Z'
-            path:
-              type: string
-              example: /api/v1/widgets/wallet/123e4567-e89b-12d3-a456-426614174000
-          required:
-          - environment
-          - timestamp
-          - path
-          example:
-            environment: sandbox
-            timestamp: '2025-06-23T12:00:00.000Z'
-            path: /api/v1/widgets/wallet/123e4567-e89b-12d3-a456-426614174000
-      required:
-      - id
-      - status
-      - code
-      - title
-      - detail
-      - meta
     InvalidPaymentIntentIdentifierResponse:
       type: object
       properties:
@@ -1239,6 +987,122 @@ components:
           description: A human-readable explanation providing more insights about the error.
           examples:
           - No valid identifier passed for payment intent identification.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/widgets/payment-intent/123e4567-e89b-12d3-a456-426614174000/linked-account
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/widgets/payment-intent/123e4567-e89b-12d3-a456-426614174000/linked-account
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    UnexpectedWidgetErrorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 500
+        code:
+          type: string
+          enum:
+          - UnexpectedError
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: UnexpectedError
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WidgetException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - An unexpected error occurred.
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/widgets/payment-intent/123e4567-e89b-12d3-a456-426614174000/linked-account
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/widgets/payment-intent/123e4567-e89b-12d3-a456-426614174000/linked-account
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    NoLinkedAccountFoundResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - NoLinkedAccountFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: NoLinkedAccountFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WidgetException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - No linked account found for payment intent.
         meta:
           type: object
           properties:
@@ -1328,6 +1192,131 @@ components:
       - title
       - detail
       - meta
+    CreateWidgetSessionRequest:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+              - CreateWidgetSession
+            attributes:
+              type: object
+              properties:
+                widgetType:
+                  type: string
+                  enum:
+                  - PaymentMethods
+                  description: The type of widget for which to create a session
+                  example: PaymentMethods
+              required:
+              - widgetType
+          required:
+          - type
+          - attributes
+      required:
+      - data
+    NoWalletFoundResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: A unique UUID for this particular occurrence of the problem.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          type: integer
+          description: The HTTP status code applicable to this error.
+          example: 400
+        code:
+          type: string
+          enum:
+          - NoWalletFound
+          description: A unique, camel-cased Accrue-specific code detailing the error.
+          example: NoWalletFound
+        title:
+          type: string
+          description: Generic title for the error.
+          example: WidgetException
+        detail:
+          type: string
+          description: A human-readable explanation providing more insights about the error.
+          examples:
+          - WidgetException (code='NoWalletFound' message='No wallet found for defined filters.' metaData=undefined)
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              enum:
+              - production
+              - sandbox
+              example: sandbox
+            timestamp:
+              type: string
+              format: date-time
+              example: '2025-06-23T12:00:00.000Z'
+            path:
+              type: string
+              example: /api/v1/widgets/wallet/123e4567-e89b-12d3-a456-426614174000
+          required:
+          - environment
+          - timestamp
+          - path
+          example:
+            environment: sandbox
+            timestamp: '2025-06-23T12:00:00.000Z'
+            path: /api/v1/widgets/wallet/123e4567-e89b-12d3-a456-426614174000
+      required:
+      - id
+      - status
+      - code
+      - title
+      - detail
+      - meta
+    WidgetSession:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the object.
+          readOnly: true
+        type:
+          type: string
+          enum:
+          - WidgetSession
+        attributes:
+          type: object
+          properties:
+            sessionToken:
+              type: string
+              description: The session token used to authenticate widget requests
+              example: wgt_session_1234567890abcdef
+            createdAt:
+              type: string
+              format: date-time
+              description: The timestamp when the session was created
+              example: '2025-01-15T10:30:00.000Z'
+          required:
+          - sessionToken
+          - createdAt
+      required:
+      - id
+      - type
+      - attributes
+      description: Widget Session
+      x-tags:
+      - Model
+    GetWalletWidgetDataResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/WalletWidgetData'
+      required:
+      - data
     FindWalletWidgetDataV2Response:
       type: object
       properties:
@@ -1338,6 +1327,17 @@ components:
           - type: 'null'
       required:
       - data
+    GetLinkedAccountWidgetDataResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/LinkedAccountWidgetData'
+      required:
+      - data
+    LinkedAccountWidgetErrorResponse:
+      anyOf:
+      - $ref: '#/components/schemas/InvalidPaymentIntentIdentifierResponse'
+      - $ref: '#/components/schemas/NoLinkedAccountFoundResponse'
 x-tagGroups:
 - name: Overview
   tags:
